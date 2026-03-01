@@ -667,7 +667,7 @@ body::after {
   <div class="ctrl-panel">
     <div class="ctrl-header">
       <div class="app-title">مراجعة</div>
-      <div class="app-sub">Smart Hafalan Tracker <span class="smart-badge">AI POWERED</span></div>
+      <div class="app-sub">Smart Hafalan Tracker</div>
       <div class="divider-line"></div>
     </div>
 
@@ -799,9 +799,9 @@ body::after {
           <div class="sec-label">🔗 Sambung Ayat</div>
           <div class="mode-note" style="margin-bottom:12px">Sistem membaca 1 ayat acak, kamu sambung ayat berikutnya</div>
 
-          <!-- Surah multi-select list -->
-          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.8px">Pilih Surah (bisa lebih dari satu)</div>
-          <div id="sambungSurahList" style="display:flex;flex-direction:column;gap:4px;max-height:220px;overflow-y:auto;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:10px;padding:6px 4px">
+          <!-- Surah grouped list by Juz -->
+          <div style="font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.8px">Pilih Surah</div>
+          <div id="sambungSurahList" style="display:flex;flex-direction:column;background:rgba(0,0,0,0.15);border:1px solid var(--border);border-radius:12px;overflow:hidden;max-height:360px;overflow-y:auto">
             <!-- Populated by JS -->
           </div>
 
@@ -841,6 +841,12 @@ body::after {
           </div>
         </div>
 
+        <!-- Hint display (hidden by default) -->
+        <div id="sambungHintBox" style="display:none;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.35);border-radius:10px;padding:10px 14px;text-align:right">
+          <div style="font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;text-align:left">💡 Hint — 2 kata pertama:</div>
+          <div id="sambungHintText" style="font-family:'UthmanicHafs','Scheherazade New',serif;font-size:28px;line-height:1.8;color:var(--gold-light);direction:rtl">—</div>
+        </div>
+
         <!-- Mic button -->
         <div class="mic-center" style="padding:8px 0">
           <button class="btn-mic" id="sambungMicBtn" onclick="toggleSambungSession()" style="width:64px;height:64px;font-size:26px">🎙️</button>
@@ -848,6 +854,12 @@ body::after {
             <strong id="sambungMicLabel">Sambung Ayat</strong>
             <span id="sambungMicSub">Tekan untuk bicara</span>
           </div>
+        </div>
+
+        <!-- Lewati & Hint buttons -->
+        <div style="display:flex;gap:8px;padding:0 4px">
+          <button onclick="sambungLewati()" style="flex:1;padding:9px;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s" onmouseover="this.style.color='var(--text)';this.style.borderColor='rgba(201,168,76,0.4)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">⏭ Lewati</button>
+          <button onclick="sambungHint()" style="flex:1;padding:9px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);border-radius:8px;color:var(--gold);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s" onmouseover="this.style.background='rgba(201,168,76,0.18)'" onmouseout="this.style.background='rgba(201,168,76,0.08)'">💡 Hint</button>
         </div>
 
         <!-- Hasil -->
@@ -1085,8 +1097,22 @@ const SURAHS = {
 const JUZ_SURAHS = {
   // Juz 1: Al-Fatihah (already in SURAHS) + Al-Baqarah 1-141
   2:  {name:'Al-Baqarah',       ayahCount:286, bismillah:true,  juz:[1,2,3]},
+  // Ali Imran (special - kept per-surah)
+  3:  {name:"Ali 'Imran",       ayahCount:200, bismillah:true,  juz:[3,4]},
+  // Juz 28
+  58: {name:'Al-Mujadila',      ayahCount:22,  bismillah:true,  juz:[28]},
+  59: {name:'Al-Hashr',         ayahCount:24,  bismillah:true,  juz:[28]},
+  60: {name:'Al-Mumtahanah',    ayahCount:13,  bismillah:true,  juz:[28]},
+  61: {name:'As-Saff',          ayahCount:14,  bismillah:true,  juz:[28]},
+  62: {name:"Al-Jumu'ah",       ayahCount:11,  bismillah:true,  juz:[28]},
+  63: {name:'Al-Munafiqun',     ayahCount:11,  bismillah:true,  juz:[28]},
+  64: {name:'At-Taghabun',      ayahCount:18,  bismillah:true,  juz:[28]},
+  65: {name:'At-Talaq',         ayahCount:12,  bismillah:true,  juz:[28]},
+  66: {name:'At-Tahrim',        ayahCount:12,  bismillah:true,  juz:[28]},
   // Juz 29
   67: {name:'Al-Mulk',          ayahCount:30,  bismillah:true,  juz:[29]},
+  68: {name:'Al-Qalam',         ayahCount:52,  bismillah:true,  juz:[29]},
+  69: {name:"Al-Haqqah",        ayahCount:52,  bismillah:true,  juz:[29]},
   70: {name:'Al-Maarij',        ayahCount:44,  bismillah:true,  juz:[29]},
   71: {name:'Nuh',              ayahCount:28,  bismillah:true,  juz:[29]},
   72: {name:'Al-Jinn',          ayahCount:28,  bismillah:true,  juz:[29]},
@@ -1130,6 +1156,9 @@ const JUZ_SURAHS = {
   109:{name:'Al-Kafirun',       ayahCount:6,   bismillah:true,  juz:[30]},
   110:{name:'An-Nasr',          ayahCount:3,   bismillah:true,  juz:[30]},
   111:{name:'Al-Masad',         ayahCount:5,   bismillah:false, juz:[30]},
+  112:{name:'Al-Ikhlas',        ayahCount:4,   bismillah:true,  juz:[30]},
+  113:{name:'Al-Falaq',         ayahCount:5,   bismillah:true,  juz:[30]},
+  114:{name:'An-Nas',           ayahCount:6,   bismillah:true,  juz:[30]},
   // 112, 113, 114 already in SURAHS
 };
 
@@ -3001,40 +3030,194 @@ function initSambungSelects() {
   const list = document.getElementById('sambungSurahList');
   if (list.children.length > 0) return;
 
-  // Combine static + dynamic surah metadata for sambung list
+  // Build combined metadata map — juz info always comes from JUZ_SURAHS
   const allForSambung = new Map();
-  Object.entries(SURAHS).forEach(([n,s]) => allForSambung.set(parseInt(n), {name:s.name, ayahCount:s.ayahs.length}));
+  Object.entries(SURAHS).forEach(([n,s]) => allForSambung.set(parseInt(n), {name:s.name, ayahCount:s.ayahs.length, juz: JUZ_SURAHS[parseInt(n)]?.juz || null}));
   Object.entries(JUZ_SURAHS).forEach(([n,s]) => {
-    if (!allForSambung.has(parseInt(n))) allForSambung.set(parseInt(n), {name:s.name, ayahCount:s.ayahCount});
+    if (!allForSambung.has(parseInt(n))) allForSambung.set(parseInt(n), {name:s.name, ayahCount:s.ayahCount, juz:s.juz});
+    else allForSambung.get(parseInt(n)).juz = s.juz; // ensure juz is set even for static surahs
   });
-  [...allForSambung.entries()].sort((a,b) => a[0]-b[0]).forEach(([num, meta]) => {
-    const s = {name: meta.name, ayahs: {length: meta.ayahCount}};
-    const row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:7px;cursor:pointer;transition:background 0.15s';
-    row.onmouseenter = () => row.style.background = 'rgba(255,255,255,0.05)';
-    row.onmouseleave = () => row.style.background = '';
 
-    const cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.id = `sc_${num}`;
-    cb.value = num;
-    cb.style.cssText = 'width:15px;height:15px;accent-color:var(--gold);cursor:pointer;flex-shrink:0';
-    cb.onchange = () => onSambungCheckboxChange(num, cb.checked, {name: s.name, ayahs: {length: meta.ayahCount}});
+  // Group: special (Al-Fatihah=1, Al-Baqarah=2, Ali Imran=3, As-Sajdah=32), juz28, juz29, juz30
+  const groups = [
+    { id: 'special', label: null, nums: [1, 2, 3, 32] },
+    { id: 'juz28',   label: 'Juz 28', nums: [] },
+    { id: 'juz29',   label: 'Juz 29', nums: [] },
+    { id: 'juz30',   label: 'Juz 30', nums: [] },
+  ];
+  const specialSet = new Set([1, 2, 3, 32]);
+  [...allForSambung.keys()].sort((a,b)=>a-b).forEach(num => {
+    if (specialSet.has(num)) return;
+    const meta = allForSambung.get(num);
+    if (meta.juz && meta.juz.includes(28)) groups[1].nums.push(num);
+    else if (meta.juz && meta.juz.includes(29)) groups[2].nums.push(num);
+    else if (meta.juz && meta.juz.includes(30)) groups[3].nums.push(num);
+  });
 
-    const lbl = document.createElement('label');
-    lbl.htmlFor = `sc_${num}`;
-    lbl.style.cssText = 'font-size:12px;color:var(--text);cursor:pointer;flex:1';
-    lbl.textContent = `${num}. ${s.name} (${meta.ayahCount} ayat)`;
+  groups.forEach(group => {
+    // Juz header row with "centang semua"
+    if (group.label) {
+      const header = document.createElement('div');
+      header.style.cssText = 'display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(201,168,76,0.08);border-bottom:1px solid rgba(201,168,76,0.12);cursor:pointer;user-select:none;sticky:top 0';
+      header.dataset.juzGroup = group.id;
 
-    row.appendChild(cb);
-    row.appendChild(lbl);
-    row.onclick = (e) => { if (e.target !== cb) { cb.checked = !cb.checked; onSambungCheckboxChange(num, cb.checked, {name: s.name, ayahs: {length: meta.ayahCount}}); } };
-    list.appendChild(row);
+      const hcb = document.createElement('input');
+      hcb.type = 'checkbox';
+      hcb.id = `juz_cb_${group.id}`;
+      hcb.style.cssText = 'width:18px;height:18px;accent-color:var(--gold);cursor:pointer;flex-shrink:0;pointer-events:none';
+
+      const htitle = document.createElement('div');
+      htitle.style.cssText = 'flex:1;font-size:13px;font-weight:700;color:var(--gold-light)';
+      htitle.innerHTML = `${group.label} <span style="font-weight:400;color:var(--muted);font-size:11px">— centang semua</span>`;
+
+      const hcount = document.createElement('div');
+      hcount.id = `juz_count_${group.id}`;
+      hcount.style.cssText = 'font-size:11px;color:var(--muted)';
+      hcount.textContent = `0/${group.nums.length}`;
+
+      header.appendChild(hcb);
+      header.appendChild(htitle);
+      header.appendChild(hcount);
+      header.onclick = () => toggleJuzGroup(group.id, group.nums, allForSambung);
+      list.appendChild(header);
+    }
+
+    // Individual surah rows
+    group.nums.forEach((num, i) => {
+      const meta = allForSambung.get(num);
+      const isLast = i === group.nums.length - 1;
+      const row = document.createElement('div');
+      row.id = `srow_${num}`;
+      const indent = group.label ? '32px' : '14px';
+      row.style.cssText = `display:flex;align-items:center;gap:10px;padding:11px 14px 11px ${indent};border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:background 0.12s;user-select:none`;
+      if (isLast) row.style.borderBottom = 'none';
+
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.id = `sc_${num}`;
+      cb.value = num;
+      cb.style.cssText = 'width:16px;height:16px;accent-color:var(--gold);cursor:pointer;flex-shrink:0;pointer-events:none';
+
+      const lbl = document.createElement('div');
+      lbl.style.cssText = 'flex:1;font-size:13px;color:var(--text)';
+      lbl.textContent = `${num}. ${meta.name}`;
+
+      const ayatCount = document.createElement('div');
+      ayatCount.style.cssText = 'font-size:12px;color:var(--muted);flex-shrink:0';
+      ayatCount.textContent = `${meta.ayahCount} ayat`;
+
+      const toggle = () => {
+        cb.checked = !cb.checked;
+        applyRowChecked(row, cb.checked);
+        onSambungCheckboxChange(num, cb.checked, {name: meta.name, ayahs: {length: meta.ayahCount}});
+        if (group.label) updateJuzHeaderCount(group.id, group.nums);
+      };
+
+      row.onclick = (e) => {
+        if (e.target === cb) {
+          applyRowChecked(row, cb.checked);
+          onSambungCheckboxChange(num, cb.checked, {name: meta.name, ayahs: {length: meta.ayahCount}});
+          if (group.label) updateJuzHeaderCount(group.id, group.nums);
+          return;
+        }
+        toggle();
+      };
+      row.onmouseenter = () => { if (!cb.checked) row.style.background = 'rgba(255,255,255,0.04)'; };
+      row.onmouseleave = () => { row.style.background = cb.checked ? 'rgba(201,168,76,0.08)' : ''; };
+
+      row.appendChild(cb);
+      row.appendChild(lbl);
+      row.appendChild(ayatCount);
+      list.appendChild(row);
+    });
+  });
+}
+
+function applyRowChecked(row, checked) {
+  row.style.background = checked ? 'rgba(201,168,76,0.08)' : '';
+}
+
+function updateJuzHeaderCount(groupId, nums) {
+  const checked = nums.filter(n => document.getElementById(`sc_${n}`)?.checked).length;
+  const countEl = document.getElementById(`juz_count_${groupId}`);
+  if (countEl) countEl.textContent = `${checked}/${nums.length}`;
+  // Sync header checkbox
+  const hcb = document.getElementById(`juz_cb_${groupId}`);
+  if (hcb) {
+    hcb.checked = checked === nums.length;
+    hcb.indeterminate = checked > 0 && checked < nums.length;
+  }
+}
+
+function toggleJuzGroup(groupId, nums, allMeta) {
+  const hcb = document.getElementById(`juz_cb_${groupId}`);
+  // If all checked → uncheck all; else check all
+  const allChecked = nums.every(n => document.getElementById(`sc_${n}`)?.checked);
+  const newState = !allChecked;
+  if (hcb) { hcb.checked = newState; hcb.indeterminate = false; }
+
+  nums.forEach(num => {
+    const cb = document.getElementById(`sc_${num}`);
+    const row = document.getElementById(`srow_${num}`);
+    if (!cb) return;
+    cb.checked = newState;
+    if (row) applyRowChecked(row, newState);
+    const meta = allMeta.get(num);
+    onSambungCheckboxChange(num, newState, {name: meta.name, ayahs: {length: meta.ayahCount}});
+  });
+  updateJuzHeaderCount(groupId, nums);
+}
+
+function selectJuz(juzNum) {
+  // kept for backward compat but now handled by toggleJuzGroup
+  const groupId = `juz${juzNum}`;
+  const nums = [...document.querySelectorAll(`#sambungSurahList [id^="sc_"]`)]
+    .filter(cb => {
+      const n = parseInt(cb.value);
+      const meta = JUZ_SURAHS[n];
+      return meta && meta.juz && meta.juz.includes(juzNum);
+    }).map(cb => parseInt(cb.value));
+  const allMeta = new Map();
+  Object.entries(SURAHS).forEach(([n,s]) => allMeta.set(parseInt(n), {name:s.name, ayahCount:s.ayahs.length}));
+  Object.entries(JUZ_SURAHS).forEach(([n,s]) => { if (!allMeta.has(parseInt(n))) allMeta.set(parseInt(n), {name:s.name, ayahCount:s.ayahCount}); });
+  // Check all unchecked
+  nums.forEach(num => {
+    const cb = document.getElementById(`sc_${num}`);
+    const row = document.getElementById(`srow_${num}`);
+    if (cb && !cb.checked) {
+      cb.checked = true;
+      if (row) applyRowChecked(row, true);
+      const meta = allMeta.get(num);
+      onSambungCheckboxChange(num, true, {name: meta.name, ayahs: {length: meta.ayahCount}});
+    }
+  });
+  updateJuzHeaderCount(groupId, nums);
+}
+
+function deselectAllSambung() {
+  document.querySelectorAll('#sambungSurahList input[type=checkbox]').forEach(cb => {
+    if (!cb.checked) return;
+    const num = parseInt(cb.value);
+    const row = document.getElementById(`srow_${num}`);
+    cb.checked = false;
+    if (row) applyRowChecked(row, false);
+    onSambungCheckboxChange(num, false, {});
+  });
+  ['juz28','juz29','juz30'].forEach(gid => {
+    const hcb = document.getElementById(`juz_cb_${gid}`);
+    if (hcb) { hcb.checked = false; hcb.indeterminate = false; }
+    const countEl = document.getElementById(`juz_count_${gid}`);
+    // reset count display
+    if (countEl) {
+      const total = countEl.textContent.split('/')[1];
+      if (total) countEl.textContent = `0/${total}`;
+    }
   });
 }
 
 function onSambungCheckboxChange(surahNum, checked, surahData) {
-  const maxAyah = surahData.ayahs.length;
+  const maxAyah = surahData.ayahs ? surahData.ayahs.length : (JUZ_SURAHS[surahNum]?.ayahCount || SURAHS[surahNum]?.ayahs?.length || 1);
+  const name = surahData.name || JUZ_SURAHS[surahNum]?.name || SURAHS[surahNum]?.name || `Surah ${surahNum}`;
   const configDiv = document.getElementById('sambungRangeConfig');
 
   if (checked) {
@@ -3043,7 +3226,7 @@ function onSambungCheckboxChange(surahNum, checked, surahData) {
     row.id = `srange_${surahNum}`;
     row.style.cssText = 'background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px';
     row.innerHTML = `
-      <div style="font-size:11px;font-weight:700;color:var(--gold-light);text-transform:uppercase;letter-spacing:0.5px">${surahNum}. ${surahData.name}</div>
+      <div style="font-size:11px;font-weight:700;color:var(--gold-light);text-transform:uppercase;letter-spacing:0.5px">${surahNum}. ${name}</div>
       <div style="display:flex;align-items:center;gap:8px">
         <span style="font-size:11px;color:var(--muted);min-width:55px">Dari Ayat</span>
         <input type="number" id="sfrom_${surahNum}" value="1" min="1" max="${maxAyah}"
@@ -3061,9 +3244,8 @@ function onSambungCheckboxChange(surahNum, checked, surahData) {
   }
 }
 
-function startSambungMode() {
+async function startSambungMode() {
   // Collect selected surahs and their ranges
-  sambungSurahRanges = [];
   const checkboxes = document.querySelectorAll('#sambungSurahList input[type=checkbox]:checked');
   
   if (checkboxes.length === 0) {
@@ -3071,10 +3253,22 @@ function startSambungMode() {
     return;
   }
 
+  // Show loading button state
+  const startBtn = document.querySelector('#sambungSetup .btn-set-start');
+  if (startBtn) { startBtn.textContent = '⏳ Memuat surah...'; startBtn.disabled = true; }
+
+  // Load all selected surahs first (in parallel)
+  const numsToLoad = Array.from(checkboxes).map(cb => parseInt(cb.value));
+  await Promise.all(numsToLoad.map(num => loadDynamicSurahSilent(num)));
+
+  if (startBtn) { startBtn.textContent = '🎲 Mulai Sambung Ayat'; startBtn.disabled = false; }
+
+  sambungSurahRanges = [];
   let hasError = false;
   checkboxes.forEach(cb => {
     const num = parseInt(cb.value);
     const data = SURAHS[num];
+    if (!data) { alert(`Gagal memuat data untuk surah ${num}`); hasError = true; return; }
     const maxAyah = data.ayahs.length;
     const from = parseInt(document.getElementById(`sfrom_${num}`)?.value || 1);
     const to   = parseInt(document.getElementById(`sto_${num}`)?.value   || maxAyah);
@@ -3095,6 +3289,7 @@ function startSambungMode() {
   document.getElementById('sambungSetup').style.display = 'none';
   document.getElementById('sambungActive').style.display = 'flex';
   document.getElementById('sambungResult').style.display = 'none';
+  document.getElementById('sambungHintBox').style.display = 'none';
   updateSambungScore();
   nextSambung();
 }
@@ -3108,14 +3303,87 @@ function stopSambungMode() {
   document.getElementById('sambungSetup').style.display = 'block';
   document.getElementById('sambungActive').style.display = 'none';
   document.getElementById('sambungResult').style.display = 'none';
+  document.getElementById('sambungHintBox').style.display = 'none';
   setSambungDot('idle', 'Selesai');
 }
+
+// Load dynamic surah without touching mushaf display
+async function loadDynamicSurahSilent(surahNum) {
+  if (SURAHS[surahNum]) return SURAHS[surahNum];
+  if (dynamicSurahCache[surahNum]) { SURAHS[surahNum] = dynamicSurahCache[surahNum]; return SURAHS[surahNum]; }
+  const meta = JUZ_SURAHS[surahNum];
+  if (!meta) return null;
+  try {
+    const res = await fetch(`https://api.alquran.cloud/v1/surah/${surahNum}/quran-uthmani`);
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+    const STRIP_RE = /[؀-؅ۖ-ۤۧ-۩]/g;
+    const simpleNorm = w => w.replace(/[ً-ٟؐ-ؚۖ-ۿٱ]/g, '').replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه');
+    const ayahs = [];
+    for (const ayah of data.data.ayahs) {
+      let words = ayah.text.trim().split(/\s+/).map(w => w.replace(STRIP_RE, '').trim()).filter(w => w.length > 0);
+      if (ayah.numberInSurah === 1 && words.length >= 4) {
+        const first4 = words.slice(0, 4).map(simpleNorm);
+        if (first4[0].includes('بسم') || first4[0] === 'بسم') words = words.slice(4);
+      }
+      ayahs.push({ n: ayah.numberInSurah, words });
+    }
+    const entry = { name: meta.name, num: surahNum, bismillah: meta.bismillah, ayahs, _dynamic: true };
+    dynamicSurahCache[surahNum] = entry;
+    SURAHS[surahNum] = entry;
+    return entry;
+  } catch(e) {
+    console.error('Failed to load surah silently', surahNum, e);
+    return null;
+  }
+}
+
+function sambungLewati() {
+  if (!sambungActive) return;
+  stopSambungRec();
+  sambungWaitingForUser = false;
+  document.getElementById('sambungHintBox').style.display = 'none';
+  // Show the correct answer briefly then move on
+  const data = SURAHS[sambungTargetSurah];
+  if (data) {
+    const targetAyah = data.ayahs.find(a => a.n === sambungTargetAyahN);
+    if (targetAyah) {
+      const resultDiv = document.getElementById('sambungResult');
+      const msgDiv = document.getElementById('sambungResultMsg');
+      const expectedDiv = document.getElementById('sambungExpected');
+      const labelDiv = document.getElementById('sambungResultLabel');
+      expectedDiv.textContent = targetAyah.words.join(' ');
+      labelDiv.textContent = `⏭ Dilewati — Ayat ${sambungTargetAyahN} ${data.name}`;
+      msgDiv.textContent = 'Ayat dilewati — lihat jawaban di atas';
+      msgDiv.style.cssText = 'font-size:13px;font-weight:600;text-align:center;padding:10px;border-radius:8px;background:rgba(201,168,76,0.1);color:var(--gold);border:1px solid rgba(201,168,76,0.3)';
+      resultDiv.style.display = 'block';
+      setSambungDot('warn', '⏭ Dilewati');
+      resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      return;
+    }
+  }
+  nextSambung();
+}
+
+function sambungHint() {
+  if (!sambungActive) return;
+  const data = SURAHS[sambungTargetSurah];
+  if (!data) return;
+  const targetAyah = data.ayahs.find(a => a.n === sambungTargetAyahN);
+  if (!targetAyah || !targetAyah.words.length) return;
+  const hintWords = targetAyah.words.slice(0, 2).join(' ');
+  document.getElementById('sambungHintText').textContent = hintWords;
+  const box = document.getElementById('sambungHintBox');
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
 
 async function nextSambung() {
   stopSambungRec();
   sambungWaitingForUser = false;
   document.getElementById('sambungResult').style.display = 'none';
   document.getElementById('sambungTranscript').textContent = '—';
+  document.getElementById('sambungHintBox').style.display = 'none';
   setSambungDot('idle', 'Memilih ayat...');
 
   // Pick random surah from selected ranges (weighted by range size)
