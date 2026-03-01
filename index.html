@@ -3,8 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Murajaah — Hafalan Al-Quran</title>
+<title>Murajaah — Hafalan Al-Quran (Smart Recognition)</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Scheherazade+New:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+@font-face {
+  font-family: 'UthmanicHafs';
+  src: url('https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.woff2') format('woff2');
+  font-display: swap;
+}
+</style>
 <style>
 :root {
   --gold: #C9A84C; --gold-light: #E8C97A; --gold-dark: #8B6914;
@@ -34,7 +41,7 @@ body::after {
 }
 
 /* ── LAYOUT ── */
-.layout { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 320px; gap: 0; height: 100vh; }
+.layout { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 360px; gap: 0; height: 100vh; }
 @media(max-width:900px){ .layout{ grid-template-columns:1fr; grid-template-rows:auto 1fr; height:auto; } }
 
 /* ── LEFT: MUSHAF ── */
@@ -50,21 +57,60 @@ body::after {
   border-bottom: 1px solid var(--border);
   background: rgba(17,31,24,0.9);
   backdrop-filter: blur(8px);
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  display: flex; flex-direction: column; gap: 12px;
   flex-shrink: 0;
+}
+.mushaf-header-top {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
 .mushaf-title-area { display: flex; flex-direction: column; gap: 2px; }
 .mushaf-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); font-weight: 600; }
 .mushaf-surah { font-family: 'Amiri', serif; font-size: 22px; color: var(--gold-light); }
 .page-info { font-size: 11px; color: var(--muted); }
 
+.mushaf-controls {
+  display: flex; gap: 12px; align-items: flex-end;
+}
+.control-group { flex: 1; }
+.control-group-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+
 .page-select-row { display: flex; gap: 8px; align-items: center; }
-.page-select-row select {
+.page-select-row select, .page-select-row input {
   background: var(--card2); border: 1px solid var(--border); color: var(--text);
   border-radius: 8px; padding: 7px 12px; font-family: 'Inter', sans-serif; font-size: 12px;
-  outline: none; cursor: pointer; -webkit-appearance: none;
+  outline: none; cursor: pointer; -webkit-appearance: none; width: 100%;
 }
-.page-select-row select:focus { border-color: var(--gold); }
+.page-select-row input { width: 60px; text-align: center; }
+.page-select-row select:focus, .page-select-row input:focus { border-color: var(--gold); }
+
+/* DISPLAY MODE TOGGLE */
+.display-toggle {
+  display: flex;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.display-toggle-btn {
+  flex: 1;
+  padding: 7px 12px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 11px;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 500;
+}
+.display-toggle-btn:hover {
+  color: var(--text);
+}
+.display-toggle-btn.active {
+  background: var(--gold);
+  color: var(--bg);
+  font-weight: 600;
+}
 
 /* MUSHAF BODY */
 .mushaf-body {
@@ -78,21 +124,53 @@ body::after {
 /* BISMILLAH */
 .bismillah {
   text-align: center;
-  font-family: 'Scheherazade New', serif;
+  font-family: 'UthmanicHafs', 'Scheherazade New', serif;
   font-size: clamp(28px, 3.5vw, 38px);
   color: var(--gold-light);
   margin-bottom: 20px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--border);
-  line-height: 1.8;
+  line-height: 2.2;
 }
 
-/* AYAH ROW */
+/* AYAH ROW - Word by Word Mode */
 .ayah-row {
   direction: rtl; text-align: justify;
-  margin-bottom: 8px;
-  line-height: 2.4;
+  margin-bottom: 16px;
+  line-height: 2.8;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.3s;
 }
+.ayah-row.playing {
+  background: rgba(201,168,76,0.12);
+  box-shadow: 0 0 0 2px rgba(201,168,76,0.3);
+}
+.ayah-row.current-reading {
+  background: rgba(46,139,91,0.08);
+  border-left: 3px solid var(--emerald-light);
+}
+
+/* AYAH ROW - Mushaf Madani Mode */
+.ayah-row.madani-mode {
+  direction: rtl;
+  text-align: justify;
+  padding: 16px 20px;
+  margin-bottom: 0;
+  border-bottom: 1px solid rgba(201,168,76,0.08);
+  line-height: 2.6;
+  background: transparent;
+  border-radius: 0;
+}
+.ayah-row.madani-mode:hover {
+  background: rgba(201,168,76,0.04);
+}
+.ayah-row.madani-mode.playing {
+  background: rgba(201,168,76,0.12);
+  box-shadow: none;
+  border-bottom-color: var(--gold);
+}
+
 .ayah-number {
   display: inline-flex; align-items: center; justify-content: center;
   width: 28px; height: 28px;
@@ -101,22 +179,53 @@ body::after {
   margin-right: 4px; vertical-align: middle;
   font-family: 'Inter', sans-serif;
 }
+
+/* Madani mode - ayah number di kanan */
+.madani-mode .ayah-number {
+  margin-right: 0;
+  margin-left: 8px;
+}
+
+/* WORD STYLING */
 .w {
-  font-family: 'Scheherazade New', 'Amiri', serif;
-  font-size: clamp(24px, 3vw, 34px);
+  font-family: 'UthmanicHafs', 'Scheherazade New', serif;
+  font-size: clamp(28px, 3.4vw, 40px);
   cursor: default;
   padding: 1px 3px;
   border-radius: 5px;
   display: inline;
   transition: background .2s, color .2s;
-  line-height: 2.2;
+  line-height: 2.6;
 }
 .w.idle    { color: var(--text); }
-.w.cursor  { color: var(--gold-light); background: rgba(201,168,76,0.18); animation: blink-cursor 1s ease-in-out infinite; }
+.w.cursor  { 
+  color: var(--gold-light); 
+  background: rgba(201,168,76,0.35); 
+  animation: blink-cursor 1s ease-in-out infinite;
+  font-weight: 600;
+  box-shadow: 0 0 0 2px rgba(201,168,76,0.3);
+}
 .w.correct { color: #5dba7d; background: rgba(76,175,80,0.1); }
 .w.wrong   { color: #ef6b5a; background: rgba(239,83,80,0.14); text-decoration: underline wavy rgba(239,83,80,0.5); }
 .w.passed  { color: rgba(240,234,216,0.38); }
-@keyframes blink-cursor { 0%,100%{background:rgba(201,168,76,.15)} 50%{background:rgba(201,168,76,.32)} }
+.w.skipped { color: rgba(201,168,76,0.4); background: rgba(201,168,76,0.05); }
+/* Retry cursor: shown on top of a correct (green) word — yellow border + pulse */
+.w.retry-cursor {
+  color: #5dba7d;
+  background: rgba(201,168,76,0.30);
+  box-shadow: 0 0 0 2px rgba(201,168,76,0.7);
+  animation: blink-cursor 0.8s ease-in-out infinite;
+}
+@keyframes blink-cursor { 0%,100%{background:rgba(201,168,76,.25)} 50%{background:rgba(201,168,76,.5)} }
+
+/* MADANI MODE - Full text styling */
+.ayah-text-madani {
+  font-family: 'UthmanicHafs', 'Scheherazade New', serif;
+  font-size: clamp(30px, 3.6vw, 42px);
+  color: var(--text);
+  line-height: 2.6;
+  display: inline;
+}
 
 /* ── RIGHT: CONTROL PANEL ── */
 .ctrl-panel {
@@ -136,6 +245,69 @@ body::after {
 .divider-line { width: 60px; height: 1px; background: linear-gradient(90deg,transparent,var(--gold),transparent); margin: 10px auto 0; }
 
 .ctrl-body { flex: 1; padding: 18px 18px 24px; display: flex; flex-direction: column; gap: 14px; }
+
+/* AUDIO PLAYER SECTION */
+.audio-player-sec {
+  background: linear-gradient(135deg, rgba(27,94,66,0.15), rgba(201,168,76,0.08));
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 15px;
+}
+.audio-controls { display: flex; flex-direction: column; gap: 10px; }
+.audio-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: center; }
+.audio-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--gold); font-weight: 600; }
+.audio-input {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  width: 100%;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+}
+.audio-input:focus { border-color: var(--gold); outline: none; }
+
+.play-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, var(--emerald-light), var(--emerald));
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(27,94,66,0.3);
+}
+.play-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(27,94,66,0.4); }
+.play-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.play-btn.playing {
+  background: linear-gradient(135deg, #b03020, #7a1f14);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{box-shadow:0 4px 12px rgba(192,57,43,0.3)} 50%{box-shadow:0 6px 20px rgba(192,57,43,0.6)} }
+
+.audio-status {
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 8px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.audio-status.active { color: var(--gold-light); }
 
 /* MIC BUTTON */
 .mic-center { display: flex; flex-direction: column; align-items: center; gap: 10px; }
@@ -212,6 +384,256 @@ body::after {
 .btn-sm { flex:1; padding: 9px 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,.2); color: var(--text); font-family:'Inter',sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: all .2s; text-align: center; }
 .btn-sm:hover { border-color: var(--gold); color: var(--gold); }
 .btn-sm.red:hover { border-color:rgba(239,107,90,.5); color:#ef6b5a; }
+.btn-sm.green { background: rgba(93,186,125,0.15); border-color: rgba(93,186,125,0.3); }
+.btn-sm.green:hover { border-color:#5dba7d; color:#5dba7d; background: rgba(93,186,125,0.25); }
+
+/* ── TABS ── */
+.tab-bar {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+.tab-btn {
+  flex: 1;
+  padding: 12px 8px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active {
+  color: var(--gold-light);
+  border-bottom-color: var(--gold);
+  font-weight: 600;
+}
+.tab-content {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 18px 24px;
+  flex-direction: column;
+  gap: 14px;
+}
+.tab-content.active { display: flex; }
+
+/* ── RETRY BANNER ── */
+.retry-banner {
+  background: linear-gradient(135deg, rgba(239,107,90,0.15), rgba(239,83,80,0.08));
+  border: 1px solid rgba(239,107,90,0.4);
+  border-radius: 12px;
+  padding: 14px 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  animation: pulse-red 1.5s ease-in-out infinite;
+}
+@keyframes pulse-red {
+  0%,100% { box-shadow: 0 0 0 0 rgba(239,107,90,0); }
+  50% { box-shadow: 0 0 0 6px rgba(239,107,90,0.15); }
+}
+.retry-ayah-label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  color: #ef6b5a;
+  text-transform: uppercase;
+}
+.retry-word-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 8px;
+  padding: 8px 16px;
+  width: 100%;
+}
+.retry-word-hint {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.retry-word {
+  font-family: 'UthmanicHafs', 'Scheherazade New', serif;
+  font-size: 32px;
+  color: #ef6b5a;
+  line-height: 1.5;
+  direction: rtl;
+}
+.retry-label {
+  font-size: 12px;
+  color: #ef6b5a;
+  font-weight: 600;
+}
+.retry-skip-btn {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(239,107,90,0.4);
+  border-radius: 8px;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.retry-skip-btn:hover { color: var(--text); border-color: var(--gold); }
+
+/* ── CTRL-BODY (keep for compatibility but tab-content replaces it) ── */
+.ctrl-body { display: none; }
+
+/* MODE NOTE */
+.mode-note {
+  font-size: 10px;
+  color: var(--muted);
+  text-align: center;
+  padding: 6px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 6px;
+}
+
+/* Smart Recognition Badge */
+.smart-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--emerald-light), var(--emerald));
+  color: white;
+  font-size: 9px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-left: 8px;
+  box-shadow: 0 2px 6px rgba(27,94,66,0.3);
+}
+
+/* START POSITION CONTROLS */
+.start-position-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.start-input-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.start-label {
+  font-size: 12px;
+  color: var(--text);
+  font-weight: 500;
+  min-width: 60px;
+}
+.start-input {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  text-align: center;
+}
+.start-input:focus {
+  border-color: var(--gold);
+  outline: none;
+}
+.btn-set-start {
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(201,168,76,0.3);
+}
+.btn-set-start:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(201,168,76,0.5);
+}
+.start-info {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  padding: 6px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
+/* COLOR LEGEND */
+.color-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 6px;
+}
+.legend-sample {
+  font-family: 'UthmanicHafs', 'Scheherazade New', serif;
+  font-size: 18px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  min-width: 40px;
+  text-align: center;
+}
+.legend-text {
+  font-size: 11px;
+  color: var(--text);
+  flex: 1;
+}
+.cursor-sample {
+  color: var(--gold-light);
+  background: rgba(201,168,76,0.35);
+  font-weight: 600;
+  box-shadow: 0 0 0 2px rgba(201,168,76,0.3);
+}
+.correct-sample {
+  color: #5dba7d;
+  background: rgba(76,175,80,0.1);
+}
+.wrong-sample {
+  color: #ef6b5a;
+  background: rgba(239,83,80,0.14);
+  text-decoration: underline wavy rgba(239,83,80,0.5);
+}
+.skipped-sample {
+  color: rgba(201,168,76,0.6);
+  background: rgba(201,168,76,0.08);
+}
+.passed-sample {
+  color: rgba(240,234,216,0.38);
+}
+.legend-note {
+  font-size: 10px;
+  color: var(--gold);
+  text-align: center;
+  padding: 8px;
+  background: rgba(201,168,76,0.08);
+  border-radius: 6px;
+  margin-top: 8px;
+  border: 1px dashed rgba(201,168,76,0.3);
+}
 </style>
 </head>
 <body>
@@ -220,14 +642,17 @@ body::after {
   <!-- ══════ LEFT: MUSHAF PAGE ══════ -->
   <div class="mushaf-panel">
     <div class="mushaf-header">
-      <div class="mushaf-title-area">
-        <span class="mushaf-label">Halaman</span>
-        <span class="mushaf-surah" id="pageTitle">Al-Fatihah</span>
-        <span class="page-info" id="pageInfo">—</span>
+      <div class="mushaf-header-top">
+        <div class="mushaf-title-area">
+          <span class="mushaf-label">Halaman</span>
+          <span class="mushaf-surah" id="pageTitle">Al-Qalam</span>
+          <span class="page-info" id="pageInfo">—</span>
+        </div>
       </div>
-      <div class="page-select-row">
-        <div>
-          <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Pilih Surah</div>
+
+      <div class="mushaf-controls">
+        <div class="control-group" style="flex:1">
+          <div class="control-group-label">Pilih Surah</div>
           <select id="surahSel" onchange="loadSurah()"></select>
         </div>
       </div>
@@ -242,11 +667,19 @@ body::after {
   <div class="ctrl-panel">
     <div class="ctrl-header">
       <div class="app-title">مراجعة</div>
-      <div class="app-sub">Hafalan Tracker</div>
+      <div class="app-sub">Smart Hafalan Tracker <span class="smart-badge">AI POWERED</span></div>
       <div class="divider-line"></div>
     </div>
 
-    <div class="ctrl-body">
+    <!-- TABS -->
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-voice" onclick="switchTab('voice')">🎙️ Voice</button>
+      <button class="tab-btn" id="tab-audio" onclick="switchTab('audio')">🔊 Audio</button>
+      <button class="tab-btn" id="tab-sambung" onclick="switchTab('sambung')">🔗 Sambung</button>
+    </div>
+
+    <!-- TAB: VOICE -->
+    <div class="tab-content active" id="tabcontent-voice">
 
       <!-- MIC -->
       <div class="mic-center">
@@ -260,6 +693,33 @@ body::after {
           <strong id="micLabel">Mulai Sesi</strong>
           <span id="micSub">Tekan untuk aktifkan mikrofon</span>
         </div>
+        <div class="mode-note">🧠 Smart tracking: otomatis mengikuti bacaan Anda</div>
+      </div>
+
+      <!-- RETRY BANNER (hidden by default) -->
+      <div class="retry-banner" id="retryBanner" style="display:none">
+        <div class="retry-ayah-label" id="retryAyahNum">AYAT —</div>
+        <div class="retry-label">⚠️ ULANGI DARI KURSOR KUNING ↑</div>
+        <div class="retry-word-row">
+          <span class="retry-word-hint">Kata yang salah:</span>
+          <div class="retry-word" id="retryWord">—</div>
+        </div>
+        <button class="retry-skip-btn" onclick="skipWrongWord()">Lewati ayat ini →</button>
+      </div>
+
+      <!-- START POSITION -->
+      <div class="sec">
+        <div class="sec-label">📍 Mulai Dari Ayat</div>
+        <div class="start-position-controls">
+          <div class="start-input-group">
+            <label class="start-label">Ayat ke</label>
+            <input type="number" id="startAyahNum" class="start-input" value="1" min="1" onchange="updateStartPosition()">
+          </div>
+          <button class="btn-set-start" onclick="goToStartPosition()">
+            📍 Pindah ke Posisi Ini
+          </button>
+        </div>
+        <div class="start-info" id="startInfo">Akan mulai dari ayat 1</div>
       </div>
 
       <!-- STATUS -->
@@ -286,27 +746,148 @@ body::after {
       </div>
 
       <!-- LOG -->
-      <div class="log-bar" id="logBar">Siap. Pilih surah dan tekan 🎙️</div>
+      <div class="log-bar" id="logBar">🧠 Smart Recognition siap</div>
 
       <!-- BUTTONS -->
       <div class="btn-row">
         <button class="btn-sm red" onclick="resetSession()">↺ Reset</button>
-        <button class="btn-sm" onclick="jumpBack()">⏮ Mundur 5</button>
-        <button class="btn-sm" onclick="skipForward()">⏭ Lewati</button>
+        <button class="btn-sm green" onclick="markCorrect()">✓ Benar</button>
+        <button class="btn-sm" onclick="jumpBack()">⏮ -5</button>
+        <button class="btn-sm" onclick="skipForward()">⏭ Skip</button>
       </div>
 
-    </div>
-  </div>
+    </div><!-- end tab-voice -->
+
+    <!-- TAB: AUDIO -->
+    <div class="tab-content" id="tabcontent-audio">
+      <div class="audio-player-sec" style="border:none; background:none; padding: 18px 18px 0;">
+        <div class="sec-label">🔊 Audio Muroja'ah</div>
+        <div class="audio-controls">
+          <div class="audio-row">
+            <div>
+              <div class="audio-label">Dari Ayat</div>
+              <input type="number" id="audioStartAyah" class="audio-input" value="1" min="1">
+            </div>
+            <div>
+              <div class="audio-label">Sampai Ayat</div>
+              <input type="number" id="audioEndAyah" class="audio-input" value="5" min="1">
+            </div>
+          </div>
+          <div>
+            <div class="audio-label">Jumlah Pengulangan</div>
+            <input type="number" id="audioRepeatCount" class="audio-input" value="3" min="1" max="100">
+          </div>
+          <div>
+            <div class="audio-label">Jeda Antar Ayat (detik)</div>
+            <input type="number" id="audioPause" class="audio-input" value="2" min="0" max="10" step="0.5">
+          </div>
+          <button class="play-btn" id="audioPlayBtn" onclick="toggleAudioPlayer()">
+            <span id="audioPlayIcon">▶️</span>
+            <span id="audioPlayText">Putar Audio</span>
+          </button>
+          <div class="audio-status" id="audioStatus">Siap memutar audio</div>
+        </div>
+      </div>
+    </div><!-- end tab-audio -->
+
+    <!-- TAB: SAMBUNG AYAT -->
+    <div class="tab-content" id="tabcontent-sambung">
+      
+      <!-- SAMBUNG STATE: SETUP -->
+      <div id="sambungSetup">
+        <div class="sec">
+          <div class="sec-label">🔗 Sambung Ayat</div>
+          <div class="mode-note" style="margin-bottom:12px">Sistem membaca 1 ayat acak, kamu sambung ayat berikutnya</div>
+
+          <!-- Surah multi-select list -->
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.8px">Pilih Surah (bisa lebih dari satu)</div>
+          <div id="sambungSurahList" style="display:flex;flex-direction:column;gap:4px;max-height:220px;overflow-y:auto;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:10px;padding:6px 4px">
+            <!-- Populated by JS -->
+          </div>
+
+          <!-- Per-surah range config (shown when surah is selected) -->
+          <div id="sambungRangeConfig" style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+            <!-- Populated by JS when a surah checkbox is toggled -->
+          </div>
+
+          <button class="btn-set-start" style="margin-top:12px" onclick="startSambungMode()">
+            🎲 Mulai Sambung Ayat
+          </button>
+        </div>
+      </div>
+
+      <!-- SAMBUNG STATE: ACTIVE -->
+      <div id="sambungActive" style="display:none;flex-direction:column;gap:12px">
+
+        <!-- Ayat yang dibacakan sistem -->
+        <div class="sec" id="sambungPromptSec">
+          <div class="sec-label" style="color:var(--gold)">🔊 Sistem Membaca</div>
+          <div id="sambungAyahInfo" style="font-size:11px;color:var(--muted);margin-bottom:6px">—</div>
+          <div id="sambungAyahText" style="font-family:'UthmanicHafs','Scheherazade New',serif;font-size:26px;line-height:1.9;direction:rtl;text-align:right;color:var(--text);padding:10px 12px;background:rgba(0,0,0,0.2);border-radius:10px;border:1px solid var(--border)">—</div>
+          <button id="sambungReplayBtn" onclick="sambungReplayAudio()" style="margin-top:8px;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);border-radius:8px;color:var(--gold-light);font-size:12px;padding:7px 14px;cursor:pointer;width:100%">
+            🔁 Putar Ulang
+          </button>
+        </div>
+
+        <!-- Status validasi user -->
+        <div class="sec">
+          <div class="sec-label">Status</div>
+          <div class="status-row" style="margin-bottom:8px">
+            <div class="sdot" id="sambungDot"></div>
+            <span class="stext" id="sambungText">Siap — tekan mikrofon untuk sambung</span>
+          </div>
+          <div class="t-box" style="min-height:40px">
+            <div class="t-arabic" id="sambungTranscript">—</div>
+          </div>
+        </div>
+
+        <!-- Mic button -->
+        <div class="mic-center" style="padding:8px 0">
+          <button class="btn-mic" id="sambungMicBtn" onclick="toggleSambungSession()" style="width:64px;height:64px;font-size:26px">🎙️</button>
+          <div class="mic-label">
+            <strong id="sambungMicLabel">Sambung Ayat</strong>
+            <span id="sambungMicSub">Tekan untuk bicara</span>
+          </div>
+        </div>
+
+        <!-- Hasil -->
+        <div id="sambungResult" style="display:none" class="sec">
+          <div class="sec-label" id="sambungResultLabel">Hasil</div>
+          <div id="sambungExpected" style="font-family:'UthmanicHafs','Scheherazade New',serif;font-size:22px;direction:rtl;text-align:right;line-height:1.9;padding:10px 12px;background:rgba(0,0,0,0.2);border-radius:10px;border:1px solid var(--border);margin-bottom:8px">—</div>
+          <div id="sambungResultMsg" style="font-size:13px;font-weight:600;text-align:center;padding:10px;border-radius:8px;margin-bottom:8px">—</div>
+          <div style="display:flex;gap:8px">
+            <button onclick="nextSambung()" style="flex:1;padding:10px;background:linear-gradient(135deg,var(--gold-dark),var(--gold));border:none;border-radius:8px;color:white;font-weight:600;cursor:pointer;font-size:13px">🎲 Soal Baru</button>
+            <button onclick="stopSambungMode()" style="flex:1;padding:10px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:8px;color:var(--muted);cursor:pointer;font-size:13px">✕ Selesai</button>
+          </div>
+        </div>
+
+        <!-- Skor sesi -->
+        <div class="sec">
+          <div class="sec-label">Skor Sesi</div>
+          <div class="stats-grid">
+            <div class="stat"><div class="sv g" id="sambungOk">0</div><div class="sl">✓ Benar</div></div>
+            <div class="stat"><div class="sv r" id="sambungErr">0</div><div class="sl">✗ Salah</div></div>
+            <div class="stat"><div class="sv b" id="sambungTotal">0</div><div class="sl">Total</div></div>
+          </div>
+        </div>
+
+        <button onclick="stopSambungMode()" style="background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;padding:8px;cursor:pointer">
+          ← Ubah Pengaturan
+        </button>
+      </div>
+
+    </div><!-- end tab-sambung -->
+
+  </div><!-- end ctrl-panel -->
 </div>
 
 <script>
 // ════════════════════════════════════════════════════════════
-//  QURAN DATA  — full short surahs as word arrays
+//  QURAN DATA
 // ════════════════════════════════════════════════════════════
 const SURAHS = {
   1: {
-    name:"Al-Fatihah", num:1,
-    bismillah: true,
+    name:"Al-Fatihah", num:1, bismillah: true,
     ayahs:[
       {n:1, words:["بِسْمِ","اللَّهِ","الرَّحْمَٰنِ","الرَّحِيمِ"]},
       {n:2, words:["الْحَمْدُ","لِلَّهِ","رَبِّ","الْعَالَمِينَ"]},
@@ -317,168 +898,15 @@ const SURAHS = {
       {n:7, words:["صِرَاطَ","الَّذِينَ","أَنْعَمْتَ","عَلَيْهِمْ","غَيْرِ","الْمَغْضُوبِ","عَلَيْهِمْ","وَلَا","الضَّالِّينَ"]}
     ]
   },
-  112: {
-    name:"Al-Ikhlas", num:112,
-    bismillah: true,
-    ayahs:[
-      {n:1, words:["قُلْ","هُوَ","اللَّهُ","أَحَدٌ"]},
-      {n:2, words:["اللَّهُ","الصَّمَدُ"]},
-      {n:3, words:["لَمْ","يَلِدْ","وَلَمْ","يُولَدْ"]},
-      {n:4, words:["وَلَمْ","يَكُن","لَّهُ","كُفُوًا","أَحَدٌ"]}
-    ]
-  },
-  113: {
-    name:"Al-Falaq", num:113,
-    bismillah: true,
-    ayahs:[
-      {n:1, words:["قُلْ","أَعُوذُ","بِرَبِّ","الْفَلَقِ"]},
-      {n:2, words:["مِن","شَرِّ","مَا","خَلَقَ"]},
-      {n:3, words:["وَمِن","شَرِّ","غَاسِقٍ","إِذَا","وَقَبَ"]},
-      {n:4, words:["وَمِن","شَرِّ","النَّفَّاثَاتِ","فِي","الْعُقَدِ"]},
-      {n:5, words:["وَمِن","شَرِّ","حَاسِدٍ","إِذَا","حَسَدَ"]}
-    ]
-  },
-  114: {
-    name:"An-Nas", num:114,
-    bismillah: true,
-    ayahs:[
-      {n:1, words:["قُلْ","أَعُوذُ","بِرَبِّ","النَّاسِ"]},
-      {n:2, words:["مَلِكِ","النَّاسِ"]},
-      {n:3, words:["إِلَٰهِ","النَّاسِ"]},
-      {n:4, words:["مِن","شَرِّ","الْوَسْوَاسِ","الْخَنَّاسِ"]},
-      {n:5, words:["الَّذِي","يُوَسْوِسُ","فِي","صُدُورِ","النَّاسِ"]},
-      {n:6, words:["مِنَ","الْجِنَّةِ","وَالنَّاسِ"]}
-    ]
-  },
-  108: {
-    name:"Al-Kautsar", num:108,
-    bismillah: true,
-    ayahs:[
-      {n:1, words:["إِنَّا","أَعْطَيْنَاكَ","الْكَوْثَرَ"]},
-      {n:2, words:["فَصَلِّ","لِرَبِّكَ","وَانْحَرْ"]},
-      {n:3, words:["إِنَّ","شَانِئَكَ","هُوَ","الْأَبْتَرُ"]}
-    ]
-  },
-  110: {
-    name:"An-Nasr", num:110,
-    bismillah: true,
-    ayahs:[
-      {n:1, words:["إِذَا","جَاءَ","نَصْرُ","اللَّهِ","وَالْفَتْحُ"]},
-      {n:2, words:["وَرَأَيْتَ","النَّاسَ","يَدْخُلُونَ","فِي","دِينِ","اللَّهِ","أَفْوَاجًا"]},
-      {n:3, words:["فَسَبِّحْ","بِحَمْدِ","رَبِّكَ","وَاسْتَغْفِرْهُ","إِنَّهُ","كَانَ","تَوَّابًا"]}
-    ]
-  },
-  109: {
-    name:"Al-Kafirun", num:109,
-    bismillah: true,
-    ayahs:[
-      {n:1, words:["قُلْ","يَا","أَيُّهَا","الْكَافِرُونَ"]},
-      {n:2, words:["لَا","أَعْبُدُ","مَا","تَعْبُدُونَ"]},
-      {n:3, words:["وَلَا","أَنتُمْ","عَابِدُونَ","مَا","أَعْبُدُ"]},
-      {n:4, words:["وَلَا","أَنَا","عَابِدٌ","مَّا","عَبَدتُّمْ"]},
-      {n:5, words:["وَلَا","أَنتُمْ","عَابِدُونَ","مَا","أَعْبُدُ"]},
-      {n:6, words:["لَكُمْ","دِينُكُمْ","وَلِيَ","دِينِ"]}
-    ]
-  },
-  111: {
-    name:"Al-Masad", num:111,
-    bismillah: true,
-    ayahs:[
-      {n:1, words:["تَبَّتْ","يَدَا","أَبِي","لَهَبٍ","وَتَبَّ"]},
-      {n:2, words:["مَا","أَغْنَىٰ","عَنْهُ","مَالُهُ","وَمَا","كَسَبَ"]},
-      {n:3, words:["سَيَصْلَىٰ","نَارًا","ذَاتَ","لَهَبٍ"]},
-      {n:4, words:["وَامْرَأَتُهُ","حَمَّالَةَ","الْحَطَبِ"]},
-      {n:5, words:["فِي","جِيدِهَا","حَبْلٌ","مِّن","مَّسَدٍ"]}
-    ]
-  },
-
-  // ══ AS-SAJDAH (32) — 30 ayat ══
-  32: {
-    name:"As-Sajdah", num:32,
-    bismillah: true,
-    ayahs:[
-      {n:1,  words:["الٓمٓ"]},
-      {n:2,  words:["تَنزِيلُ","الْكِتَابِ","لَا","رَيْبَ","فِيهِ","مِن","رَّبِّ","الْعَالَمِينَ"]},
-      {n:3,  words:["أَمْ","يَقُولُونَ","افْتَرَاهُ","بَلْ","هُوَ","الْحَقُّ","مِن","رَّبِّكَ","لِتُنذِرَ","قَوْمًا","مَّا","أَتَاهُم","مِّن","نَّذِيرٍ","مِّن","قَبْلِكَ","لَعَلَّهُمْ","يَهْتَدُونَ"]},
-      {n:4,  words:["اللَّهُ","الَّذِي","خَلَقَ","السَّمَاوَاتِ","وَالْأَرْضَ","وَمَا","بَيْنَهُمَا","فِي","سِتَّةِ","أَيَّامٍ","ثُمَّ","اسْتَوَىٰ","عَلَى","الْعَرْشِ","مَا","لَكُم","مِّن","دُونِهِ","مِن","وَلِيٍّ","وَلَا","شَفِيعٍ","أَفَلَا","تَتَذَكَّرُونَ"]},
-      {n:5,  words:["يُدَبِّرُ","الْأَمْرَ","مِنَ","السَّمَاءِ","إِلَى","الْأَرْضِ","ثُمَّ","يَعْرُجُ","إِلَيْهِ","فِي","يَوْمٍ","كَانَ","مِقْدَارُهُ","أَلْفَ","سَنَةٍ","مِّمَّا","تَعُدُّونَ"]},
-      {n:6,  words:["ذَٰلِكَ","عَالِمُ","الْغَيْبِ","وَالشَّهَادَةِ","الْعَزِيزُ","الرَّحِيمُ"]},
-      {n:7,  words:["الَّذِي","أَحْسَنَ","كُلَّ","شَيْءٍ","خَلَقَهُ","وَبَدَأَ","خَلْقَ","الْإِنسَانِ","مِن","طِينٍ"]},
-      {n:8,  words:["ثُمَّ","جَعَلَ","نَسْلَهُ","مِن","سُلَالَةٍ","مِّن","مَّاءٍ","مَّهِينٍ"]},
-      {n:9,  words:["ثُمَّ","سَوَّاهُ","وَنَفَخَ","فِيهِ","مِن","رُّوحِهِ","وَجَعَلَ","لَكُمُ","السَّمْعَ","وَالْأَبْصَارَ","وَالْأَفْئِدَةَ","قَلِيلًا","مَّا","تَشْكُرُونَ"]},
-      {n:10, words:["وَقَالُوا","أَإِذَا","ضَلَلْنَا","فِي","الْأَرْضِ","أَإِنَّا","لَفِي","خَلْقٍ","جَدِيدٍ","بَلْ","هُم","بِلِقَاءِ","رَبِّهِمْ","كَافِرُونَ"]},
-      {n:11, words:["قُلْ","يَتَوَفَّاكُم","مَّلَكُ","الْمَوْتِ","الَّذِي","وُكِّلَ","بِكُمْ","ثُمَّ","إِلَىٰ","رَبِّكُمْ","تُرْجَعُونَ"]},
-      {n:12, words:["وَلَوْ","تَرَىٰ","إِذِ","الْمُجْرِمُونَ","نَاكِسُو","رُءُوسِهِمْ","عِندَ","رَبِّهِمْ","رَبَّنَا","أَبْصَرْنَا","وَسَمِعْنَا","فَارْجِعْنَا","نَعْمَلْ","صَالِحًا","إِنَّا","مُوقِنُونَ"]},
-      {n:13, words:["وَلَوْ","شِئْنَا","لَآتَيْنَا","كُلَّ","نَفْسٍ","هُدَاهَا","وَلَٰكِنْ","حَقَّ","الْقَوْلُ","مِنِّي","لَأَمْلَأَنَّ","جَهَنَّمَ","مِنَ","الْجِنَّةِ","وَالنَّاسِ","أَجْمَعِينَ"]},
-      {n:14, words:["فَذُوقُوا","بِمَا","نَسِيتُمْ","لِقَاءَ","يَوْمِكُمْ","هَٰذَا","إِنَّا","نَسِينَاكُمْ","وَذُوقُوا","عَذَابَ","الْخُلْدِ","بِمَا","كُنتُمْ","تَعْمَلُونَ"]},
-      {n:15, words:["إِنَّمَا","يُؤْمِنُ","بِآيَاتِنَا","الَّذِينَ","إِذَا","ذُكِّرُوا","بِهَا","خَرُّوا","سُجَّدًا","وَسَبَّحُوا","بِحَمْدِ","رَبِّهِمْ","وَهُمْ","لَا","يَسْتَكْبِرُونَ"]},
-      {n:16, words:["تَتَجَافَىٰ","جُنُوبُهُمْ","عَنِ","الْمَضَاجِعِ","يَدْعُونَ","رَبَّهُمْ","خَوْفًا","وَطَمَعًا","وَمِمَّا","رَزَقْنَاهُمْ","يُنفِقُونَ"]},
-      {n:17, words:["فَلَا","تَعْلَمُ","نَفْسٌ","مَّا","أُخْفِيَ","لَهُم","مِّن","قُرَّةِ","أَعْيُنٍ","جَزَاءً","بِمَا","كَانُوا","يَعْمَلُونَ"]},
-      {n:18, words:["أَفَمَن","كَانَ","مُؤْمِنًا","كَمَن","كَانَ","فَاسِقًا","لَّا","يَسْتَوُونَ"]},
-      {n:19, words:["أَمَّا","الَّذِينَ","آمَنُوا","وَعَمِلُوا","الصَّالِحَاتِ","فَلَهُمْ","جَنَّاتُ","الْمَأْوَىٰ","نُزُلًا","بِمَا","كَانُوا","يَعْمَلُونَ"]},
-      {n:20, words:["وَأَمَّا","الَّذِينَ","فَسَقُوا","فَمَأْوَاهُمُ","النَّارُ","كُلَّمَا","أَرَادُوا","أَن","يَخْرُجُوا","مِنْهَا","أُعِيدُوا","فِيهَا","وَقِيلَ","لَهُمْ","ذُوقُوا","عَذَابَ","النَّارِ","الَّذِي","كُنتُم","بِهِ","تُكَذِّبُونَ"]},
-      {n:21, words:["وَلَنُذِيقَنَّهُم","مِّنَ","الْعَذَابِ","الْأَدْنَىٰ","دُونَ","الْعَذَابِ","الْأَكْبَرِ","لَعَلَّهُمْ","يَرْجِعُونَ"]},
-      {n:22, words:["وَمَنْ","أَظْلَمُ","مِمَّن","ذُكِّرَ","بِآيَاتِ","رَبِّهِ","ثُمَّ","أَعْرَضَ","عَنْهَا","إِنَّا","مِنَ","الْمُجْرِمِينَ","مُنتَقِمُونَ"]},
-      {n:23, words:["وَلَقَدْ","آتَيْنَا","مُوسَى","الْكِتَابَ","فَلَا","تَكُن","فِي","مِرْيَةٍ","مِّن","لِّقَائِهِ","وَجَعَلْنَاهُ","هُدًى","لِّبَنِي","إِسْرَائِيلَ"]},
-      {n:24, words:["وَجَعَلْنَا","مِنْهُمْ","أَئِمَّةً","يَهْدُونَ","بِأَمْرِنَا","لَمَّا","صَبَرُوا","وَكَانُوا","بِآيَاتِنَا","يُوقِنُونَ"]},
-      {n:25, words:["إِنَّ","رَبَّكَ","هُوَ","يَفْصِلُ","بَيْنَهُمْ","يَوْمَ","الْقِيَامَةِ","فِيمَا","كَانُوا","فِيهِ","يَخْتَلِفُونَ"]},
-      {n:26, words:["أَوَلَمْ","يَهْدِ","لَهُمْ","كَمْ","أَهْلَكْنَا","مِن","قَبْلِهِم","مِّنَ","الْقُرُونِ","يَمْشُونَ","فِي","مَسَاكِنِهِمْ","إِنَّ","فِي","ذَٰلِكَ","لَآيَاتٍ","أَفَلَا","يَسْمَعُونَ"]},
-      {n:27, words:["أَوَلَمْ","يَرَوْا","أَنَّا","نَسُوقُ","الْمَاءَ","إِلَى","الْأَرْضِ","الْجُرُزِ","فَنُخْرِجُ","بِهِ","زَرْعًا","تَأْكُلُ","مِنْهُ","أَنْعَامُهُمْ","وَأَنفُسُهُمْ","أَفَلَا","يُبْصِرُونَ"]},
-      {n:28, words:["وَيَقُولُونَ","مَتَىٰ","هَٰذَا","الْفَتْحُ","إِن","كُنتُمْ","صَادِقِينَ"]},
-      {n:29, words:["قُلْ","يَوْمَ","الْفَتْحِ","لَا","يَنفَعُ","الَّذِينَ","كَفَرُوا","إِيمَانُهُمْ","وَلَا","هُمْ","يُنظَرُونَ"]},
-      {n:30, words:["فَأَعْرِضْ","عَنْهُمْ","وَانتَظِرْ","إِنَّهُم","مُّنتَظِرُونَ"]}
-    ]
-  },
-
-  // ══ AL-MULK (67) — 30 ayat ══
-  67: {
-    name:"Al-Mulk", num:67,
-    bismillah: true,
-    ayahs:[
-      {n:1,  words:["تَبَارَكَ","الَّذِي","بِيَدِهِ","الْمُلْكُ","وَهُوَ","عَلَىٰ","كُلِّ","شَيْءٍ","قَدِيرٌ"]},
-      {n:2,  words:["الَّذِي","خَلَقَ","الْمَوْتَ","وَالْحَيَاةَ","لِيَبْلُوَكُمْ","أَيُّكُمْ","أَحْسَنُ","عَمَلًا","وَهُوَ","الْعَزِيزُ","الْغَفُورُ"]},
-      {n:3,  words:["الَّذِي","خَلَقَ","سَبْعَ","سَمَاوَاتٍ","طِبَاقًا","مَّا","تَرَىٰ","فِي","خَلْقِ","الرَّحْمَٰنِ","مِن","تَفَاوُتٍ","فَارْجِعِ","الْبَصَرَ","هَلْ","تَرَىٰ","مِن","فُطُورٍ"]},
-      {n:4,  words:["ثُمَّ","ارْجِعِ","الْبَصَرَ","كَرَّتَيْنِ","يَنقَلِبْ","إِلَيْكَ","الْبَصَرُ","خَاسِئًا","وَهُوَ","حَسِيرٌ"]},
-      {n:5,  words:["وَلَقَدْ","زَيَّنَّا","السَّمَاءَ","الدُّنْيَا","بِمَصَابِيحَ","وَجَعَلْنَاهَا","رُجُومًا","لِّلشَّيَاطِينِ","وَأَعْتَدْنَا","لَهُمْ","عَذَابَ","السَّعِيرِ"]},
-      {n:6,  words:["وَلِلَّذِينَ","كَفَرُوا","بِرَبِّهِمْ","عَذَابُ","جَهَنَّمَ","وَبِئْسَ","الْمَصِيرُ"]},
-      {n:7,  words:["إِذَا","أُلْقُوا","فِيهَا","سَمِعُوا","لَهَا","شَهِيقًا","وَهِيَ","تَفُورُ"]},
-      {n:8,  words:["تَكَادُ","تَمَيَّزُ","مِنَ","الْغَيْظِ","كُلَّمَا","أُلْقِيَ","فِيهَا","فَوْجٌ","سَأَلَهُمْ","خَزَنَتُهَا","أَلَمْ","يَأْتِكُمْ","نَذِيرٌ"]},
-      {n:9,  words:["قَالُوا","بَلَىٰ","قَدْ","جَاءَنَا","نَذِيرٌ","فَكَذَّبْنَا","وَقُلْنَا","مَا","نَزَّلَ","اللَّهُ","مِن","شَيْءٍ","إِنْ","أَنتُمْ","إِلَّا","فِي","ضَلَالٍ","كَبِيرٍ"]},
-      {n:10, words:["وَقَالُوا","لَوْ","كُنَّا","نَسْمَعُ","أَوْ","نَعْقِلُ","مَا","كُنَّا","فِي","أَصْحَابِ","السَّعِيرِ"]},
-      {n:11, words:["فَاعْتَرَفُوا","بِذَنبِهِمْ","فَسُحْقًا","لِّأَصْحَابِ","السَّعِيرِ"]},
-      {n:12, words:["إِنَّ","الَّذِينَ","يَخْشَوْنَ","رَبَّهُم","بِالْغَيْبِ","لَهُم","مَّغْفِرَةٌ","وَأَجْرٌ","كَبِيرٌ"]},
-      {n:13, words:["وَأَسِرُّوا","قَوْلَكُمْ","أَوِ","اجْهَرُوا","بِهِ","إِنَّهُ","عَلِيمٌ","بِذَاتِ","الصُّدُورِ"]},
-      {n:14, words:["أَلَا","يَعْلَمُ","مَنْ","خَلَقَ","وَهُوَ","اللَّطِيفُ","الْخَبِيرُ"]},
-      {n:15, words:["هُوَ","الَّذِي","جَعَلَ","لَكُمُ","الْأَرْضَ","ذَلُولًا","فَامْشُوا","فِي","مَنَاكِبِهَا","وَكُلُوا","مِن","رِّزْقِهِ","وَإِلَيْهِ","النُّشُورُ"]},
-      {n:16, words:["أَأَمِنتُم","مَّن","فِي","السَّمَاءِ","أَن","يَخْسِفَ","بِكُمُ","الْأَرْضَ","فَإِذَا","هِيَ","تَمُورُ"]},
-      {n:17, words:["أَمْ","أَمِنتُم","مَّن","فِي","السَّمَاءِ","أَن","يُرْسِلَ","عَلَيْكُمْ","حَاصِبًا","فَسَتَعْلَمُونَ","كَيْفَ","نَذِيرِ"]},
-      {n:18, words:["وَلَقَدْ","كَذَّبَ","الَّذِينَ","مِن","قَبْلِهِمْ","فَكَيْفَ","كَانَ","نَكِيرِ"]},
-      {n:19, words:["أَوَلَمْ","يَرَوْا","إِلَى","الطَّيْرِ","فَوْقَهُمْ","صَافَّاتٍ","وَيَقْبِضْنَ","مَا","يُمْسِكُهُنَّ","إِلَّا","الرَّحْمَٰنُ","إِنَّهُ","بِكُلِّ","شَيْءٍ","بَصِيرٌ"]},
-      {n:20, words:["أَمَّنْ","هَٰذَا","الَّذِي","هُوَ","جُندٌ","لَّكُمْ","يَنصُرُكُم","مِّن","دُونِ","الرَّحْمَٰنِ","إِنِ","الْكَافِرُونَ","إِلَّا","فِي","غُرُورٍ"]},
-      {n:21, words:["أَمَّنْ","هَٰذَا","الَّذِي","يَرْزُقُكُمْ","إِنْ","أَمْسَكَ","رِزْقَهُ","بَل","لَّجُّوا","فِي","عُتُوٍّ","وَنُفُورٍ"]},
-      {n:22, words:["أَفَمَن","يَمْشِي","مُكِبًّا","عَلَىٰ","وَجْهِهِ","أَهْدَىٰ","أَمَّن","يَمْشِي","سَوِيًّا","عَلَىٰ","صِرَاطٍ","مُّسْتَقِيمٍ"]},
-      {n:23, words:["قُلْ","هُوَ","الَّذِي","أَنشَأَكُمْ","وَجَعَلَ","لَكُمُ","السَّمْعَ","وَالْأَبْصَارَ","وَالْأَفْئِدَةَ","قَلِيلًا","مَّا","تَشْكُرُونَ"]},
-      {n:24, words:["قُلْ","هُوَ","الَّذِي","ذَرَأَكُمْ","فِي","الْأَرْضِ","وَإِلَيْهِ","تُحْشَرُونَ"]},
-      {n:25, words:["وَيَقُولُونَ","مَتَىٰ","هَٰذَا","الْوَعْدُ","إِن","كُنتُمْ","صَادِقِينَ"]},
-      {n:26, words:["قُلْ","إِنَّمَا","الْعِلْمُ","عِندَ","اللَّهِ","وَإِنَّمَا","أَنَا","نَذِيرٌ","مُّبِينٌ"]},
-      {n:27, words:["فَلَمَّا","رَأَوْهُ","زُلْفَةً","سِيئَتْ","وُجُوهُ","الَّذِينَ","كَفَرُوا","وَقِيلَ","هَٰذَا","الَّذِي","كُنتُم","بِهِ","تَدَّعُونَ"]},
-      {n:28, words:["قُلْ","أَرَأَيْتُمْ","إِنْ","أَهْلَكَنِيَ","اللَّهُ","وَمَن","مَّعِيَ","أَوْ","رَحِمَنَا","فَمَن","يُجِيرُ","الْكَافِرِينَ","مِنْ","عَذَابٍ","أَلِيمٍ"]},
-      {n:29, words:["قُلْ","هُوَ","الرَّحْمَٰنُ","آمَنَّا","بِهِ","وَعَلَيْهِ","تَوَكَّلْنَا","فَسَتَعْلَمُونَ","مَنْ","هُوَ","فِي","ضَلَالٍ","مُّبِينٍ"]},
-      {n:30, words:["قُلْ","أَرَأَيْتُمْ","إِنْ","أَصْبَحَ","مَاؤُكُمْ","غَوْرًا","فَمَن","يَأْتِيكُم","بِمَاءٍ","مَّعِينٍ"]}
-    ]
-  },
-
-  // ══ AL-QALAM (68) — 52 ayat ══
   68: {
-    name:"Al-Qalam", num:68,
-    bismillah: true,
+    name:"Al-Qalam", num:68, bismillah: true,
     ayahs:[
       {n:1,  words:["نٓ","وَالْقَلَمِ","وَمَا","يَسْطُرُونَ"]},
-      {n:2,  words:["مَا","أَنتَ","بِنِعْمَةِ","رَبِّكَ","بِمَجْنُونٍ"]},
+      {n:2,  words:["مَا","أَنتَ","بِنِعْمَتِ","رَبِّكَ","بِمَجْنُونٍ"]},
       {n:3,  words:["وَإِنَّ","لَكَ","لَأَجْرًا","غَيْرَ","مَمْنُونٍ"]},
       {n:4,  words:["وَإِنَّكَ","لَعَلَىٰ","خُلُقٍ","عَظِيمٍ"]},
       {n:5,  words:["فَسَتُبْصِرُ","وَيُبْصِرُونَ"]},
-      {n:6,  words:["بِأَييِّكُمُ","الْمَفْتُونُ"]},
+      {n:6,  words:["بِأَيِّكُمُ","الْمَفْتُونُ"]},
       {n:7,  words:["إِنَّ","رَبَّكَ","هُوَ","أَعْلَمُ","بِمَن","ضَلَّ","عَن","سَبِيلِهِ","وَهُوَ","أَعْلَمُ","بِالْمُهْتَدِينَ"]},
       {n:8,  words:["فَلَا","تُطِعِ","الْمُكَذِّبِينَ"]},
       {n:9,  words:["وَدُّوا","لَوْ","تُدْهِنُ","فَيُدْهِنُونَ"]},
@@ -512,7 +940,7 @@ const SURAHS = {
       {n:37, words:["أَمْ","لَكُمْ","كِتَابٌ","فِيهِ","تَدْرُسُونَ"]},
       {n:38, words:["إِنَّ","لَكُمْ","فِيهِ","لَمَا","تَخَيَّرُونَ"]},
       {n:39, words:["أَمْ","لَكُمْ","أَيْمَانٌ","عَلَيْنَا","بَالِغَةٌ","إِلَىٰ","يَوْمِ","الْقِيَامَةِ","إِنَّ","لَكُمْ","لَمَا","تَحْكُمُونَ"]},
-      {n:40, words:["سَلْهُم","أَيُّهُم","بِذَٰلِكَ","زَعِيمٌ"]},
+      {n:40, words:["سَلْهُمْ","أَيُّهُم","بِذَٰلِكَ","زَعِيمٌ"]},
       {n:41, words:["أَمْ","لَهُمْ","شُرَكَاءُ","فَلْيَأْتُوا","بِشُرَكَائِهِمْ","إِن","كَانُوا","صَادِقِينَ"]},
       {n:42, words:["يَوْمَ","يُكْشَفُ","عَن","سَاقٍ","وَيُدْعَوْنَ","إِلَى","السُّجُودِ","فَلَا","يَسْتَطِيعُونَ"]},
       {n:43, words:["خَاشِعَةً","أَبْصَارُهُمْ","تَرْهَقُهُمْ","ذِلَّةٌ","وَقَدْ","كَانُوا","يُدْعَوْنَ","إِلَى","السُّجُودِ","وَهُمْ","سَالِمُونَ"]},
@@ -527,11 +955,73 @@ const SURAHS = {
       {n:52, words:["وَمَا","هُوَ","إِلَّا","ذِكْرٌ","لِّلْعَالَمِينَ"]}
     ]
   },
-
-  // ══ AL-HAQQAH (69) — 52 ayat ══
+  112: {
+    name:"Al-Ikhlas", num:112, bismillah: true,
+    ayahs:[
+      {n:1, words:["قُلْ","هُوَ","اللَّهُ","أَحَدٌ"]},
+      {n:2, words:["اللَّهُ","الصَّمَدُ"]},
+      {n:3, words:["لَمْ","يَلِدْ","وَلَمْ","يُولَدْ"]},
+      {n:4, words:["وَلَمْ","يَكُن","لَّهُ","كُفُوًا","أَحَدٌ"]}
+    ]
+  },
+  113: {
+    name:"Al-Falaq", num:113, bismillah: true,
+    ayahs:[
+      {n:1, words:["قُلْ","أَعُوذُ","بِرَبِّ","الْفَلَقِ"]},
+      {n:2, words:["مِن","شَرِّ","مَا","خَلَقَ"]},
+      {n:3, words:["وَمِن","شَرِّ","غَاسِقٍ","إِذَا","وَقَبَ"]},
+      {n:4, words:["وَمِن","شَرِّ","النَّفَّاثَاتِ","فِي","الْعُقَدِ"]},
+      {n:5, words:["وَمِن","شَرِّ","حَاسِدٍ","إِذَا","حَسَدَ"]}
+    ]
+  },
+  114: {
+    name:"An-Nas", num:114, bismillah: true,
+    ayahs:[
+      {n:1, words:["قُلْ","أَعُوذُ","بِرَبِّ","النَّاسِ"]},
+      {n:2, words:["مَلِكِ","النَّاسِ"]},
+      {n:3, words:["إِلَٰهِ","النَّاسِ"]},
+      {n:4, words:["مِن","شَرِّ","الْوَسْوَاسِ","الْخَنَّاسِ"]},
+      {n:5, words:["الَّذِي","يُوَسْوِسُ","فِي","صُدُورِ","النَّاسِ"]},
+      {n:6, words:["مِنَ","الْجِنَّةِ","وَالنَّاسِ"]}
+    ]
+  },
+  32: {
+    name:"As-Sajdah", num:32, bismillah: true,
+    ayahs:[
+      {n:1,  words:["الٓمٓ"]},
+      {n:2,  words:["تَنزِيلُ","الْكِتَٰبِ","لَا","رَيْبَ","فِيهِ","مِن","رَّبِّ","الْعَالَمِينَ"]},
+      {n:3,  words:["أَمْ","يَقُولُونَ","افْتَرَىٰهُ","بَلْ","هُوَ","الْحَقُّ","مِن","رَّبِّكَ","لِتُنذِرَ","قَوْمًا","مَّا","أَتَاهُم","مِّن","نَّذِيرٍ","مِّن","قَبْلِكَ","لَعَلَّهُمْ","يَهْتَدُونَ"]},
+      {n:4,  words:["اللَّهُ","الَّذِي","خَلَقَ","السَّمَاوَاتِ","وَالْأَرْضَ","وَمَا","بَيْنَهُمَا","فِي","سِتَّةِ","أَيَّامٍ","ثُمَّ","اسْتَوَىٰ","عَلَى","الْعَرْشِ","مَا","لَكُم","مِّن","دُونِهِ","مِن","وَلِيٍّ","وَلَا","شَفِيعٍ","أَفَلَا","تَتَذَكَّرُونَ"]},
+      {n:5,  words:["يُدَبِّرُ","الْأَمْرَ","مِنَ","السَّمَاءِ","إِلَى","الْأَرْضِ","ثُمَّ","يَعْرُجُ","إِلَيْهِ","فِي","يَوْمٍ","كَانَ","مِقْدَارُهُ","أَلْفَ","سَنَةٍ","مِّمَّا","تَعُدُّونَ"]},
+      {n:6,  words:["ذَٰلِكَ","عَالِمُ","الْغَيْبِ","وَالشَّهَادَةِ","الْعَزِيزُ","الرَّحِيمُ"]},
+      {n:7,  words:["الَّذِي","أَحْسَنَ","كُلَّ","شَيْءٍ","خَلَقَهُ","وَبَدَأَ","خَلْقَ","الْإِنسَانِ","مِن","طِينٍ"]},
+      {n:8,  words:["ثُمَّ","جَعَلَ","نَسْلَهُ","مِن","سُلَالَةٍ","مِّن","مَّاءٍ","مَّهِينٍ"]},
+      {n:9,  words:["ثُمَّ","سَوَّاهُ","وَنَفَخَ","فِيهِ","مِن","رُّوحِهِ","وَجَعَلَ","لَكُمُ","السَّمْعَ","وَالْأَبْصَارَ","وَالْأَفْئِدَةَ","قَلِيلًا","مَّا","تَشْكُرُونَ"]},
+      {n:10, words:["وَقَالُوا","أَإِذَا","ضَلَلْنَا","فِي","الْأَرْضِ","أَإِنَّا","لَفِي","خَلْقٍ","جَدِيدٍ","بَلْ","هُم","بِلِقَاءِ","رَبِّهِمْ","كَافِرُونَ"]},
+      {n:11, words:["قُلْ","يَتَوَفَّاكُم","مَّلَكُ","الْمَوْتِ","الَّذِي","وُكِّلَ","بِكُمْ","ثُمَّ","إِلَىٰ","رَبِّكُمْ","تُرْجَعُونَ"]},
+      {n:12, words:["وَلَوْ","تَرَىٰ","إِذِ","الْمُجْرِمُونَ","نَاكِسُو","رُءُوسِهِمْ","عِندَ","رَبِّهِمْ","رَبَّنَا","أَبْصَرْنَا","وَسَمِعْنَا","فَارْجِعْنَا","نَعْمَلْ","صَالِحًا","إِنَّا","مُوقِنُونَ"]},
+      {n:13, words:["وَلَوْ","شِئْنَا","لَآتَيْنَا","كُلَّ","نَفْسٍ","هُدَاهَا","وَلَٰكِنْ","حَقَّ","الْقَوْلُ","مِنِّي","لَأَمْلَأَنَّ","جَهَنَّمَ","مِنَ","الْجِنَّةِ","وَالنَّاسِ","أَجْمَعِينَ"]},
+      {n:14, words:["فَذُوقُوا","بِمَا","نَسِيتُمْ","لِقَاءَ","يَوْمِكُمْ","هَٰذَا","إِنَّا","نَسِينَاكُمْ","وَذُوقُوا","عَذَابَ","الْخُلْدِ","بِمَا","كُنتُمْ","تَعْمَلُونَ"]},
+      {n:15, words:["إِنَّمَا","يُؤْمِنُ","بِآيَاتِنَا","الَّذِينَ","إِذَا","ذُكِّرُوا","بِهَا","خَرُّوا","سُجَّدًا","وَسَبَّحُوا","بِحَمْدِ","رَبِّهِمْ","وَهُمْ","لَا","يَسْتَكْبِرُونَ"]},
+      {n:16, words:["تَتَجَافَىٰ","جُنُوبُهُمْ","عَنِ","الْمَضَاجِعِ","يَدْعُونَ","رَبَّهُمْ","خَوْفًا","وَطَمَعًا","وَمِمَّا","رَزَقْنَاهُمْ","يُنفِقُونَ"]},
+      {n:17, words:["فَلَا","تَعْلَمُ","نَفْسٌ","مَّا","أُخْفِيَ","لَهُم","مِّن","قُرَّةِ","أَعْيُنٍ","جَزَاءً","بِمَا","كَانُوا","يَعْمَلُونَ"]},
+      {n:18, words:["أَفَمَن","كَانَ","مُؤْمِنًا","كَمَن","كَانَ","فَاسِقًا","لَّا","يَسْتَوُونَ"]},
+      {n:19, words:["أَمَّا","الَّذِينَ","آمَنُوا","وَعَمِلُوا","الصَّالِحَٰتِ","فَلَهُمْ","جَنَّاتُ","الْمَأْوَىٰ","نُزُلًا","بِمَا","كَانُوا","يَعْمَلُونَ"]},
+      {n:20, words:["وَأَمَّا","الَّذِينَ","فَسَقُوا","فَمَأْوَاهُمُ","النَّارُ","كُلَّمَا","أَرَادُوا","أَن","يَخْرُجُوا","مِنْهَا","أُعِيدُوا","فِيهَا","وَقِيلَ","لَهُمْ","ذُوقُوا","عَذَابَ","النَّارِ","الَّذِي","كُنتُم","بِهِ","تُكَذِّبُونَ"]},
+      {n:21, words:["وَلَنُذِيقَنَّهُم","مِّنَ","الْعَذَابِ","الْأَدْنَىٰ","دُونَ","الْعَذَابِ","الْأَكْبَرِ","لَعَلَّهُمْ","يَرْجِعُونَ"]},
+      {n:22, words:["وَمَنْ","أَظْلَمُ","مِمَّن","ذُكِّرَ","بِآيَاتِ","رَبِّهِ","ثُمَّ","أَعْرَضَ","عَنْهَا","إِنَّا","مِنَ","الْمُجْرِمِينَ","مُنتَقِمُونَ"]},
+      {n:23, words:["وَلَقَدْ","آتَيْنَا","مُوسَى","الْكِتَٰبَ","فَلَا","تَكُن","فِي","مِرْيَةٍ","مِّن","لِّقَائِهِ","وَجَعَلْنَاهُ","هُدًى","لِّبَنِي","إِسْرَائِيلَ"]},
+      {n:24, words:["وَجَعَلْنَا","مِنْهُمْ","أَئِمَّةً","يَهْدُونَ","بِأَمْرِنَا","لَمَّا","صَبَرُوا","وَكَانُوا","بِآيَاتِنَا","يُوقِنُونَ"]},
+      {n:25, words:["إِنَّ","رَبَّكَ","هُوَ","يَفْصِلُ","بَيْنَهُمْ","يَوْمَ","الْقِيَامَةِ","فِيمَا","كَانُوا","فِيهِ","يَخْتَلِفُونَ"]},
+      {n:26, words:["أَوَلَمْ","يَهْدِ","لَهُمْ","كَمْ","أَهْلَكْنَا","مِن","قَبْلِهِم","مِّنَ","الْقُرُونِ","يَمْشُونَ","فِي","مَسَاكِنِهِمْ","إِنَّ","فِي","ذَٰلِكَ","لَآيَاتٍ","أَفَلَا","يَسْمَعُونَ"]},
+      {n:27, words:["أَوَلَمْ","يَرَوْا","أَنَّا","نَسُوقُ","الْمَاءَ","إِلَى","الْأَرْضِ","الْجُرُزِ","فَنُخْرِجُ","بِهِ","زَرْعًا","تَأْكُلُ","مِنْهُ","أَنْعَامُهُمْ","وَأَنفُسُهُمْ","أَفَلَا","يُبْصِرُونَ"]},
+      {n:28, words:["وَيَقُولُونَ","مَتَىٰ","هَٰذَا","الْفَتْحُ","إِن","كُنتُمْ","صَادِقِينَ"]},
+      {n:29, words:["قُلْ","يَوْمَ","الْفَتْحِ","لَا","يَنفَعُ","الَّذِينَ","كَفَرُوا","إِيمَانُهُمْ","وَلَا","هُمْ","يُنظَرُونَ"]},
+      {n:30, words:["فَأَعْرِضْ","عَنْهُمْ","وَانتَظِرْ","إِنَّهُم","مُّنتَظِرُونَ"]}
+    ]
+  },
   69: {
-    name:"Al-Haqqah", num:69,
-    bismillah: true,
+    name:"Al-Haqqah", num:69, bismillah: true,
     ayahs:[
       {n:1,  words:["الْحَاقَّةُ"]},
       {n:2,  words:["مَا","الْحَاقَّةُ"]},
@@ -543,7 +1033,7 @@ const SURAHS = {
       {n:8,  words:["فَهَلْ","تَرَىٰ","لَهُم","مِّن","بَاقِيَةٍ"]},
       {n:9,  words:["وَجَاءَ","فِرْعَوْنُ","وَمَن","قَبْلَهُ","وَالْمُؤْتَفِكَاتُ","بِالْخَاطِئَةِ"]},
       {n:10, words:["فَعَصَوْا","رَسُولَ","رَبِّهِمْ","فَأَخَذَهُمْ","أَخْذَةً","رَّابِيَةً"]},
-      {n:11, words:["إِنَّا","لَمَّا","طَغَى","الْمَاءُ","حَمَلْنَاكُمْ","فِي","الْجَارِيَةِ"]},
+      {n:11, words:["إِنَّا","لَمَّا","طَغَا","الْمَاءُ","حَمَلْنَاكُمْ","فِي","الْجَارِيَةِ"]},
       {n:12, words:["لِنَجْعَلَهَا","لَكُمْ","تَذْكِرَةً","وَتَعِيَهَا","أُذُنٌ","وَاعِيَةٌ"]},
       {n:13, words:["فَإِذَا","نُفِخَ","فِي","الصُّورِ","نَفْخَةٌ","وَاحِدَةٌ"]},
       {n:14, words:["وَحُمِلَتِ","الْأَرْضُ","وَالْجِبَالُ","فَدُكَّتَا","دَكَّةً","وَاحِدَةً"]},
@@ -551,17 +1041,17 @@ const SURAHS = {
       {n:16, words:["وَانشَقَّتِ","السَّمَاءُ","فَهِيَ","يَوْمَئِذٍ","وَاهِيَةٌ"]},
       {n:17, words:["وَالْمَلَكُ","عَلَىٰ","أَرْجَائِهَا","وَيَحْمِلُ","عَرْشَ","رَبِّكَ","فَوْقَهُمْ","يَوْمَئِذٍ","ثَمَانِيَةٌ"]},
       {n:18, words:["يَوْمَئِذٍ","تُعْرَضُونَ","لَا","تَخْفَىٰ","مِنكُمْ","خَافِيَةٌ"]},
-      {n:19, words:["فَأَمَّا","مَنْ","أُوتِيَ","كِتَابَهُ","بِيَمِينِهِ","فَيَقُولُ","هَاؤُمُ","اقْرَءُوا","كِتَابِيَهْ"]},
-      {n:20, words:["إِنِّي","ظَنَنتُ","أَنِّي","مُلَاقٍ","حِسَابِيَهْ"]},
+      {n:19, words:["فَأَمَّا","مَنْ","أُوتِيَ","كِتَابَهُ","بِيَمِينِهِ","فَيَقُولُ","هَاؤُمُ","اقْرَءُوا","كِتَٰبِيَهْ"]},
+      {n:20, words:["إِنِّي","ظَنَنتُ","أَنِّي","مُلَاقٍ","حِسَٰبِيَهْ"]},
       {n:21, words:["فَهُوَ","فِي","عِيشَةٍ","رَّاضِيَةٍ"]},
       {n:22, words:["فِي","جَنَّةٍ","عَالِيَةٍ"]},
       {n:23, words:["قُطُوفُهَا","دَانِيَةٌ"]},
       {n:24, words:["كُلُوا","وَاشْرَبُوا","هَنِيئًا","بِمَا","أَسْلَفْتُمْ","فِي","الْأَيَّامِ","الْخَالِيَةِ"]},
-      {n:25, words:["وَأَمَّا","مَنْ","أُوتِيَ","كِتَابَهُ","بِشِمَالِهِ","فَيَقُولُ","يَا","لَيْتَنِي","لَمْ","أُوتَ","كِتَابِيَهْ"]},
-      {n:26, words:["وَلَمْ","أَدْرِ","مَا","حِسَابِيَهْ"]},
+      {n:25, words:["وَأَمَّا","مَنْ","أُوتِيَ","كِتَابَهُ","بِشِمَالِهِ","فَيَقُولُ","يَا","لَيْتَنِي","لَمْ","أُوتَ","كِتَٰبِيَهْ"]},
+      {n:26, words:["وَلَمْ","أَدْرِ","مَا","حِسَٰبِيَهْ"]},
       {n:27, words:["يَا","لَيْتَهَا","كَانَتِ","الْقَاضِيَةَ"]},
       {n:28, words:["مَا","أَغْنَىٰ","عَنِّي","مَالِيَهْ"]},
-      {n:29, words:["هَلَكَ","عَنِّي","سُلْطَانِيَهْ"]},
+      {n:29, words:["هَلَكَ","عَنِّي","سُلْطَٰنِيَهْ"]},
       {n:30, words:["خُذُوهُ","فَغُلُّوهُ"]},
       {n:31, words:["ثُمَّ","الْجَحِيمَ","صَلُّوهُ"]},
       {n:32, words:["ثُمَّ","فِي","سِلْسِلَةٍ","ذَرْعُهَا","سَبْعُونَ","ذِرَاعًا","فَاسْلُكُوهُ"]},
@@ -590,486 +1080,1578 @@ const SURAHS = {
 };
 
 // ════════════════════════════════════════════════════════════
-//  STATE
+//  JUZ METADATA — surahs fetched dynamically from API
 // ════════════════════════════════════════════════════════════
-let currentSurah = 1;
-let allWords = [];        // flat list: {word, ayahNum, wIdx, globalIdx, el}
-let cursor = 0;           // current expected word index
-let sessionActive = false;  // user wants to be tracking
-let paused = true;           // mic is running but we ignore results (between sessions)
-let rec = null;
-let audioCtx = null;
-let recRunning = false;      // has rec.start() been called successfully
-let processingResult = false;
-let wrongCount = 0, correctCount = 0;
+const JUZ_SURAHS = {
+  // Juz 1: Al-Fatihah (already in SURAHS) + Al-Baqarah 1-141
+  2:  {name:'Al-Baqarah',       ayahCount:286, bismillah:true,  juz:[1,2,3]},
+  // Juz 29
+  67: {name:'Al-Mulk',          ayahCount:30,  bismillah:true,  juz:[29]},
+  70: {name:'Al-Maarij',        ayahCount:44,  bismillah:true,  juz:[29]},
+  71: {name:'Nuh',              ayahCount:28,  bismillah:true,  juz:[29]},
+  72: {name:'Al-Jinn',          ayahCount:28,  bismillah:true,  juz:[29]},
+  73: {name:'Al-Muzzammil',     ayahCount:20,  bismillah:true,  juz:[29]},
+  74: {name:'Al-Muddathir',     ayahCount:56,  bismillah:true,  juz:[29]},
+  75: {name:'Al-Qiyamah',       ayahCount:40,  bismillah:false, juz:[29]},
+  76: {name:'Al-Insan',         ayahCount:31,  bismillah:true,  juz:[29]},
+  77: {name:'Al-Mursalat',      ayahCount:50,  bismillah:true,  juz:[29]},
+  // Juz 30
+  78: {name:"An-Naba'",         ayahCount:40,  bismillah:true,  juz:[30]},
+  79: {name:"An-Nazi'at",       ayahCount:46,  bismillah:true,  juz:[30]},
+  80: {name:"'Abasa",           ayahCount:42,  bismillah:true,  juz:[30]},
+  81: {name:'At-Takwir',        ayahCount:29,  bismillah:true,  juz:[30]},
+  82: {name:'Al-Infitar',       ayahCount:19,  bismillah:true,  juz:[30]},
+  83: {name:'Al-Mutaffifin',    ayahCount:36,  bismillah:true,  juz:[30]},
+  84: {name:'Al-Inshiqaq',      ayahCount:25,  bismillah:true,  juz:[30]},
+  85: {name:'Al-Buruj',         ayahCount:22,  bismillah:true,  juz:[30]},
+  86: {name:'At-Tariq',         ayahCount:17,  bismillah:true,  juz:[30]},
+  87: {name:"Al-A'la",          ayahCount:19,  bismillah:true,  juz:[30]},
+  88: {name:'Al-Ghashiyah',     ayahCount:26,  bismillah:true,  juz:[30]},
+  89: {name:'Al-Fajr',          ayahCount:30,  bismillah:true,  juz:[30]},
+  90: {name:'Al-Balad',         ayahCount:20,  bismillah:true,  juz:[30]},
+  91: {name:'Ash-Shams',        ayahCount:15,  bismillah:true,  juz:[30]},
+  92: {name:'Al-Layl',          ayahCount:21,  bismillah:true,  juz:[30]},
+  93: {name:'Ad-Duha',          ayahCount:11,  bismillah:true,  juz:[30]},
+  94: {name:'Ash-Sharh',        ayahCount:8,   bismillah:true,  juz:[30]},
+  95: {name:'At-Tin',           ayahCount:8,   bismillah:true,  juz:[30]},
+  96: {name:"Al-'Alaq",         ayahCount:19,  bismillah:true,  juz:[30]},
+  97: {name:'Al-Qadr',          ayahCount:5,   bismillah:true,  juz:[30]},
+  98: {name:'Al-Bayyinah',      ayahCount:8,   bismillah:true,  juz:[30]},
+  99: {name:'Az-Zalzalah',      ayahCount:8,   bismillah:true,  juz:[30]},
+  100:{name:"Al-'Adiyat",       ayahCount:11,  bismillah:true,  juz:[30]},
+  101:{name:"Al-Qari'ah",       ayahCount:11,  bismillah:true,  juz:[30]},
+  102:{name:'At-Takathur',      ayahCount:8,   bismillah:true,  juz:[30]},
+  103:{name:"Al-'Asr",          ayahCount:3,   bismillah:true,  juz:[30]},
+  104:{name:'Al-Humazah',       ayahCount:9,   bismillah:true,  juz:[30]},
+  105:{name:'Al-Fil',           ayahCount:5,   bismillah:true,  juz:[30]},
+  106:{name:'Quraish',          ayahCount:4,   bismillah:true,  juz:[30]},
+  107:{name:"Al-Ma'un",         ayahCount:7,   bismillah:true,  juz:[30]},
+  108:{name:'Al-Kawthar',       ayahCount:3,   bismillah:true,  juz:[30]},
+  109:{name:'Al-Kafirun',       ayahCount:6,   bismillah:true,  juz:[30]},
+  110:{name:'An-Nasr',          ayahCount:3,   bismillah:true,  juz:[30]},
+  111:{name:'Al-Masad',         ayahCount:5,   bismillah:false, juz:[30]},
+  // 112, 113, 114 already in SURAHS
+};
 
-// ════════════════════════════════════════════════════════════
-//  AUDIO — "tet tot" beep
-// ════════════════════════════════════════════════════════════
-function getCtx() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  return audioCtx;
-}
+// Dynamic surah cache: surahNum -> loaded SURAHS-format entry
+const dynamicSurahCache = {};
 
-function beepWrong() {
+async function loadDynamicSurah(surahNum) {
+  // Already in static SURAHS
+  if (SURAHS[surahNum]) return SURAHS[surahNum];
+  // Already cached
+  if (dynamicSurahCache[surahNum]) return dynamicSurahCache[surahNum];
+
+  const meta = JUZ_SURAHS[surahNum];
+  if (!meta) return null;
+
+  // Show loading state
+  const body = document.getElementById('mushafBody');
+  body.innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--muted);font-family:Inter">
+    <div style="font-size:32px;margin-bottom:12px">📖</div>
+    <div style="font-size:14px;font-weight:600;color:var(--text)">Memuat ${meta.name}...</div>
+    <div style="font-size:12px;margin-top:6px">Mengambil data dari server</div>
+  </div>`;
+
   try {
-    const ctx = getCtx();
-    const now = ctx.currentTime;
-    // Two tones: high short, low longer
-    [
-      { freq: 900, start: now,        dur: 0.10, amp: 0.5 },
-      { freq: 420, start: now + 0.20, dur: 0.18, amp: 0.5 }
-    ].forEach(({freq, start, dur, amp}) => {
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, start);
-      gain.gain.setValueAtTime(0, start);
-      gain.gain.linearRampToValueAtTime(amp, start + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.001, start + dur + 0.08);
-      osc.start(start);
-      osc.stop(start + dur + 0.1);
-    });
-  } catch(e) {}
+    // Fetch word-by-word data from alquran.cloud
+    const res = await fetch(`https://api.alquran.cloud/v1/surah/${surahNum}/quran-uthmani`);
+    if (!res.ok) throw new Error('API error ' + res.status);
+    const data = await res.json();
+
+    const STRIP_RE = /[؀-؅ۖ-ۤۧ-۩]/g;
+    const simpleNorm = w => w.replace(/[ً-ٟؐ-ؚۖ-ۿٱ]/g, '')
+                              .replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه');
+
+    const ayahs = [];
+    for (const ayah of data.data.ayahs) {
+      let words = ayah.text.trim()
+        .split(/\s+/)
+        .map(w => w.replace(STRIP_RE, '').trim())
+        .filter(w => w.length > 0);
+
+      // Strip bismillah prepended to ayah 1
+      if (ayah.numberInSurah === 1 && words.length >= 4) {
+        const first4 = words.slice(0, 4).map(simpleNorm);
+        if (first4[0].includes('بسم') || first4[0] === 'بسم') {
+          words = words.slice(4);
+        }
+      }
+
+      ayahs.push({ n: ayah.numberInSurah, words });
+    }
+
+    const entry = {
+      name: meta.name,
+      num: surahNum,
+      bismillah: meta.bismillah,
+      ayahs,
+      _dynamic: true
+    };
+
+    dynamicSurahCache[surahNum] = entry;
+    // Also inject into SURAHS so all existing code works seamlessly
+    SURAHS[surahNum] = entry;
+    console.log(`✅ Dynamic surah ${surahNum} ${meta.name} loaded — ${ayahs.length} ayat`);
+    return entry;
+
+  } catch(e) {
+    console.error('Failed to load surah', surahNum, e);
+    body.innerHTML = `<div style="text-align:center;padding:60px 20px;color:#ef6b5a;font-family:Inter">
+      <div style="font-size:32px;margin-bottom:12px">⚠️</div>
+      <div style="font-size:14px;font-weight:600">Gagal memuat ${meta.name}</div>
+      <div style="font-size:12px;margin-top:6px;color:var(--muted)">Periksa koneksi internet dan coba lagi</div>
+      <button onclick="loadSurah()" style="margin-top:16px;padding:8px 20px;background:var(--gold);border:none;border-radius:8px;color:white;cursor:pointer;font-size:13px">Coba Lagi</button>
+    </div>`;
+    return null;
+  }
+}
+
+
+// ════════════════════════════════════════════════════════════
+//  GLOBALS
+// ════════════════════════════════════════════════════════════
+let currentSurah = 68;
+let displayMode = 'word';
+let allWords = [];
+let allAyahs = [];
+let cursor = 0;
+let sessionActive = false;
+let correctCount = 0, wrongCount = 0;
+let rec = null;
+let recRunning = false;
+let processingResult = false;
+
+// Smart Recognition Variables
+let lastTranscriptTime = 0;
+let silenceTimeout = null;
+let transcriptBuffer = [];
+let currentAyahIndex = 0;
+let autoAdvanceEnabled = true;
+let sessionRunStart = -1;   // titik awal sesi baca aktif (untuk retry return)
+
+// Audio Player Globals
+let audioPlaying = false;
+let audioCurrentRepeat = 0;
+let audioCurrentAyah = 0;
+let audioTimeoutId = null;
+
+// ─── Analytics: track patterns of mismatches for debugging ────────────────────
+let matchStats = {
+  totalProcessed: 0,
+  directMatch: 0,
+  ngramMatch: 0,
+  revNgramMatch: 0,
+  skipMatch: 0,
+  extraSR: 0,
+  mismatches: 0,
+  cascadeBreaks: 0,
+  recentMismatches: []  // keep last 20 for inspection
+};
+
+function logMatchStats() {
+  const pct = matchStats.totalProcessed > 0
+    ? (matchStats.directMatch / matchStats.totalProcessed * 100).toFixed(1)
+    : '0';
+  console.log(`📊 Match Stats: ${matchStats.totalProcessed} tokens processed, ${pct}% direct match`);
+  console.log(`   Ngram: ${matchStats.ngramMatch}, RevNgram: ${matchStats.revNgramMatch}, Skip: ${matchStats.skipMatch}`);
+  console.log(`   Mismatches: ${matchStats.mismatches}, Cascade breaks: ${matchStats.cascadeBreaks}`);
+  if (matchStats.recentMismatches.length > 0) {
+    console.log(`   Recent mismatches (last 5):`, matchStats.recentMismatches.slice(-5));
+  }
+}
+
+
+// ════════════════════════════════════════════════════════════
+//  DISPLAY MODE SWITCHING
+// ════════════════════════════════════════════════════════════
+function switchDisplayMode(mode) {
+  // Mushaf Madani removed — always word mode
+  renderPage(currentSurah);
+  // renderPage is async but we don't need to await here
 }
 
 // ════════════════════════════════════════════════════════════
-//  RENDER MUSHAF PAGE
+//  AUDIO PLAYER FUNCTIONALITY
 // ════════════════════════════════════════════════════════════
-function renderPage(sNum) {
-  const surah = SURAHS[sNum];
-  const body  = document.getElementById('mushafBody');
-  body.innerHTML = '';
-  allWords = [];
 
-  // Bismillah
-  if (surah.bismillah && sNum !== 1) {
-    const bism = document.createElement('div');
-    bism.className = 'bismillah';
-    bism.textContent = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
-    body.appendChild(bism);
+function getAudioUrl(surahNum, ayahNum) {
+  const paddedSurah = String(surahNum).padStart(3, '0');
+  const paddedAyah = String(ayahNum).padStart(3, '0');
+  return `https://everyayah.com/data/Alafasy_128kbps/${paddedSurah}${paddedAyah}.mp3`;
+}
+
+async function toggleAudioPlayer() {
+  if (audioPlaying) {
+    stopAudioPlayer();
+  } else {
+    startAudioPlayer();
+  }
+}
+
+function startAudioPlayer() {
+  const startAyah = parseInt(document.getElementById('audioStartAyah').value);
+  const endAyah = parseInt(document.getElementById('audioEndAyah').value);
+  const repeatCount = parseInt(document.getElementById('audioRepeatCount').value);
+  const pauseDuration = parseFloat(document.getElementById('audioPause').value) * 1000;
+
+  const surahData = SURAHS[currentSurah];
+  if (!surahData) {
+    updateAudioStatus('❌ Surah tidak ditemukan', false);
+    return;
   }
 
-  let globalIdx = 0;
+  const maxAyah = surahData.ayahs.length;
+  if (startAyah < 1 || endAyah > maxAyah || startAyah > endAyah) {
+    updateAudioStatus(`❌ Range ayat tidak valid (1-${maxAyah})`, false);
+    return;
+  }
 
-  surah.ayahs.forEach(ayah => {
-    const row = document.createElement('div');
-    row.className = 'ayah-row';
+  audioPlaying = true;
+  audioCurrentRepeat = 0;
+  audioCurrentAyah = startAyah;
 
-    // Ayah number at end (RTL, so append last = right side visually = end of ayah)
-    const numEl = document.createElement('span');
-    numEl.className = 'ayah-number';
-    numEl.textContent = ayah.n;
+  document.getElementById('audioPlayBtn').classList.add('playing');
+  document.getElementById('audioPlayIcon').textContent = '⏸️';
+  document.getElementById('audioPlayText').textContent = 'Hentikan Audio';
 
-    // Words (in RTL, first word is rightmost — render in order)
-    ayah.words.forEach((word, wIdx) => {
-      const span = document.createElement('span');
-      span.className = 'w idle';
-      span.textContent = word + ' ';
-      span.dataset.idx = globalIdx;
-      row.appendChild(span);
+  log(`🔊 Memutar ${surahData.name} ayat ${startAyah}-${endAyah}, ${repeatCount}x pengulangan`);
 
-      allWords.push({
-        word,
-        ayahNum: ayah.n,
-        wIdx,
-        globalIdx,
-        el: span
-      });
-      globalIdx++;
-    });
+  playNextAyah(startAyah, endAyah, repeatCount, pauseDuration);
+}
 
-    row.appendChild(numEl);
-    body.appendChild(row);
+function playNextAyah(startAyah, endAyah, totalRepeats, pauseDuration) {
+  if (!audioPlaying) return;
+
+  if (audioCurrentAyah > endAyah) {
+    audioCurrentRepeat++;
+    if (audioCurrentRepeat >= totalRepeats) {
+      stopAudioPlayer();
+      updateAudioStatus('✅ Selesai! Audio telah diputar lengkap', true);
+      log(`✅ Audio selesai - ${totalRepeats} pengulangan`);
+      return;
+    }
+    audioCurrentAyah = startAyah;
+  }
+
+  const surahData = SURAHS[currentSurah];
+  
+  highlightPlayingAyah(audioCurrentAyah);
+
+  const audioUrl = getAudioUrl(currentSurah, audioCurrentAyah);
+  const audio = new Audio(audioUrl);
+
+  const repeatText = `Pengulangan ${audioCurrentRepeat + 1}/${totalRepeats}`;
+  const ayahText = `${surahData.name} ayat ${audioCurrentAyah}/${endAyah}`;
+  updateAudioStatus(`🔊 ${ayahText} • ${repeatText}`, true);
+
+  audio.onended = () => {
+    audioTimeoutId = setTimeout(() => {
+      audioCurrentAyah++;
+      playNextAyah(startAyah, endAyah, totalRepeats, pauseDuration);
+    }, pauseDuration);
+  };
+
+  audio.onerror = () => {
+    log(`⚠️ Error loading audio untuk ayat ${audioCurrentAyah}`, true);
+    audioTimeoutId = setTimeout(() => {
+      audioCurrentAyah++;
+      playNextAyah(startAyah, endAyah, totalRepeats, pauseDuration);
+    }, 500);
+  };
+
+  audio.play().catch(err => {
+    log(`⚠️ Tidak dapat memutar audio: ${err.message}`, true);
+    audioTimeoutId = setTimeout(() => {
+      audioCurrentAyah++;
+      playNextAyah(startAyah, endAyah, totalRepeats, pauseDuration);
+    }, 500);
   });
+}
 
-  // Update header
-  document.getElementById('pageTitle').textContent = surah.name;
-  document.getElementById('pageInfo').textContent =
-    'Surah ' + surah.num + ' · ' + surah.ayahs.length + ' ayat · ' + allWords.length + ' kata';
+function stopAudioPlayer() {
+  audioPlaying = false;
+  if (audioTimeoutId) {
+    clearTimeout(audioTimeoutId);
+    audioTimeoutId = null;
+  }
+
+  document.getElementById('audioPlayBtn').classList.remove('playing');
+  document.getElementById('audioPlayIcon').textContent = '▶️';
+  document.getElementById('audioPlayText').textContent = 'Putar Audio';
+
+  clearPlayingAyahHighlight();
+  updateAudioStatus('⏸️ Audio dihentikan', false);
+  log('⏸️ Pemutaran audio dihentikan');
+}
+
+function highlightPlayingAyah(ayahNum) {
+  clearPlayingAyahHighlight();
+  
+  if (allAyahs[ayahNum - 1]) {
+    allAyahs[ayahNum - 1].classList.add('playing');
+    allAyahs[ayahNum - 1].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+function clearPlayingAyahHighlight() {
+  allAyahs.forEach(ayah => ayah.classList.remove('playing'));
+}
+
+function updateAudioStatus(text, active) {
+  const statusEl = document.getElementById('audioStatus');
+  statusEl.textContent = text;
+  if (active) {
+    statusEl.classList.add('active');
+  } else {
+    statusEl.classList.remove('active');
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════════════════════════
+// ── Uthmani text cache (API fetch results) ───────────────────────────────────
+const uthmaniCache = {};
+
+async function fetchUthmaniText(surahNum) {
+  if (uthmaniCache[surahNum]) return uthmaniCache[surahNum];
+  try {
+    const res = await fetch(`https://api.alquran.cloud/v1/surah/${surahNum}/quran-uthmani`);
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+    // Build map: ayahNumber → array of words (split on spaces)
+    const ayahMap = {};
+    
+    // Characters to strip from display words (Quranic structural marks, not harakat)
+    // U+06DD ۝ End of Ayah, U+06DE ۞ Rub el-Hizb, U+06E9 ۩ Sajdah mark
+    // U+0600-0603 Quranic annotation signs
+    // Strip ALL Quranic annotation/structural marks that aren't part of the word text:
+    // U+0600-U+0605: Arabic annotation signs
+    // U+06D6-U+06E4: Quranic waqf marks (ۖ ۗ ۘ ۙ ۚ ۛ ۜ ۝ ۞ ۟ ۠ ۡ ۢ ۣ ۤ)
+    // U+06E7-U+06E9: Arabic small high chars, sajdah mark
+    // NOTE: U+06E5 ۥ (small waw) and U+06E6 ۦ (small ya) are kept — they're word-internal
+    const STRIP_RE = /[\u0600-\u0605\u06D6-\u06E4\u06E7-\u06E9]/g;
+    
+    // Bismillah normalized form (to detect if API prepended it to ayah 1)
+    const BISMILLAH_NORM = ['بسم', 'الله', 'الرحمن', 'الرحيم'];
+    
+    for (const ayah of data.data.ayahs) {
+      // Split by whitespace, strip structural markers, filter empties
+      let words = ayah.text.trim()
+        .split(/\s+/)
+        .map(w => w.replace(STRIP_RE, '').trim())
+        .filter(w => w.length > 0);
+      
+      // FIX: quran-uthmani API prepends bismillah to ayah 1 text for most surahs
+      // Detect and strip it so our SURAHS word alignment stays correct
+      if (ayah.numberInSurah === 1 && words.length >= 4) {
+        // Normalize first 4 words and check if they match bismillah
+        const simpleNorm = w => w.replace(/[\u064B-\u065F\u0610-\u061A\u06D6-\u06FF\u0671]/g, '')
+                                  .replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه');
+        const first4 = words.slice(0, 4).map(simpleNorm);
+        const isBismillah = first4[0].includes('بسم') || first4[0] === 'بسم';
+        if (isBismillah) {
+          console.log(`  ✂️ Stripping bismillah prefix (${words.slice(0,4).join(' ')}) from ayah 1`);
+          words = words.slice(4);
+        }
+      }
+      
+      ayahMap[ayah.numberInSurah] = words;
+    }
+
+    console.log(`📖 API surah ${surahNum} loaded — ayah 1: ${ayahMap[1]?.length} words, ayah 2: ${ayahMap[2]?.length} words`);
+    uthmaniCache[surahNum] = ayahMap;
+    return ayahMap;
+  } catch (e) {
+    console.warn('Uthmani API fetch failed, using fallback data:', e);
+    return null;
+  }
+}
+
+async function renderPage(sn) {
+  // Load dynamically if not in static SURAHS
+  let s = SURAHS[sn];
+  if (!s) {
+    s = await loadDynamicSurah(sn);
+    if (!s) return; // failed to load, error shown in body
+  }
+  
+  document.getElementById('pageTitle').textContent = s.name;
+  document.getElementById('pageInfo').textContent = s.ayahs.length + ' ayat';
+
+  const b = document.getElementById('mushafBody');
+  b.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-family:Inter">Memuat teks mushaf...</div>';
+  allWords = [];
+  allAyahs = [];
+
+  // Fetch Uthmani text from API (with waqf marks, correct mad signs)
+  const uthmaniMap = await fetchUthmaniText(sn);
+
+  // Merge API words into surah data (keep fallback norms from SURAHS for matching)
+  // First clear any stale uthmaniWords from previous loads
+  s.ayahs.forEach(ayah => { delete ayah.uthmaniWords; });
+  
+  if (uthmaniMap) {
+    s.ayahs.forEach(ayah => {
+      const uthmaniWords = uthmaniMap[ayah.n];
+      if (uthmaniWords && uthmaniWords.length > 0) {
+        ayah.uthmaniWords = uthmaniWords;
+      }
+    });
+  }
+
+  b.innerHTML = '';
+
+  if (s.bismillah && sn !== 1 && sn !== 9) {
+    const bis = document.createElement('div');
+    bis.className = 'bismillah';
+    // Always use the Uthmanic bismillah text (same for all surahs)
+    bis.textContent = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ';
+    b.appendChild(bis);
+  }
+
+  if (displayMode === 'madani') {
+    renderMadaniMode(s, b);
+  } else {
+    renderWordMode(s, b);
+  }
+
+  document.getElementById('audioStartAyah').max = s.ayahs.length;
+  document.getElementById('audioEndAyah').max = s.ayahs.length;
+  document.getElementById('audioEndAyah').value = Math.min(5, s.ayahs.length);
 
   cursor = 0;
-  highlightCursor();
+  currentAyahIndex = 0;
+  if (displayMode === 'word') {
+    highlightCursor();
+    updateCurrentAyahHighlight();
+  }
+}
+
+function renderWordMode(s, container) {
+  s.ayahs.forEach((ayah, ayahIdx) => {
+    const row = document.createElement('div');
+    row.className = 'ayah-row';
+    row.dataset.ayahNum = ayah.n;
+    row.dataset.ayahIndex = ayahIdx;
+    
+    const num = document.createElement('span');
+    num.className = 'ayah-number';
+    num.textContent = ayah.n;
+
+    // DISPLAY: use Uthmani API words (correct waqf + mad signs)
+    // MATCHING: use SURAHS hardcode words (stable normalization)
+    const uthmaniWords = ayah.uthmaniWords;
+    const matchWords = ayah.words;
+    
+    // Smart alignment: map SURAHS word index to nearest Uthmani word
+    // Handles cases where API may split/merge words slightly differently
+    const useUthmani = uthmaniWords && uthmaniWords.length > 0;
+    
+
+    
+    matchWords.forEach((matchWord, wordIdx) => {
+      // Map index proportionally if word counts differ
+      let displayWord = matchWord;
+      if (useUthmani) {
+        if (uthmaniWords.length === matchWords.length) {
+          displayWord = uthmaniWords[wordIdx];
+        } else {
+          // Proportional mapping (rare case)
+          const ratio = wordIdx / matchWords.length;
+          const uIdx = Math.min(Math.round(ratio * uthmaniWords.length), uthmaniWords.length - 1);
+          displayWord = uthmaniWords[uIdx];
+        }
+      }
+      
+      const w = document.createElement('span');
+      w.className = 'w idle';
+      w.textContent = displayWord + ' ';
+      w.dataset.wordIndex = allWords.length;
+      w.dataset.ayahIndex = ayahIdx;
+      const norm = normalizeArabic(matchWord); // normalize the rasm word, not display
+      const normStrict = normalizeArabicStrict(matchWord); // preserves أ vs إ
+      allWords.push({ 
+        el: w, 
+        norm,
+        normStrict,          // strict norm for short-word hamza comparison
+        ref: matchWord,      // original ref word WITH harakat for vowel comparison
+        original: displayWord, // display word for retry banner
+        ayahIndex: ayahIdx,
+        wordIndexInAyah: wordIdx 
+      });
+      row.appendChild(w);
+    });
+
+    row.appendChild(num);
+    container.appendChild(row);
+    allAyahs.push(row);
+  });
+}
+
+function renderMadaniMode(s, container) {
+  s.ayahs.forEach((ayah, ayahIdx) => {
+    const row = document.createElement('div');
+    row.className = 'ayah-row madani-mode';
+    row.dataset.ayahNum = ayah.n;
+    
+    const textSpan = document.createElement('span');
+    textSpan.className = 'ayah-text-madani';
+    // Use Uthmani API words if available for correct display
+    const displayText = (ayah.uthmaniWords || ayah.words).join(' ');
+    textSpan.textContent = displayText + ' ';
+    row.appendChild(textSpan);
+    
+    const num = document.createElement('span');
+    num.className = 'ayah-number';
+    num.textContent = ayah.n;
+    row.appendChild(num);
+
+    container.appendChild(row);
+    allAyahs.push(row);
+    
+    ayah.words.forEach((word) => {
+      const norm = normalizeArabic(word);
+      allWords.push({ el: textSpan, norm, ayahRow: row, ayahIndex: ayahIdx });
+    });
+  });
 }
 
 function highlightCursor() {
+  if (displayMode === 'madani') return;
+  
   allWords.forEach((w, i) => {
-    if (i < cursor) {
-      // already passed — keep correct/wrong state
-    } else if (i === cursor) {
-      if (w.el.className === 'w idle' || w.el.className === 'w passed') {
+    if (!w.el.className || !w.el.className.includes('w ')) return;
+    
+    if (i === cursor) {
+      if (retryMode && i === retryAyahStart) {
+        // In retry mode at the restart point: use retry-cursor (yellow on green)
+        w.el.className = 'w retry-cursor';
+      } else if (w.el.className === 'w idle' || w.el.className === 'w skipped' || w.el.className === 'w passed') {
         w.el.className = 'w cursor';
       }
-    } else {
-      if (w.el.className === 'w idle' || w.el.className === 'w cursor') {
-        w.el.className = 'w idle';
-      }
+      // If already 'correct' or 'wrong', keep their color
+    } else if (w.el.className === 'w cursor' || w.el.className === 'w retry-cursor') {
+      // This word WAS the cursor but no longer is
+      // If it became correct through validation, it would already be 'w correct'
+      // Otherwise restore to idle
+      w.el.className = 'w idle';
+    } else if (i < cursor && w.el.className === 'w idle') {
+      w.el.className = 'w passed';
     }
+    // All other states (correct, wrong, skipped, passed) — leave unchanged
   });
-  scrollToCursor();
-  updateStats();
 }
 
-function scrollToCursor() {
-  if (cursor < allWords.length) {
-    allWords[cursor].el.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  }
+function updateCurrentAyahHighlight() {
+  allAyahs.forEach((ayah, idx) => {
+    ayah.classList.toggle('current-reading', idx === currentAyahIndex);
+  });
 }
 
 // ════════════════════════════════════════════════════════════
-//  SPEECH RECOGNITION
+//  NORMALIZE - STRICT VERSION
+// ════════════════════════════════════════════════════════════
+// ─── Normalization ───────────────────────────────────────────────────────────
+function normalizeArabic(text) {
+  if (!text || typeof text !== 'string') return '';
+  return text
+    // Full harakat + Quranic symbols strip
+    .replace(/[ً-ٟؐ-ؚۖ-ۜ۟-۪ۤۧۨ-ٰۭ]/g, '')
+    .replace(/[أإآٱ]/g, 'ا')
+    .replace(/ى/g, 'ي')
+    .replace(/ة/g, 'ه')
+    .replace(/ـ/g, '')   // tatweel
+    .trim();
+}
+
+// Strict normalization: preserves أ (fathah hamza) vs إ (kasrah hamza).
+// ar-SA SR outputs these as different letters — they are different Arabic words:
+//   أَن (An) → SR: أن   vs   إِن (In) → SR: إن   (very common Quran error)
+//   أَمْ (Am) → SR: أم  vs   إِمَّا   → SR: إما
+// Used in wordSimStrict() for short words (≤5 chars) where this distinction matters.
+function normalizeArabicStrict(text) {
+  if (!text || typeof text !== 'string') return '';
+  return text
+    .replace(/[\u064B-\u065F\u0610-\u061A\u06D6-\u06E4\u06E7-\u06E9]/g, '')
+    .replace(/[\u0622\u0671]/g, '\u0627')
+    .replace(/ى/g, 'ي')
+    .replace(/ة/g, 'ه')
+    .replace(/ـ/g, '')
+    .trim();
+}
+
+function alternateNormalize(text) {
+  if (!text || typeof text !== 'string') return '';
+  return normalizeArabic(text)
+    .replace(/ء/g, '')
+    .replace(/ئ/g, 'ي')
+    .replace(/ؤ/g, 'و')
+    .trim();
+}
+
+// ─── Levenshtein edit distance ────────────────────────────────────────────────
+function editDist(a, b) {
+  const m = a.length, n = b.length;
+  if (!m) return n; if (!n) return m;
+  const dp = Array.from({length: m + 1}, (_, i) => [i, ...Array(n).fill(0)]);
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1]
+        : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+  return dp[m][n];
+}
+
+// ─── Spoken candidates (handle SR transcription quirks + tajweed) ────────────
+function spokenCandidates(spoken) {
+  const s = normalizeArabic(spoken);
+  const c = new Set([s, alternateNormalize(spoken)]);
+  
+  // ── SR PREFIX QUIRKS ────────────────────────────────────────────────────────
+  if (s.startsWith('ال') && s.length > 3) { c.add(s.slice(2)); c.add('ل' + s.slice(2)); }
+  if (s.startsWith('وال') && s.length > 4) { c.add(s.slice(3)); c.add('ل' + s.slice(3)); }
+  
+  // ── TAJWEED: الا (SR) = أَن + لَّا merged ──────────────────────────────────
+  // ONLY fires for exact token "الا" — not generic, to prevent over-matching
+  if (s === 'الا' || s === 'الا') {
+    c.add('لا');   // matches ref لَّا
+    c.add('ان');   // matches ref أَن — for bigram matching
+    c.add('انلا'); // merged bigram form
+  }
+  if (s.startsWith('الا') && s.length > 3) { c.add('لا' + s.slice(3)); }
+  if (s.startsWith('لا') && s.length > 2) { c.add('الا' + s.slice(2)); }
+
+  // ── TAJWEED: dropped initial ا (alif wasl) ──────────────────────────────────
+  // اغْدُوا → SR hears "غدوا". Only add prefix for words >= 4 chars (alif wasl
+  // only occurs on longer words; prevents short-word false matches)
+  const ARABIC_CONSONANTS = 'بتثجحخدذرزسشصضطظعغفقكلمنهوي';
+  if (s.length >= 4 && ARABIC_CONSONANTS.includes(s[0])) {
+    c.add('ا' + s);
+  }
+  if (s.length >= 4 && s[0] === 'ا' && ARABIC_CONSONANTS.includes(s[1] || '')) {
+    c.add(s.slice(1));
+  }
+
+  // ── TAJWEED: dropped hamza ء ────────────────────────────────────────────────
+  // مَّشَّاءٍ → SR hears "مشا". Only for words >= 3 chars to prevent إنا→إناء etc.
+  if (s.endsWith('ا') && s.length >= 3) {
+    c.add(s + 'ء');
+  }
+  if (s.endsWith('ء') && s.length >= 3) {
+    c.add(s.slice(0, -1));
+  }
+
+  // ── TAJWEED: IQLAB — tanwin/nun + ب = SR hears trailing م on previous word ──
+  // e.g. مَّشَّاءٍ بِنَمِيمٍ → SR hears "مشاءم" or "مشائم" (tanwin+ب merged as م)
+  //      هَمَّازٍ → SR may hear "همازم" when followed by مَّشَّاءٍ
+  //      عُتُلٍّ → SR may hear "عتلم" when followed by بَعْدَ
+  // Idgham/iqlab: spoken ends with م → strip it (ref has no trailing م)
+  if (s.endsWith('م') && s.length >= 3) {
+    c.add(s.slice(0, -1));        // همازم → هماز
+    c.add(s.slice(0, -1) + 'ن'); // عتلم → عتلن (tanwin variant)
+  }
+  // Iqlab with ئم or يم suffix (SR inserts ي/ئ before م due to hamza)
+  if ((s.endsWith('ئم') || s.endsWith('يم')) && s.length >= 4) {
+    c.add(s.slice(0, -2));        // مشائم → مشا, then hamza rule adds مشاء
+    c.add(s.slice(0, -2) + 'ء'); // مشائم → مشاء directly
+  }
+
+  // ── ان / اني / انا variants (short particles only) ─────────────────────────
+  if (s === 'ان') { c.add('ان'); c.add('اني'); c.add('انا'); c.add('ا'); }
+  if (s === 'اني') { c.add('ان'); c.add('انا'); }
+  if (s.startsWith('اني') && s.length > 3) { c.add('ان' + s.slice(3)); }
+  if (s === 'انا') { c.add('ان'); c.add('اني'); }
+  if (s === 'ا') { c.add('ان'); c.add('اني'); }
+  if (s.startsWith('ان') && s.length > 2) { c.add('اني' + s.slice(2)); }
+  
+  // ── SR SUFFIX: trailing ا drop (only for >= 4 chars, prevents إذ→إذا inflation) 
+  if (s.endsWith('ا') && s.length >= 4) c.add(s.slice(0, -1));
+  // NO generic "add trailing ا" — too broad, causes إذ→إذا→matches إنا
+
+  // ── ين/ون confusion ─────────────────────────────────────────────────────────
+  if (s.endsWith('ين')) { c.add(s.slice(0, -2) + 'ون'); }
+  if (s.endsWith('ون')) { c.add(s.slice(0, -2) + 'ين'); }
+  
+  return [...c].filter(Boolean);
+}
+
+// ─── Muqattaat letter names → single chars ───────────────────────────────────
+const LETTER_NAMES = {
+  'نون':'ن','قاف':'ق','صاد':'ص','سين':'س','شين':'ش','ميم':'م',
+  'لام':'ل','كاف':'ك','عين':'ع','طاء':'ط','حاء':'ح','ياء':'ي',
+  'الف':'ا','را':'ر','هاء':'ه','واو':'و','باء':'ب','فاء':'ف',
+  'نن':'ن','قف':'ق',
+};
+
+
+// ─── N-gram coalescing: merge 2-3 ref words to match SR multi-word output ─────
+// SR often hears "أَنِ اغْدُوا" as single token "اغدوا" (no space)
+function refNgrams(refWords, startIdx, maxN = 3) {
+  const grams = [];
+  for (let n = 1; n <= Math.min(maxN, refWords.length - startIdx); n++) {
+    const slice = refWords.slice(startIdx, startIdx + n);
+    const merged = slice.map(w => w.norm || '').join('');  // no space!
+    if (merged) grams.push({ merged, count: n });
+  }
+  return grams;
+}
+
+
+// ─── Reverse N-gram: SR split 1 ref word into 2-3 spoken tokens ───────────────
+// e.g. "أَوْسَطُهُمْ" → SR hears "اوسط" + "هم" (2 tokens)
+function spokenNgrams(spokenTokens, startIdx, maxN = 3) {
+  const grams = [];
+  for (let n = 1; n <= Math.min(maxN, spokenTokens.length - startIdx); n++) {
+    const slice = spokenTokens.slice(startIdx, startIdx + n);
+    const merged = slice.join('');  // concat NO space
+    if (merged) grams.push({ merged, count: n });
+  }
+  return grams;
+}
+
+// ─── Phonetic coalescing: handle shadda/idgham fusion ─────────────────────────
+// "لَّا" (shadda on lam) often transcribed as "لا" (no shadda marker)
+// "أَوْسَطُهُمْ" → "اوسطهم" (hamza/sukun dropped)
+function phoneticNorm(text) {
+  if (!text) return '';
+  return alternateNormalize(text)
+    .replace(/^لا/g, 'لا')      // normalize laa variants
+    .replace(/ؤ/g, 'و')         // hamza on waw
+    .replace(/ئ/g, 'ي');        // hamza on ya
+}
+
+// ─── Similarity between two normalized strings ───────────────────────────────
+function simNorm(s, r) {
+  if (!s || !r) return 0;
+  if (s === r) return 1;
+
+  // ── ABSOLUTE RULE: ف (fa) vs و (wa) must NEVER match when same root ─────────
+  const sFirst = s[0], rFirst = r[0];
+  if (s.length >= 2 && r.length >= 2) {
+    const sRoot = s.slice(1), rRoot = r.slice(1);
+    if ((sFirst === 'ف' && rFirst === 'و') || (sFirst === 'و' && rFirst === 'ف')) {
+      // Only hard-block if roots are very similar (genuine fa/wa swap)
+      if (editDist(sRoot, rRoot) <= 1) return 0;
+    }
+  }
+
+  const maxLen = Math.max(s.length, r.length);
+  const dist = editDist(s, r);
+  let sim = 1 - dist / maxLen;
+  // Strong penalty when first letter differs
+  if (sFirst !== rFirst) sim *= 0.70;
+  // Penalty for big length mismatch
+  const lr = Math.min(s.length, r.length) / maxLen;
+  if (lr < 0.65) sim *= lr;
+  return Math.max(0, sim);
+}
+
+// Hard check: returns true if spoken has ف where ref has و or vice versa
+// Only applies when the root (after waw/fa prefix) is the SAME — i.e. genuine swap
+// Does NOT fire when waw is just a conjunction prefix on a different root
+function hasFaWaConflict(spoken, refNorm) {
+  const sn = normalizeArabic(spoken);
+  const rn = refNorm;
+  if (!sn || !rn) return false;
+  // Strip ال prefix then check
+  const sStrip = sn.startsWith('ال') ? sn.slice(2) : sn;
+  const rStrip = rn.startsWith('ال') ? rn.slice(2) : rn;
+  if (!sStrip || !rStrip) return false;
+  const sFirst = sStrip[0], rFirst = rStrip[0];
+  // Only conflict if first letters are genuinely ف vs و
+  if (!((sFirst === 'ف' && rFirst === 'و') || (sFirst === 'و' && rFirst === 'ف'))) return false;
+  // CRITICAL: only block if the ROOT (after the ف/و) is the same
+  // e.g. فلما vs ولما → same root → conflict
+  // e.g. فان vs وان → same root → conflict  
+  // e.g. وهو vs فهو → same root → conflict
+  // But: وإن (spoken) vs فلا (ref) → different roots, no conflict (edit distance handles it)
+  const sRoot = sStrip.slice(1);
+  const rRoot = rStrip.slice(1);
+  if (!sRoot || !rRoot) return false;
+  // Conflict only if roots are very similar (edit distance ≤ 1)
+  return editDist(sRoot, rRoot) <= 1;
+}
+
+const MATCH_THRESHOLD = 0.72;
+
+// ─── Extract main vowels (harakat) from Arabic text ──────────────────────────
+// Returns array of vowel chars per consonant position
+// We only care about fathah (َ), kasrah (ِ), dhammah (ُ) — not sukun/shadda/tanwin
+const FATHAH  = '\u064E'; // َ
+const KASRAH  = '\u0650'; // ِ  
+const DHAMMAH = '\u064F'; // ُ
+
+function extractVowelSequence(text) {
+  if (!text) return [];
+  const vowels = [];
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    // Skip diacritics themselves
+    if (c >= '\u064B' && c <= '\u065F') continue;
+    // For each consonant, check what vowel follows
+    let v = null;
+    if (i + 1 < text.length) {
+      const next = text[i + 1];
+      if (next === FATHAH)  v = 'a';
+      else if (next === KASRAH)  v = 'i';
+      else if (next === DHAMMAH) v = 'u';
+    }
+    vowels.push(v); // null = no explicit vowel (sukun or end)
+  }
+  return vowels.filter(v => v !== null); // only keep explicit vowels
+}
+
+// ─── Harakat penalty: compare vowel sequences of spoken vs ref ────────────────
+// Returns a multiplier [0.5, 1.0]: 1.0 = vowels match, lower = mismatch
+// Only penalizes when BOTH spoken and ref have harakat (SR does include them for ar-SA)
+function harakatPenalty(spokenRaw, refRaw) {
+  // refRaw is the original ref word WITH harakat (from SURAHS data)
+  // spokenRaw is the SR transcript which often includes harakat for ar-SA
+  if (!spokenRaw || !refRaw) return 1.0;
+  
+  const spokenVowels = extractVowelSequence(spokenRaw);
+  const refVowels = extractVowelSequence(refRaw);
+  
+  // Need at least 2 vowels in each to make a meaningful comparison
+  // Short words or words without harakat: no penalty
+  if (spokenVowels.length < 1 || refVowels.length < 1) return 1.0;
+  
+  // Compare up to min(len) vowels
+  const compareLen = Math.min(spokenVowels.length, refVowels.length, 4);
+  let mismatches = 0;
+  for (let i = 0; i < compareLen; i++) {
+    if (spokenVowels[i] !== refVowels[i]) mismatches++;
+  }
+  
+  const mismatchRate = mismatches / compareLen;
+  
+  // Penalty scale: 
+  // 0% mismatch = 1.0 (no penalty)
+  // 50%+ mismatch = 0.60 (significant penalty, pushes below MATCH_THRESHOLD)
+  // 100% mismatch = 0.50 (heavy penalty)
+  if (mismatchRate === 0) return 1.0;
+  if (mismatchRate <= 0.25) return 0.92; // minor mismatch (1 of 4 vowels)
+  if (mismatchRate <= 0.5)  return 0.78; // moderate — "Am" vs "Im" in 2-vowel word
+  return 0.65; // heavy mismatch
+}
+
+// ─── Main word similarity ─────────────────────────────────────────────────────
+function wordSim(spokenRaw, refNorm) {
+  if (!refNorm) return 0;
+
+  // ── ABSOLUTE: reject ف vs و mismatch BEFORE any scoring ──────────────────
+  if (hasFaWaConflict(spokenRaw, refNorm)) {
+    console.log(`🚫 FA/WA conflict: spoken="${spokenRaw}" vs ref="${refNorm}" → score=0`);
+    return 0;
+  }
+
+  // ── Also try matching against ref with ء stripped (ref-side hamza tolerance) ──
+  // مشاء (ref) should match مشا (SR) even if candidate generation misses it
+  const refAlt = refNorm.replace(/ء/g, ''); // strip hamza from ref
+  if (refAlt !== refNorm) {
+    // Check spoken candidates against hamza-stripped ref
+    const altScore = Math.max(...spokenCandidates(spokenRaw).map(c => simNorm(c, refAlt)));
+    if (altScore >= MATCH_THRESHOLD) return altScore;
+  }
+
+  // ── Also try: ref starts with ا (alif wasl), match spoken without initial ا ──
+  // اغدوا (ref) should match غدوا (SR) where alif wasl was absorbed
+  if (refNorm.length >= 3 && refNorm[0] === 'ا') {
+    const refNoAlif = refNorm.slice(1);
+    const noAlifScore = Math.max(...spokenCandidates(spokenRaw).map(c => simNorm(c, refNoAlif)));
+    if (noAlifScore >= MATCH_THRESHOLD) return noAlifScore * 0.95; // slight discount
+  }
+
+  // Special handling for very short words (أَنِ, أَن, etc.)
+  if (refNorm.length <= 2) {
+    const candidates = spokenCandidates(spokenRaw);
+    for (const c of candidates) {
+      if (c === refNorm) return 1.0;
+      if (c.length <= 3 && c[0] === refNorm[0]) return 0.85;
+      if (c.includes(refNorm) || refNorm.includes(c)) return 0.80;
+    }
+    const best = Math.max(...candidates.map(c => simNorm(c, refNorm)));
+    if (best > 0.5) return Math.max(0.75, best);
+    return best;
+  }
+  
+  // Muqattaat: single-char reference (ن، ق، ص…)
+  if (refNorm.length === 1) {
+    for (const c of spokenCandidates(spokenRaw)) {
+      if (c === refNorm || LETTER_NAMES[c] === refNorm || c[0] === refNorm[0]) return 0.95;
+    }
+    return 0;
+  }
+  
+  // Short muqattaat (الم، يس…)
+  if (refNorm.length <= 4) {
+    const sn = normalizeArabic(spokenRaw);
+    if (LETTER_NAMES[sn] && normalizeArabic(LETTER_NAMES[sn]) === refNorm) return 1;
+    if (sn[0] === refNorm[0] && sn.length <= refNorm.length * 3) {
+      const base = Math.max(...spokenCandidates(spokenRaw).map(c => simNorm(c, refNorm)));
+      return Math.max(0.78, base);
+    }
+  }
+  return Math.max(...spokenCandidates(spokenRaw).map(c => simNorm(c, refNorm)));
+}
+
+// Kept for any existing callers
+function isSimilarWord(w1, w2) {
+  return wordSim(w1, normalizeArabic(w2)) >= MATCH_THRESHOLD;
+}
+
+// ════════════════════════════════════════════════════════════
+//  SMART SPEECH RECOGNITION
 // ════════════════════════════════════════════════════════════
 function setupRec() {
+  if (rec) return true;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) {
-    log('❌ Speech Recognition tidak tersedia. Gunakan Chrome.', true);
-    document.getElementById('btnMic').disabled = true;
-    return false;
-  }
-  if (rec) return true; // NEVER recreate — same instance holds permission forever
+  if (!SR) return false;
 
   rec = new SR();
   rec.lang = 'ar-SA';
-  rec.continuous = false;   // false = cleaner; we restart manually after each chunk
-  rec.interimResults = true;
-  rec.maxAlternatives = 3;
+  rec.continuous = true;
+  rec.interimResults = true; // Enable interim results for better responsiveness
+  rec.maxAlternatives = 5; // Increased for better matching
 
   rec.onstart = () => {
     recRunning = true;
+    document.getElementById('btnMic').classList.add('live');
+    document.getElementById('btnMic').textContent = '⏸️';
+    document.getElementById('micLabel').textContent = 'Mendengarkan...';
+    document.getElementById('micSub').textContent = 'Otomatis mengikuti bacaan Anda';
+    setDot('rec', 'Smart tracking aktif');
+    document.getElementById('wave').classList.add('show');
+    log('🧠 Smart Recognition aktif — baca dengan natural, sistem akan mengikuti');
   };
 
   rec.onresult = (e) => {
-    let interim = '', final = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      const t = e.results[i][0].transcript;
-      if (e.results[i].isFinal) final += t;
-      else interim += t;
+    if (!sessionActive || processingResult) return;
+    if (window.srWarmingUp) {
+      console.log('🔇 Warm-up period — ignoring result');
+      return;
     }
-    const show = (final || interim).trim();
-    if (show) {
-      const tEl = document.getElementById('tText');
-      tEl.textContent = show;
-      tEl.classList.toggle('live', !final);
-    }
-    // Always process even if paused=true — just don't match, but DO restart
-    if (final && !processingResult) {
-      processingResult = true;
-      if (!paused) matchTranscript(final.trim());
-      else processingResult = false;
-    } else if (interim && !processingResult && !paused) {
-      const parts = interim.trim().split(/\s+/);
-      if (parts.length >= 2) {
-        matchInterim(parts.slice(0, -1).join(' '));
+    
+    const lastIdx = e.results.length - 1;
+    const result = e.results[lastIdx];
+    
+    // Try all alternatives if available (not just [0])
+    let transcript = '';
+    let foundValidTranscript = false;
+    
+    for (let i = 0; i < Math.min(result.length, 3); i++) {
+      const alt = result[i].transcript.trim();
+      if (alt && alt.length > 0) {
+        transcript = alt;
+        foundValidTranscript = true;
+        if (i > 0) console.log(`📝 Using alternative ${i}: "${alt}"`);
+        break;
       }
+    }
+    
+    // If no valid transcript found, skip
+    if (!foundValidTranscript) {
+      console.warn('⚠️ All alternatives empty — SR heard noise/silence');
+      return;
+    }
+    
+    // Show interim results in real-time
+    if (!result.isFinal) {
+      document.getElementById('tText').textContent = transcript + ' ⏳';
+      document.getElementById('tText').classList.add('live');
+      console.log(`🎤 Interim: "${transcript.slice(0, 30)}..."`);
+      return;
+    }
+    
+    // Final result processing
+    document.getElementById('tText').textContent = transcript;
+    document.getElementById('tText').classList.add('live');
+    setTimeout(() => document.getElementById('tText').classList.remove('live'), 2000);
+    
+    console.log(`✅ SR Final: "${transcript}" (buffer now: ${transcriptBuffer.length + 1} chunks)`);
+    
+    lastTranscriptTime = Date.now();
+    transcriptBuffer.push(transcript);
+    
+    // Clear silence timeout and set new one
+    clearTimeout(silenceTimeout);
+    silenceTimeout = setTimeout(() => {
+      console.log(`⏱️ 10ms silence reached — processing buffer of ${transcriptBuffer.length} chunks`);
+      processBufferedTranscripts();
+    }, 10); // 10ms — very fast response
+    
+    // Also process immediately if buffer gets large
+    if (transcriptBuffer.length >= 3) {
+      console.log(`📦 Buffer full (${transcriptBuffer.length} chunks) — processing immediately`);
+      clearTimeout(silenceTimeout);
+      processBufferedTranscripts();
     }
   };
 
   rec.onerror = (e) => {
-    recRunning = false;
-    if (e.error === 'no-speech') {
-      // Silence detected — just restart, NO permission prompt (same instance)
-      if (!paused) restartRec();
-      return;
+    if (e.error === 'not-allowed') {
+      log('❌ Izinkan akses mikrofon di browser', true);
+      setMicOff();
+      sessionActive = false;
+      recRunning = false;
+    } else if (e.error === 'no-speech') {
+      // Don't show error for no-speech, just continue
+    } else if (e.error !== 'aborted') {
+      log('⚠️ Error: ' + e.error);
     }
-    if (e.error === 'aborted') return; // we triggered this, ignore
-    const m = {
-      'not-allowed':         '🚫 Mic ditolak — klik ikon 🔒 di address bar → izinkan → refresh',
-      'network':             '🌐 Butuh internet untuk Google Speech API',
-      'audio-capture':       '🎤 Mikrofon tidak terdeteksi',
-      'service-not-allowed': '⛔ Gunakan HTTPS atau localhost',
-    };
-    log(m[e.error] || '❌ Error: ' + e.error, true);
   };
 
   rec.onend = () => {
-    // Fires after each utterance (continuous=false) or on error
-    recRunning = false;
-    if (!paused) {
-      // Auto-restart silently — browser already granted permission,
-      // same instance = NO new permission dialog ever
-      restartRec();
+    if (sessionActive && recRunning) {
+      // Auto-restart to keep listening
+      setTimeout(() => {
+        if (sessionActive && recRunning) {
+          try {
+            rec.start();
+          } catch(e) {
+            if (e.name !== 'InvalidStateError') {
+              console.error('Restart error:', e);
+            }
+          }
+        }
+      }, 100);
+    } else {
+      setMicOff();
     }
   };
 
   return true;
 }
 
-function restartRec() {
-  if (!rec || paused || !sessionActive) return;
-  clearTimeout(restartTimer);
-  restartTimer = setTimeout(() => {
-    if (!rec || paused || !sessionActive || recRunning) return;
-    try {
-      rec.start();
-      // recRunning set in onstart
-    } catch(e) {
-      if (e.name === 'InvalidStateError') {
-        recRunning = true; // already running — good
-      } else {
-        setTimeout(restartRec, 400);
+// ════════════════════════════════════════════════════════════
+//  SMART TRANSCRIPT PROCESSING — Ayah-level DTW
+// ════════════════════════════════════════════════════════════
+
+// DTW: align spoken sequence to reference sequence, return match ratio
+function dtwScore(spokenArr, refArr) {
+  const m = spokenArr.length, n = refArr.length;
+  if (!m || !n) return 0;
+  const INF = -1e9;
+  const dp = Array.from({length: m+1}, () => new Float32Array(n+1).fill(INF));
+  dp[0][0] = 0;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const ws = wordSim(spokenArr[i-1], refArr[j-1]);
+      const best = Math.max(
+        dp[i-1][j-1],          // match
+        dp[i-1][j]   - 0.30,   // skip spoken (SR hallucinated) — raised penalty
+        dp[i][j-1]   - 0.30    // skip ref (user mumbled) — raised penalty
+      );
+      if (best > INF / 2) dp[i][j] = best + ws;
+    }
+  }
+  // Best score ending anywhere in reference (partial alignment ok)
+  let best = INF;
+  for (let j = 1; j <= n; j++) if (dp[m][j] > best) best = dp[m][j];
+  // Normalize: divide by spoken length
+  return best > INF/2 ? best / m : 0;
+}
+
+function processBufferedTranscripts() {
+  if (!transcriptBuffer.length || cursor >= allWords.length) {
+    transcriptBuffer = []; return;
+  }
+
+  processingResult = true;
+  const fullTranscript = transcriptBuffer.join(' ');
+  transcriptBuffer = [];
+  window.emptyTranscriptCount = 0;
+
+  const spokenTokens = fullTranscript.trim().split(/\s+/).filter(Boolean);
+  if (!spokenTokens.length) {
+    console.warn('⚠️ Empty transcript');
+    processingResult = false; return;
+  }
+
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log(`🎯 "${fullTranscript.slice(0,60)}" [${spokenTokens.length} tokens]`);
+
+  // ── Record where this reading session chunk started (for retry return point)
+  if (sessionRunStart < 0) sessionRunStart = cursor;
+
+  // ── Collect reference words: CURRENT AYAH ONLY, strictly ──
+  // NEVER peek into the next ayah within one utterance.
+  // Rationale: if SR captures trailing words from next ayah (user reading smoothly),
+  // those extra tokens simply won't find a match and the loop stops — safe.
+  // But if we DO peek and match them, cursor jumps ahead and the NEXT utterance
+  // falsely validates as correct (the bug seen in ayat 3→4→5 skip).
+  const currentAyahIdx = cursor < allWords.length ? allWords[cursor].ayahIndex : currentAyahIndex;
+  const remainingWords = [];
+  for (let i = cursor; i < allWords.length; i++) {
+    if (allWords[i].ayahIndex !== currentAyahIdx) break;
+    remainingWords.push({ idx: i, norm: allWords[i].norm, normStrict: allWords[i].normStrict, ref: allWords[i].ref, original: allWords[i].original, ayahIndex: allWords[i].ayahIndex });
+  }
+
+  // Quick sanity: DTW score against the window
+  const refNorms = remainingWords.map(w => w.norm);
+  const windowScore = dtwScore(spokenTokens, refNorms);
+  console.log(`   Window DTW score: ${windowScore.toFixed(3)} (${remainingWords.length} ref words)`);
+
+  // ── Sanity check: is this transcript plausibly matching current position? ──
+  // If window score is very low → user is likely reading the wrong ayah/position.
+  // We distinguish two cases:
+  //   A) Very short transcript (1-2 tokens) with low score → might be noise, wait
+  //   B) Longer transcript with low score → user definitely reading wrong place → ERROR
+  const isLikelyNoise = windowScore < 0.30 && spokenTokens.length <= 2;
+  const isWrongPosition = windowScore < 0.20 && spokenTokens.length >= 2;
+  
+  if (isLikelyNoise) {
+    console.log(`⚠️ Short transcript, low score (${windowScore.toFixed(3)}) — likely noise, ignoring`);
+    processingResult = false;
+    return;
+  }
+
+  // ── FIRST-WORD GATE ──────────────────────────────────────────────────────────
+  // Purpose: detect when user reads a completely different ayah/position.
+  // 
+  // Strategy: check if spoken[0] matches ref[cursor].
+  // STRICT mode (cursor at start of ayah): must match, else ERROR immediately.
+  // LOOSE mode (cursor mid-ayah): if spoken[0] doesn't match, also try spoken[0]
+  //   against ref[cursor+1] and ref[cursor+2] — SR might have swallowed one word.
+  //   If still no match → ERROR.
+  //
+  // This catches "user reads ayah N+1 while cursor at ayah N" without blocking
+  // legitimate cases like SR missing a word at start of an utterance mid-ayah.
+  if (remainingWords.length > 0) {
+    const firstRefNorm = remainingWords[0].norm;
+    const firstSpoken = spokenTokens[0];
+    const firstWS = wordSim(firstSpoken, firstRefNorm);
+    
+    // Try bigram: ref[0]+ref[1] vs spoken[0]
+    let bigramWS = 0;
+    if (remainingWords.length >= 2) {
+      const bg = remainingWords[0].norm + remainingWords[1].norm;
+      bigramWS = Math.max(...spokenCandidates(firstSpoken).map(c => simNorm(c, bg)),
+                          simNorm(normalizeArabic(firstSpoken), bg));
+    }
+
+    // Is cursor at the very first word of this ayah?
+    const isAtAyahStart = cursor === 0 || 
+      (cursor > 0 && allWords[cursor - 1].ayahIndex !== currentAyahIdx);
+    
+    let firstWordMatches = firstWS >= MATCH_THRESHOLD || bigramWS >= 0.72;
+    
+    // Mid-ayah: also try next 1-2 ref words (SR may have missed a word)
+    if (!firstWordMatches && !isAtAyahStart && remainingWords.length >= 2) {
+      const ws1 = wordSim(firstSpoken, remainingWords[1].norm);
+      if (ws1 >= MATCH_THRESHOLD) firstWordMatches = true;
+      if (!firstWordMatches && remainingWords.length >= 3) {
+        const ws2 = wordSim(firstSpoken, remainingWords[2].norm);
+        if (ws2 >= MATCH_THRESHOLD) firstWordMatches = true;
       }
     }
-  }, 50);  // minimal delay — faster ayah-to-ayah
-}
-
-function startMicIfNeeded() {
-  if (recRunning) return;
-  try {
-    rec.start();
-  } catch(e) {
-    if (e.name !== 'InvalidStateError') setTimeout(startMicIfNeeded, 300);
-  }
-}
-
-// schedRestart no longer needed — kept as no-op for safety
-function schedRestart(ms) {}
-
-// ════════════════════════════════════════════════════════════
-//  MATCHING ENGINE — strict word comparison
-// ════════════════════════════════════════════════════════════
-
-function norm(t) {
-  return (t||'')
-    // strip harakat & diacritics
-    .replace(/[\u064B-\u065F\u0610-\u061A\u06D6-\u06DC\u06DF-\u06E4\u06E7\u06E8\u06EA-\u06ED\u0670]/g,'')
-    // normalize alef variants
-    .replace(/[أإآٱ]/g,'ا')
-    // normalize ta marbuta, alef maqsura
-    .replace(/ة/g,'ه').replace(/ى/g,'ي')
-    // strip tatweel
-    .replace(/\u0640/g,'')
-    .replace(/\s+/g,' ').trim();
-}
-
-// Levenshtein edit distance — counts actual character insertions/deletions/substitutions
-function editDist(a, b) {
-  const m = a.length, n = b.length;
-  if (m === 0) return n; if (n === 0) return m;
-  const dp = Array.from({length: m+1}, (_, i) => [i, ...Array(n).fill(0)]);
-  for (let j = 0; j <= n; j++) dp[0][j] = j;
-  for (let i = 1; i <= m; i++)
-    for (let j = 1; j <= n; j++)
-      dp[i][j] = a[i-1] === b[j-1]
-        ? dp[i-1][j-1]
-        : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
-  return dp[m][n];
-}
-
-// Speech API quirk: sometimes transcribes لَأَجْرًا as الاجر (adds ال, changes ل→ال)
-// Generate multiple candidate normalizations of what was spoken
-function spokenCandidates(spoken) {
-  const s = norm(spoken);
-  const c = new Set([s]);
-  // Strip ال prefix → speech API adds this when hearing لَ or لأ at word start
-  if (s.startsWith('ال') && s.length > 3) { c.add(s.slice(2)); c.add('ل' + s.slice(2)); }
-  // Strip وال prefix
-  if (s.startsWith('وال') && s.length > 4) { c.add(s.slice(3)); c.add('ل' + s.slice(3)); }
-  // Strip trailing ا (tanwin alef sometimes dropped/added)
-  if (s.endsWith('ا') && s.length > 2) c.add(s.slice(0, -1));
-  return [...c];
-}
-
-// Similarity between two already-normalized strings
-function simPair(s, r) {
-  if (!s || !r) return 0;
-  if (s === r) return 1;
-  const maxLen = Math.max(s.length, r.length);
-  const dist = editDist(s, r);
-  let sim = 1 - dist / maxLen;
-  // Strong penalty if first letter differs — catches فلهم vs ولهم
-  if (s[0] !== r[0]) sim *= 0.72;
-  // Penalty for large length mismatch
-  const lenRatio = Math.min(s.length, r.length) / maxLen;
-  if (lenRatio < 0.7) sim *= lenRatio;
-  return Math.max(0, sim);
-}
-
-// Arabic letter names → their single-letter forms (huruf muqattaat)
-const LETTER_NAMES = {
-  'نون':'ن','نن':'ن','الم':'الم','الر':'الر','المر':'المر','المص':'المص',
-  'كهيعص':'كهيعص','طه':'طه','طسم':'طسم','طس':'طس','يس':'يس',
-  'حم':'حم','عسق':'عسق','ص':'ص','ق':'ق','ن':'ن',
-  // expanded spoken forms for each letter
-  'الف':'ا','اليف':'ا',
-  'باء':'ب','بي':'ب',
-  'تاء':'ت',
-  'ثاء':'ث',
-  'جيم':'ج',
-  'حاء':'ح',
-  'خاء':'خ',
-  'دال':'د',
-  'ذال':'ذ',
-  'راء':'ر',
-  'زاي':'ز','زين':'ز',
-  'سين':'س',
-  'شين':'ش',
-  'صاد':'ص',
-  'ضاد':'ض',
-  'طاء':'ط',
-  'ظاء':'ظ',
-  'عين':'ع',
-  'غين':'غ',
-  'فاء':'ف',
-  'قاف':'ق',
-  'كاف':'ك',
-  'لام':'ل',
-  'ميم':'م',
-  'نون':'ن',
-  'هاء':'ه','ها':'ه',
-  'واو':'و',
-  'ياء':'ي',
-};
-
-// Main similarity: best score across all spoken candidate forms vs reference
-function wordSim(spoken, ref) {
-  const r = norm(ref);
-  if (!r) return 0;
-
-  // Special case: single-letter reference (muqattaat like ن، ق، ص)
-  // Speech API returns the full letter name e.g. نون، قاف، صاد
-  if (r.length === 1) {
-    const candidates = spokenCandidates(spoken);
-    for (const c of candidates) {
-      if (c === r) return 1.0;                    // exact match
-      if (LETTER_NAMES[c] === r) return 1.0;      // letter name → single char
-      if (c[0] === r[0]) return 0.9;              // starts with same letter
-    }
-    // Also check: if spoken starts with the right letter sound
-    const s0 = norm(spoken)[0];
-    if (s0 === r[0]) return 0.9;
-    return 0;
-  }
-
-  // Multi-letter muqattaat (الم، طه، يس etc.) — try matching by initials
-  if (r.length <= 4) {
-    const sNorm = norm(spoken);
-    // If spoken is the full sequence of letter names, extract initials
-    const mapped = LETTER_NAMES[sNorm];
-    if (mapped && norm(mapped) === r) return 1.0;
-    // Check first char match with leniency
-    if (sNorm[0] === r[0] && sNorm.length <= r.length * 3) {
-      const baseSim = Math.max(...spokenCandidates(spoken).map(c => simPair(c, r)));
-      return Math.max(baseSim, 0.75); // floor for muqattaat
-    }
-  }
-
-  return Math.max(...spokenCandidates(spoken).map(c => simPair(c, r)));
-}
-
-// Process interim results as they stream in — word by word
-function matchInterim(interimText) {
-  if (!sessionActive || paused) return;
-  const words = interimText.trim().split(/\s+/).filter(Boolean);
-  if (!words.length || cursor >= allWords.length) return;
-
-  const lastWord = words[words.length - 1];
-  if (!lastWord) return;
-
-  const expected = allWords[cursor];
-  const sim = wordSim(lastWord, expected.word);
-
-  if (sim >= MATCH_THRESHOLD) {
-    expected.el.className = 'w correct';
-    // For very short words (muqattaat like ن) the final result may never come —
-    // advance cursor immediately on interim match
-    if (norm(expected.word).length <= 2 && !processingResult) {
-      processingResult = true;
-      cursor++;
-      highlightCursor();
-      setDot('ok', 'Lanjutkan...');
-      log('✅ ' + cursor + ' / ' + allWords.length + ' kata');
+    
+    console.log(`   🔑 First-word gate: spoken="${firstSpoken}" vs ref="${firstRefNorm}" → ws=${firstWS.toFixed(2)}, bigram=${bigramWS.toFixed(2)}, ayahStart=${isAtAyahStart}, pass=${firstWordMatches}`);
+    
+    if (!firstWordMatches) {
+      console.log(`❌ First-word gate FAILED — user reading wrong position`);
+      const cursorWord = allWords[cursor];
+      if (cursorWord && cursorWord.el.className !== 'w correct') {
+        cursorWord.el.className = 'w wrong';
+        wrongCount++;
+      }
+      playWrongSound();
+      enterRetryMode(cursor);
+      setDot('warn', '⚠️ Posisi salah');
+      matchStats.mismatches++;
       updateStats();
       processingResult = false;
-      if (cursor >= allWords.length) onSurahComplete();
+      return;
     }
-  } else {
-    expected.el.className = 'w cursor';
   }
-}
 
-const MATCH_THRESHOLD = 0.72; // stricter — was 0.55, now requires real similarity
-const LOOKAHEAD = 2;          // max words to look ahead for skipped words
+  // ── Greedy per-word match: advance as far as spoken tokens reach ────────────
+  let matchedAny = false, hasError = false;
+  let correctInBatch = 0, wrongInBatch = 0;
+  let firstWrongIdx = -1;
+  let lastCorrectCursor = cursor;
 
-function matchTranscript(spoken) {
-  const spokenWords = spoken.trim().split(/\s+/).filter(Boolean);
-  if (!spokenWords.length || !sessionActive || paused) { processingResult = false; return; }
+  let si = 0;
+  let refSkipped = 0;
+  const MAX_LEADING_SKIP = 0; // No leading skip — must match from current cursor position
 
-  let si = 0;           // index into spokenWords
-  let lc = cursor;      // local cursor into allWords
-  let anyWrong = false;
-  let anyMatch = false;
+  for (let wi = 0; wi < remainingWords.length && si < spokenTokens.length; wi++) {
+    const wObj = allWords[remainingWords[wi].idx];
+    if (!wObj || !wObj.norm) continue;
 
-  while (si < spokenWords.length && lc < allWords.length) {
-    const sw = spokenWords[si];
-    const sim = wordSim(sw, allWords[lc].word);
+    // ── Try single-word match first ───────────────────────────────────────────
+    // Look-ahead limited to si+2: prevents system from skipping spoken tokens
+    // and finding a match much later (which would wrongly validate skipped content)
+    let bestWS = 0, bestSI = -1;
+    for (let t = si; t < Math.min(si + 2, spokenTokens.length); t++) {
+      let ws = wordSim(spokenTokens[t], wObj.norm);
 
-    if (sim >= MATCH_THRESHOLD) {
-      // ✅ MATCH
-      allWords[lc].el.className = 'w correct';
-      lc++; si++;
-      anyMatch = true;
-    } else {
-      // ❌ MISMATCH — look ahead to see if user skipped a word
-      let skipped = false;
-      for (let la = 1; la <= LOOKAHEAD && (lc + la) < allWords.length; la++) {
-        if (wordSim(sw, allWords[lc + la].word) >= MATCH_THRESHOLD) {
-          // User skipped `la` words — mark them wrong
-          for (let k = 0; k < la; k++) {
-            allWords[lc + k].el.className = 'w wrong';
+      // ── SHORT WORD STRICT CHECK (≤5 chars): preserve أ vs إ distinction ──────
+      // For short words, ar-SA SR outputs أن vs إن as different tokens.
+      // normalizeArabic() merges both to ان, losing the distinction.
+      // normStrict() keeps أ/إ separate → if spoken أن vs ref إن → score drops.
+      if (wObj.normStrict && wObj.norm.length <= 5) {
+        const spokenStrict = normalizeArabicStrict(spokenTokens[t]);
+        // If strict norms differ but loose norms match → harakat error detected
+        if (spokenStrict !== wObj.normStrict) {
+          // Check: is the difference ONLY in أ vs إ (hamza fathah vs kasrah)?
+          const spokenLoose = normalizeArabic(spokenTokens[t]);
+          if (spokenLoose === wObj.norm) {
+            // Consonants match but hamza form differs → harakat error
+            console.log(`   🔤 Hamza harakat error: spoken="${spokenTokens[t]}"(${spokenStrict}) vs ref="${wObj.ref}"(${wObj.normStrict}) → penalized`);
+            ws *= 0.60; // Heavy penalty — pushes below MATCH_THRESHOLD 0.72
           }
-          allWords[lc + la].el.className = 'w correct';
-          lc = lc + la + 1;
-          si++;
-          skipped = true;
-          anyWrong = true;
-          break;
         }
       }
-      if (!skipped) {
-        // Spoken word doesn't match anything near cursor — wrong word spoken
-        anyWrong = true;
-        // Mark expected word as wrong, advance spoken index only
-        allWords[lc].el.className = 'w wrong';
-        si++;
-        // Don't advance lc — user should re-read this word
+
+      // ── HARAKAT PENALTY (when SR includes diacritics in output) ──────────────
+      if (ws >= 0.55 && wObj.ref) {
+        const penalty = harakatPenalty(spokenTokens[t], wObj.ref);
+        if (penalty < 1.0) {
+          console.log(`   🔤 Harakat penalty: spoken="${spokenTokens[t]}" ref="${wObj.ref}" penalty=${penalty.toFixed(2)}`);
+          ws *= penalty;
+        }
       }
+
+      if (ws > bestWS) { bestWS = ws; bestSI = t; }
+    }
+
+    // ── Try ref BIGRAM: merge ref[wi] + ref[wi+1] to match ONE spoken token ──
+    // Handles tajweed cases where two short ref words sound like one SR token
+    // e.g. أَن+لَّا → SR outputs "الا"; هَمَّازٍ+مَّشَّاءٍ → SR outputs "همازمشاء"
+    let bigramMatched = false;
+    if (wi + 1 < remainingWords.length) {
+      const wObj2 = allWords[remainingWords[wi + 1].idx];
+      if (wObj2 && wObj2.norm) {
+        const bigramNorm = wObj.norm + wObj2.norm; // merged norm of 2 ref words
+        let bestBigramWS = 0, bestBigramSI = -1;
+        for (let t = si; t < Math.min(si + 3, spokenTokens.length); t++) {
+          const spokenNorm = normalizeArabic(spokenTokens[t]);
+          const candidates = spokenCandidates(spokenTokens[t]);
+          let bgWS = Math.max(
+            ...candidates.map(c => simNorm(c, bigramNorm)),
+            simNorm(spokenNorm, bigramNorm)
+          );
+          if (bgWS > bestBigramWS) { bestBigramWS = bgWS; bestBigramSI = t; }
+        }
+        
+        if (bestBigramWS >= 0.72) {
+          console.log(`   🔗 Bigram: "${spokenTokens[bestBigramSI]}" ~ "${wObj.norm}+${wObj2.norm}" (${bestBigramWS.toFixed(2)})`);
+          wObj.el.className = 'w correct';
+          wObj2.el.className = 'w correct';
+          correctCount += 2; correctInBatch += 2;
+          si = bestBigramSI + 1;
+          lastCorrectCursor = remainingWords[wi + 1].idx + 1;
+          matchedAny = true;
+          refSkipped = 0;
+          wi++;
+          bigramMatched = true;
+        }
+      }
+    }
+    if (bigramMatched) continue;
+
+    // ── Normal single-word result ──────────────────────────────────────────────
+    if (bestWS >= MATCH_THRESHOLD) {
+      wObj.el.className = 'w correct';
+      correctCount++; correctInBatch++;
+      if (bestSI >= 0) si = bestSI + 1;
+      lastCorrectCursor = remainingWords[wi].idx + 1;
+      matchedAny = true;
+      refSkipped = 0;
+    } else if (bestWS >= 0.65) {
+      // Partial match — SR quirk on long/complex Quranic words only
+      wObj.el.className = 'w correct';
+      correctCount++; correctInBatch++;
+      console.log(`   🟡 Partial: "${spokenTokens[bestSI] || '?'}" ~ "${wObj.norm}" (${bestWS.toFixed(2)})`);
+      if (bestSI >= 0) si = bestSI + 1;
+      lastCorrectCursor = remainingWords[wi].idx + 1;
+      matchedAny = true;
+      refSkipped = 0;
+    } else {
+      // No match for this ref word
+      // Only flag as wrong if in the SAME ayah as cursor start
+      if (remainingWords[wi].ayahIndex === currentAyahIdx && wObj.el.className !== 'w correct') {
+        wObj.el.className = 'w wrong';
+        wrongCount++; wrongInBatch++;
+        hasError = true;
+        if (firstWrongIdx < 0) firstWrongIdx = remainingWords[wi].idx;
+      }
+      break;
     }
   }
 
-  // Advance global cursor
-  if (lc > cursor) {
-    cursor = lc;
-    highlightCursor();
+  // ── Handle case: nothing matched at all ───────────────────────────────────
+  // User spoke something but it doesn't match current position → treat as ERROR
+  if (!matchedAny) {
+    console.log(`⚠️ No words matched — user likely reading wrong position`);
+    // Mark the current cursor word as wrong
+    const cursorWord = allWords[cursor];
+    if (cursorWord && cursorWord.el.className !== 'w correct' && cursorWord.ayahIndex === currentAyahIdx) {
+      cursorWord.el.className = 'w wrong';
+      wrongCount++; wrongInBatch++;
+      hasError = true;
+      firstWrongIdx = cursor;
+    }
+    // If still no error (e.g. cursor word is already correct), just warn silently
+    if (!hasError) {
+      matchStats.mismatches++;
+      setDot('warn', '⚠️ Bacaan tidak terdeteksi jelas');
+      updateStats();
+      processingResult = false;
+      return;
+    }
   }
 
-  // Feedback
-  if (anyWrong) {
-    beepWrong();
-    setDot('warn', '⚠️ Tidak sesuai');
-    log('⚠️ Kata tidak sesuai — kata ke-' + cursor + ' / ' + allWords.length);
-  } else if (anyMatch) {
-    setDot('ok', 'Lanjutkan...');
-    log('✅ ' + cursor + ' / ' + allWords.length + ' kata');
+  // ── Advance cursor to how far user correctly read ─────────────────────────
+  if (correctInBatch > 0 && !hasError) {
+    if (lastCorrectCursor > cursor) {
+      cursor = lastCorrectCursor;
+      const newAyah = cursor < allWords.length ? allWords[cursor].ayahIndex : currentAyahIndex;
+      if (newAyah !== currentAyahIndex) {
+        currentAyahIndex = newAyah;
+        updateCurrentAyahHighlight();
+        log(`📖 Pindah ke ayat ${currentAyahIndex + 1}`);
+      }
+      highlightCursor();
+      allWords[cursor]?.el?.closest('.ayah-row')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  } else if (correctInBatch > 0 && hasError) {
+    // Error detected — do NOT advance cursor past error
+    // Keep cursor at where it was before this batch (retry mode will reset it)
+    // Don't update cursor here — enterRetryMode will set it to sessionRunStart
   }
+
+  // ── Analytics ─────────────────────────────────────────────────────────────
+  matchStats.totalProcessed += spokenTokens.length;
+  if (correctInBatch > 0) matchStats.directMatch += correctInBatch;
+  if (wrongInBatch > 0) {
+    matchStats.mismatches += wrongInBatch;
+    matchStats.recentMismatches.push({
+      sw: spokenTokens.slice(0,3).join(' ').slice(0,20),
+      exp: `cursor ${cursor}`,
+      score: windowScore.toFixed(2)
+    });
+    if (matchStats.recentMismatches.length > 20) matchStats.recentMismatches.shift();
+  }
+
+  console.log(`📊 Done: cursor→${cursor}, correct=${correctInBatch}, errors=${hasError}`);
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+  if (hasError && firstWrongIdx >= 0) {
+    playWrongSound();
+    // Reset any words marked correct in this batch (from cursor to firstWrongIdx)
+    // since enterRetryMode will re-evaluate and re-highlight them
+    // (enterRetryMode will mark them green itself based on what's in the current ayah)
+    for (let i = cursor; i < firstWrongIdx; i++) {
+      if (allWords[i]?.el?.className === 'w correct') {
+        // keep — enterRetryMode will re-mark them appropriately
+      }
+    }
+    // Reset any additional wrong words after first wrong → idle
+    for (let i = firstWrongIdx + 1; i < allWords.length; i++) {
+      if (allWords[i]?.el?.className === 'w wrong') {
+        allWords[i].el.className = 'w idle';
+        wrongCount--;
+      }
+    }
+    enterRetryMode(firstWrongIdx);
+  } else if (correctInBatch > 0) {
+    playCorrectSound();
+    exitRetryMode();
+    // Reset session run start for next chunk
+    sessionRunStart = cursor;
+  }
+
+  if (hasError)        setDot('warn', '⚠️ Ada kesalahan');
+  else if (matchedAny) setDot('ok', '✓ Bagus!');
 
   updateStats();
   processingResult = false;
-
   if (cursor >= allWords.length) onSurahComplete();
+}
+// ════════════════════════════════════════════════════════════
+//  RETRY MODE — ketika salah, user kembali ke awal sesi bacaan
+// ════════════════════════════════════════════════════════════
+let retryMode = false;
+let retryCursor = -1;       // index kata yang salah (ditandai merah)
+let retryAyahStart = -1;    // index awal sesi bacaan (kursor emas → titik harus ulang dari sini)
+
+function enterRetryMode(wrongWordIdx) {
+  retryMode = true;
+  retryCursor = wrongWordIdx;
+
+  const wrongWord = allWords[wrongWordIdx];
+  if (!wrongWord) return;
+
+  // Titik kembali = awal ayat tempat kata salah berada
+  // (selalu kembali ke awal ayat, bukan hanya sessionRunStart,
+  //  agar user mengulang SELURUH ayat dari awal)
+  const wrongAyah = wrongWord.ayahIndex;
+  let returnIdx = wrongWordIdx;
+  for (let i = wrongWordIdx - 1; i >= 0; i--) {
+    if (allWords[i].ayahIndex === wrongAyah) returnIdx = i; else break;
+  }
+
+  retryAyahStart = returnIdx;
+
+  // Visual state:
+  // - Kata SEBELUM returnIdx (ayat-ayat sebelumnya): tetap sebagaimana adanya (correct/passed)
+  // - Kata dari returnIdx sampai SEBELUM kata salah: highlight HIJAU (sudah benar di sesi ini)
+  // - Kata yang salah: MERAH
+  // - Kata setelah kata salah: idle
+  
+  // Reset kata setelah kata salah → idle
+  for (let i = wrongWordIdx + 1; i < allWords.length; i++) {
+    if (allWords[i]?.el?.className === 'w correct' || allWords[i]?.el?.className === 'w wrong') {
+      allWords[i].el.className = 'w idle';
+    }
+  }
+
+  // Kata dari returnIdx s.d. sebelum wrongWordIdx: tandai hijau (benar dalam batch ini)
+  for (let i = returnIdx; i < wrongWordIdx; i++) {
+    if (allWords[i]?.el && allWords[i].el.className !== 'w correct') {
+      allWords[i].el.className = 'w correct';
+    }
+  }
+
+  // Pastikan kata yang salah tetap merah
+  if (wrongWord.el) wrongWord.el.className = 'w wrong';
+
+  // Set cursor ke titik kembali (awal ayat)
+  cursor = returnIdx;
+  // Tandai kata di returnIdx sebagai retry-cursor (kuning di atas hijau)
+  if (allWords[returnIdx]?.el) {
+    allWords[returnIdx].el.className = 'w retry-cursor';
+  }
+  currentAyahIndex = wrongAyah;
+  updateCurrentAyahHighlight();
+
+  // Reset sessionRunStart agar sesi retry dimulai dari awal ayat
+  sessionRunStart = returnIdx;
+
+  // Banner
+  const wrongAyahNum = wrongWord.ayahIndex + 1;
+  document.getElementById('retryAyahNum').textContent = `AYAT ${wrongAyahNum}`;
+  document.getElementById('retryWord').textContent = wrongWord.original || wrongWord.norm;
+  document.getElementById('retryBanner').style.display = 'flex';
+
+  // Scroll agar kata salah (merah) kelihatan
+  wrongWord.el.closest('.ayah-row')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  log(`🔁 Salah di kata "${wrongWord.original}" — ulangi dari awal ayat ${wrongAyahNum}`);
+  setDot('warn', '🔁 Ulangi dari posisi kursor kuning');
+}
+
+function exitRetryMode() {
+  // Clean up any retry-cursor styling before exiting
+  allWords.forEach(w => {
+    if (w.el?.className === 'w retry-cursor') {
+      w.el.className = 'w idle';
+    }
+  });
+  retryMode = false;
+  retryCursor = -1;
+  retryAyahStart = -1;
+  document.getElementById('retryBanner').style.display = 'none';
+}
+
+function skipWrongWord() {
+  // Lewati sampai akhir ayat tempat kata salah berada, lanjut ke ayat berikutnya
+  if (retryCursor >= 0 && retryCursor < allWords.length) {
+    const wrongAyahIndex = allWords[retryCursor].ayahIndex;
+    let nextIdx = retryCursor;
+    while (nextIdx < allWords.length && allWords[nextIdx].ayahIndex === wrongAyahIndex) {
+      if (allWords[nextIdx].el.className !== 'w correct') {
+        allWords[nextIdx].el.className = 'w skipped';
+      }
+      nextIdx++;
+    }
+    cursor = nextIdx;
+    if (cursor < allWords.length) {
+      currentAyahIndex = allWords[cursor].ayahIndex;
+    }
+    sessionRunStart = cursor;
+  }
+  exitRetryMode();
+  highlightCursor();
+  updateCurrentAyahHighlight();
+  log('⏭ Ayat dilewati — lanjut ke ayat berikutnya');
+}
+
+// ════════════════════════════════════════════════════════════
+//  TAB SWITCHING
+// ════════════════════════════════════════════════════════════
+function switchTab(tab) {
+  if (tab === 'sambung') initSambungSelects();
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('tabcontent-' + tab).classList.add('active');
+}
+function playCorrectSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Play two pleasant tones (like a "ding")
+    const frequencies = [800, 1000];
+    frequencies.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      
+      const startTime = ctx.currentTime + i * 0.05;
+      gain.gain.setValueAtTime(0.1, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.15);
+      
+      osc.start(startTime);
+      osc.stop(startTime + 0.15);
+    });
+  } catch(e) {
+    console.error('Audio context error:', e);
+  }
+}
+
+function playWrongSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    // Lower frequency for "wrong" sound
+    osc.frequency.value = 200;
+    osc.type = 'sawtooth';
+    
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+    
+    osc.start();
+    osc.stop(ctx.currentTime + 0.25);
+  } catch(e) {
+    console.error('Audio context error:', e);
+  }
+}
+
+function beepWrong() {
+  playWrongSound();
 }
 
 function onSurahComplete() {
-  // Pause (not stop) so mic stays alive — no re-permission needed for next surah
-  sessionActive = false;
-  paused = true;
-  setMicOff();
+  stopSession();
   setDot('ok', '🎉 Selesai!');
   log('🎉 Alhamdulillah! Surah selesai — Benar: ' + correctCount + ' | Salah: ' + wrongCount);
   document.getElementById('tText').textContent = 'Masyaa Allah! 🌙';
   document.getElementById('micLabel').textContent = 'Selesai!';
-  document.getElementById('micSub').textContent = 'Tekan 🎙️ untuk surah berikutnya';
+  document.getElementById('micSub').textContent = 'Tekan untuk mulai ulang';
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1080,43 +2662,66 @@ function toggleSession() {
   else startSession();
 }
 
-function startSession() {
-  if (!setupRec()) return;
+async function startSession() {
+  if (displayMode === 'madani') {
+    log('ℹ️ Mode Mushaf Madani: gunakan untuk membaca, bukan tracking');
+    return;
+  }
+
+  // Ensure mic permission once — keeps stream alive so browser won't ask again
+  const micOk = await ensureMicPermission();
+  if (!micOk) {
+    log('❌ Izinkan akses mikrofon di browser', true);
+    return;
+  }
+  
+  if (!rec && !setupRec()) {
+    log('❌ Browser tidak support Speech Recognition', true);
+    return;
+  }
 
   sessionActive = true;
-  paused = false;              // start accepting results
+  transcriptBuffer = [];
+  lastTranscriptTime = Date.now();
+  sessionRunStart = cursor; // catat posisi awal sesi
+  
+  // Warm-up flag: ignore first 500ms of results (mic stabilization)
+  window.srWarmingUp = true;
+  setTimeout(() => {
+    window.srWarmingUp = false;
+    console.log('✅ Warm-up complete — tracking active');
+    log('✅ Siap — mulai membaca sekarang');
+  }, 500);
 
-  // Start mic ONCE — after this, continuous=true keeps it alive forever.
-  // Browser will NOT ask for permission again on subsequent startSession() calls
-  // because we never abort() and the permission is held by the same rec instance.
-  startMicIfNeeded();
-
-  // Update UI
-  document.getElementById('btnMic').classList.add('live');
-  document.getElementById('btnMic').textContent = '⏹';
-  document.getElementById('micLabel').textContent = 'Sesi Aktif';
-  document.getElementById('micSub').textContent = 'Tekan untuk berhenti';
-  document.getElementById('wave').classList.add('show');
-  setDot('rec', 'Mendengarkan...');
-  log('▶️ Sesi aktif — baca dari halaman ini. Mic tidak akan minta izin lagi.');
+  if (!recRunning) {
+    try {
+      rec.start();
+      log('🎤 Memulai mikrofon... tunggu "LIVE" sebelum baca');
+    } catch(e) {
+      log('⚠️ Error: ' + e.message, true);
+      sessionActive = false;
+    }
+  } else {
+    setDot('rec', 'Smart tracking aktif');
+    document.getElementById('wave').classList.add('show');
+    document.getElementById('btnMic').classList.add('live');
+    log('▶️ Melanjutkan sesi — baca dengan natural');
+  }
 }
 
 function stopSession() {
   sessionActive = false;
-  paused = true;               // keep mic running but ignore all results
-  // ⚠️ DO NOT call rec.abort() or rec.stop() — that kills the permission grant.
-  // Mic stays running silently in the background.
+  clearTimeout(silenceTimeout);
+  transcriptBuffer = [];
   setMicOff();
 }
 
 function setMicOff() {
-  // UI only — never touches rec, mic stays running silently
   document.getElementById('wave').classList.remove('show');
   document.getElementById('btnMic').classList.remove('live');
   document.getElementById('btnMic').textContent = '🎙️';
   document.getElementById('micLabel').textContent = 'Mulai Sesi';
-  document.getElementById('micSub').textContent = recRunning
-    ? 'Mic siap — tekan untuk lanjut' : 'Tekan untuk aktifkan mikrofon';
+  document.getElementById('micSub').textContent = 'Smart tracking: otomatis mengikuti';
   setDot('', 'Sesi dijeda');
 }
 
@@ -1137,8 +2742,8 @@ function log(msg, err) {
 function updateStats() {
   const total = allWords.length;
   const pct = total ? Math.round(cursor/total*100) : 0;
-  const wrongs = allWords.filter(w => w.el.className === 'w wrong').length;
-  const corrects = allWords.filter(w => w.el.className === 'w correct').length;
+  const wrongs = allWords.filter(w => w.el && w.el.className === 'w wrong').length;
+  const corrects = allWords.filter(w => w.el && w.el.className === 'w correct').length;
   document.getElementById('stOk').textContent  = corrects;
   document.getElementById('stErr').textContent = wrongs;
   document.getElementById('stPos').textContent = cursor + 1 > total ? total : cursor + 1;
@@ -1150,9 +2755,14 @@ function updateStats() {
 // ════════════════════════════════════════════════════════════
 function jumpBack() {
   cursor = Math.max(0, cursor - 5);
-  // Reset words from cursor onwards
   for (let i = cursor; i < allWords.length; i++) {
-    allWords[i].el.className = 'w idle';
+    if (allWords[i].el.className && allWords[i].el.className.includes('w ')) {
+      allWords[i].el.className = 'w idle';
+    }
+  }
+  if (cursor < allWords.length) {
+    currentAyahIndex = allWords[cursor].ayahIndex;
+    updateCurrentAyahHighlight();
   }
   highlightCursor();
   log('⏮ Mundur ke kata ' + (cursor+1));
@@ -1160,38 +2770,155 @@ function jumpBack() {
 
 function skipForward() {
   if (cursor < allWords.length) {
-    allWords[cursor].el.className = 'w wrong';
+    // Mark as "skipped" (not wrong, just skipped by user)
+    allWords[cursor].el.className = 'w skipped';
     cursor++;
+    if (cursor < allWords.length) {
+      currentAyahIndex = allWords[cursor].ayahIndex;
+      updateCurrentAyahHighlight();
+    }
     highlightCursor();
-    log('⏭ Lewati ke kata ' + (cursor+1));
+    updateStats();
+    log(`⏭ Lewati ke kata ${cursor + 1}: "${allWords[cursor]?.original || 'selesai'}"`);
+  }
+}
+
+// New function: Mark current word as correct manually (for SR issues)
+function markCorrect() {
+  if (cursor < allWords.length) {
+    allWords[cursor].el.className = 'w correct';
+    correctCount++;
+    cursor++;
+    if (cursor < allWords.length) {
+      currentAyahIndex = allWords[cursor].ayahIndex;
+      updateCurrentAyahHighlight();
+    }
+    highlightCursor();
+    updateStats();
+    playCorrectSound();
+    log(`✅ Ditandai benar — lanjut ke kata ${cursor + 1}`);
   }
 }
 
 function resetSession() {
-  // Pause session — mic stays running silently, no permission re-prompt
   sessionActive = false;
-  paused = true;
+  clearTimeout(silenceTimeout);
+  transcriptBuffer = [];
   setMicOff();
-  correctCount = 0; wrongCount = 0; cursor = 0;
-  processingResult = false;
-  allWords.forEach(w => { w.el.className = 'w idle'; });
+  correctCount = 0; wrongCount = 0; cursor = 0; currentAyahIndex = 0;
+  processingResult = false; sessionRunStart = -1;
+  allWords.forEach(w => { 
+    if (w.el.className && w.el.className.includes('w ')) {
+      w.el.className = 'w idle'; 
+    }
+  });
   highlightCursor();
+  updateCurrentAyahHighlight();
   document.getElementById('tText').textContent = '—';
   document.getElementById('tText').classList.remove('live');
   updateStats();
-  log('↺ Reset — tekan 🎙️ untuk mulai (mic sudah siap, tidak perlu izin ulang)');
+  log('↺ Reset — tekan 🎙️ untuk mulai sesi baru');
 }
 
-function loadSurah() {
+async function loadSurah() {
   currentSurah = parseInt(document.getElementById("surahSel").value);
-  // DO NOT stop or restart mic — just reset the tracking cursor.
-  // Mic keeps running seamlessly (continuous=true).
-  correctCount = 0; wrongCount = 0; cursor = 0; processingResult = false;
-  renderPage(currentSurah);
-  updateStats();
+  correctCount = 0; wrongCount = 0; cursor = 0; currentAyahIndex = 0;
+  processingResult = false; sessionRunStart = -1;
+  transcriptBuffer = [];
+  clearTimeout(silenceTimeout);
+  
+  if (audioPlaying) stopAudioPlayer();
+  
   document.getElementById("tText").textContent = "—";
   document.getElementById("tText").classList.remove("live");
-  log("📖 " + SURAHS[currentSurah].name + " dimuat — lanjutkan membaca");
+
+  // For dynamic surahs, load first then update UI
+  const surahName = SURAHS[currentSurah]?.name || JUZ_SURAHS[currentSurah]?.name || '...';
+  log("📖 Memuat " + surahName + "...");
+
+  await renderPage(currentSurah);
+  updateStats();
+  
+  const surahData = SURAHS[currentSurah];
+  if (surahData) {
+    document.getElementById('startAyahNum').max = surahData.ayahs.length;
+    document.getElementById('startAyahNum').value = 1;
+    updateStartPosition();
+    log("📖 " + surahData.name + " dimuat — siap untuk tracking");
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  START POSITION FUNCTIONS
+// ════════════════════════════════════════════════════════════
+function updateStartPosition() {
+  const startAyah = parseInt(document.getElementById('startAyahNum').value);
+  const surahData = SURAHS[currentSurah];
+  
+  if (!surahData) return;
+  
+  const maxAyah = surahData.ayahs.length;
+  if (startAyah < 1 || startAyah > maxAyah) {
+    document.getElementById('startInfo').textContent = `❌ Ayat tidak valid (1-${maxAyah})`;
+    document.getElementById('startInfo').style.color = '#ef6b5a';
+    return;
+  }
+  
+  document.getElementById('startInfo').textContent = `Akan mulai dari ayat ${startAyah}`;
+  document.getElementById('startInfo').style.color = '';
+}
+
+function goToStartPosition() {
+  const startAyah = parseInt(document.getElementById('startAyahNum').value);
+  const surahData = SURAHS[currentSurah];
+  
+  if (!surahData) return;
+  
+  const maxAyah = surahData.ayahs.length;
+  if (startAyah < 1 || startAyah > maxAyah) {
+    log(`❌ Ayat tidak valid. Pilih antara 1-${maxAyah}`, true);
+    return;
+  }
+  
+  // Find the first word index of the target ayah
+  let targetWordIndex = 0;
+  let targetAyahIndex = startAyah - 1; // Convert to 0-based index
+  
+  for (let i = 0; i < allWords.length; i++) {
+    if (allWords[i].ayahIndex === targetAyahIndex) {
+      targetWordIndex = i;
+      break;
+    }
+  }
+  
+  // Reset words before this position to idle
+  for (let i = 0; i < targetWordIndex; i++) {
+    if (allWords[i].el.className && allWords[i].el.className.includes('w ')) {
+      allWords[i].el.className = 'w passed';
+    }
+  }
+  
+  // Reset words from this position onwards to idle
+  for (let i = targetWordIndex; i < allWords.length; i++) {
+    if (allWords[i].el.className && allWords[i].el.className.includes('w ')) {
+      allWords[i].el.className = 'w idle';
+    }
+  }
+  
+  // Set cursor to the start position
+  cursor = targetWordIndex;
+  currentAyahIndex = targetAyahIndex;
+  
+  // Update highlights
+  highlightCursor();
+  updateCurrentAyahHighlight();
+  
+  // Scroll to the ayah
+  if (allAyahs[targetAyahIndex]) {
+    allAyahs[targetAyahIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  
+  log(`📍 Posisi diatur ke ayat ${startAyah} — siap untuk muroja'ah`);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1199,10 +2926,16 @@ function loadSurah() {
 // ════════════════════════════════════════════════════════════
 function init() {
   const sel = document.getElementById('surahSel');
-  Object.entries(SURAHS).sort((a,b)=>parseInt(a[0])-parseInt(b[0])).forEach(([n,s]) => {
+  // Combine static SURAHS + JUZ_SURAHS for the dropdown
+  const allSurahEntries = new Map();
+  Object.entries(SURAHS).forEach(([n,s]) => allSurahEntries.set(parseInt(n), s.name));
+  Object.entries(JUZ_SURAHS).forEach(([n,s]) => {
+    if (!allSurahEntries.has(parseInt(n))) allSurahEntries.set(parseInt(n), s.name);
+  });
+  [...allSurahEntries.entries()].sort((a,b) => a[0]-b[0]).forEach(([n, name]) => {
     const o = document.createElement('option');
-    o.value = n; o.textContent = n + '. ' + s.name;
-    if (parseInt(n) === currentSurah) o.selected = true;
+    o.value = n; o.textContent = n + '. ' + name;
+    if (n === currentSurah) o.selected = true;
     sel.appendChild(o);
   });
 
@@ -1211,14 +2944,458 @@ function init() {
     log('❌ Gunakan Chrome untuk Speech Recognition', true);
     document.getElementById('btnMic').disabled = true;
   } else {
-    log('✅ Siap — tekan 🎙️ untuk mulai. Izin mikrofon hanya diminta sekali.');
+    log('🧠 Smart Recognition siap — akan otomatis mengikuti bacaan Anda');
   }
 
   renderPage(currentSurah);
-  updateStats();
+  // Set max value for start ayah input
+  const surahData = SURAHS[currentSurah];
+  if (surahData) {
+    document.getElementById('startAyahNum').max = surahData.ayahs.length;
+    updateStartPosition();
+  }
 }
 
-window.addEventListener('DOMContentLoaded', init);
+
+// ════════════════════════════════════════════════════════════
+//  PERSISTENT MIC PERMISSION
+// ════════════════════════════════════════════════════════════
+// Request mic permission once on first use, keep stream alive
+// so browser doesn't ask again on each SR restart.
+let globalMicStream = null;
+
+async function ensureMicPermission() {
+  if (globalMicStream) return true; // already have permission
+  try {
+    globalMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    console.log('✅ Mic permission granted — stream kept alive');
+    return true;
+  } catch (err) {
+    console.error('❌ Mic permission denied:', err);
+    return false;
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  SAMBUNG AYAT MODE
+// ════════════════════════════════════════════════════════════
+let sambungActive = false;
+let sambungRec = null;
+let sambungRecRunning = false;
+
+// Multi-surah config: array of { surahNum, fromAyah, toAyah }
+let sambungSurahRanges = [];
+
+let sambungPromptSurah = -1;   // surah num of prompted ayah
+let sambungPromptAyahN = -1;   // ayat number prompted by system
+let sambungTargetSurah = -1;   // surah num of target ayah
+let sambungTargetAyahN = -1;   // ayat number user must recite
+let sambungScoreOk = 0;
+let sambungScoreErr = 0;
+let sambungBuffer = [];
+let sambungSilenceTimeout = null;
+let sambungCurrentAudio = null;
+let sambungWaitingForUser = false;
+
+function initSambungSelects() {
+  const list = document.getElementById('sambungSurahList');
+  if (list.children.length > 0) return;
+
+  // Combine static + dynamic surah metadata for sambung list
+  const allForSambung = new Map();
+  Object.entries(SURAHS).forEach(([n,s]) => allForSambung.set(parseInt(n), {name:s.name, ayahCount:s.ayahs.length}));
+  Object.entries(JUZ_SURAHS).forEach(([n,s]) => {
+    if (!allForSambung.has(parseInt(n))) allForSambung.set(parseInt(n), {name:s.name, ayahCount:s.ayahCount});
+  });
+  [...allForSambung.entries()].sort((a,b) => a[0]-b[0]).forEach(([num, meta]) => {
+    const s = {name: meta.name, ayahs: {length: meta.ayahCount}};
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:7px;cursor:pointer;transition:background 0.15s';
+    row.onmouseenter = () => row.style.background = 'rgba(255,255,255,0.05)';
+    row.onmouseleave = () => row.style.background = '';
+
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.id = `sc_${num}`;
+    cb.value = num;
+    cb.style.cssText = 'width:15px;height:15px;accent-color:var(--gold);cursor:pointer;flex-shrink:0';
+    cb.onchange = () => onSambungCheckboxChange(num, cb.checked, {name: s.name, ayahs: {length: meta.ayahCount}});
+
+    const lbl = document.createElement('label');
+    lbl.htmlFor = `sc_${num}`;
+    lbl.style.cssText = 'font-size:12px;color:var(--text);cursor:pointer;flex:1';
+    lbl.textContent = `${num}. ${s.name} (${meta.ayahCount} ayat)`;
+
+    row.appendChild(cb);
+    row.appendChild(lbl);
+    row.onclick = (e) => { if (e.target !== cb) { cb.checked = !cb.checked; onSambungCheckboxChange(num, cb.checked, {name: s.name, ayahs: {length: meta.ayahCount}}); } };
+    list.appendChild(row);
+  });
+}
+
+function onSambungCheckboxChange(surahNum, checked, surahData) {
+  const maxAyah = surahData.ayahs.length;
+  const configDiv = document.getElementById('sambungRangeConfig');
+
+  if (checked) {
+    // Add range row for this surah
+    const row = document.createElement('div');
+    row.id = `srange_${surahNum}`;
+    row.style.cssText = 'background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px';
+    row.innerHTML = `
+      <div style="font-size:11px;font-weight:700;color:var(--gold-light);text-transform:uppercase;letter-spacing:0.5px">${surahNum}. ${surahData.name}</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;color:var(--muted);min-width:55px">Dari Ayat</span>
+        <input type="number" id="sfrom_${surahNum}" value="1" min="1" max="${maxAyah}"
+          style="flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 8px;font-size:13px;text-align:center">
+        <span style="font-size:11px;color:var(--muted)">–</span>
+        <input type="number" id="sto_${surahNum}" value="${maxAyah}" min="1" max="${maxAyah}"
+          style="flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 8px;font-size:13px;text-align:center">
+        <span style="font-size:11px;color:var(--muted);min-width:30px">/ ${maxAyah}</span>
+      </div>`;
+    configDiv.appendChild(row);
+  } else {
+    // Remove range row
+    const row = document.getElementById(`srange_${surahNum}`);
+    if (row) row.remove();
+  }
+}
+
+function startSambungMode() {
+  // Collect selected surahs and their ranges
+  sambungSurahRanges = [];
+  const checkboxes = document.querySelectorAll('#sambungSurahList input[type=checkbox]:checked');
+  
+  if (checkboxes.length === 0) {
+    alert('Pilih minimal 1 surah dulu');
+    return;
+  }
+
+  let hasError = false;
+  checkboxes.forEach(cb => {
+    const num = parseInt(cb.value);
+    const data = SURAHS[num];
+    const maxAyah = data.ayahs.length;
+    const from = parseInt(document.getElementById(`sfrom_${num}`)?.value || 1);
+    const to   = parseInt(document.getElementById(`sto_${num}`)?.value   || maxAyah);
+
+    if (from < 1 || to > maxAyah || from >= to) {
+      alert(`Range tidak valid untuk ${data.name}. Range harus minimal 2 ayat dan dalam batas 1–${maxAyah}`);
+      hasError = true;
+      return;
+    }
+    sambungSurahRanges.push({ surahNum: num, fromAyah: from, toAyah: to });
+  });
+
+  if (hasError || sambungSurahRanges.length === 0) return;
+
+  sambungScoreOk = 0;
+  sambungScoreErr = 0;
+  sambungActive = true;
+  document.getElementById('sambungSetup').style.display = 'none';
+  document.getElementById('sambungActive').style.display = 'flex';
+  document.getElementById('sambungResult').style.display = 'none';
+  updateSambungScore();
+  nextSambung();
+}
+
+function stopSambungMode() {
+  sambungActive = false;
+  sambungWaitingForUser = false;
+  stopSambungRec();
+  if (sambungCurrentAudio) { sambungCurrentAudio.pause(); sambungCurrentAudio = null; }
+  if (sambungSilenceTimeout) { clearTimeout(sambungSilenceTimeout); sambungSilenceTimeout = null; }
+  document.getElementById('sambungSetup').style.display = 'block';
+  document.getElementById('sambungActive').style.display = 'none';
+  document.getElementById('sambungResult').style.display = 'none';
+  setSambungDot('idle', 'Selesai');
+}
+
+async function nextSambung() {
+  stopSambungRec();
+  sambungWaitingForUser = false;
+  document.getElementById('sambungResult').style.display = 'none';
+  document.getElementById('sambungTranscript').textContent = '—';
+  setSambungDot('idle', 'Memilih ayat...');
+
+  // Pick random surah from selected ranges (weighted by range size)
+  let pool = [];
+  sambungSurahRanges.forEach(r => {
+    for (let n = r.fromAyah; n <= r.toAyah - 1; n++) {
+      pool.push({ surahNum: r.surahNum, ayahN: n });
+    }
+  });
+
+  if (pool.length === 0) {
+    setSambungDot('warn', '⚠️ Tidak ada ayat dalam range yang valid');
+    return;
+  }
+
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  sambungPromptSurah = pick.surahNum;
+  sambungPromptAyahN = pick.ayahN;
+  sambungTargetSurah = pick.surahNum;
+
+  // Ensure dynamic surah is loaded before use
+  let data = SURAHS[sambungPromptSurah];
+  if (!data) {
+    setSambungDot('idle', '📖 Memuat surah...');
+    data = await loadDynamicSurah(sambungPromptSurah);
+    if (!data) { setSambungDot('warn', '⚠️ Gagal memuat surah'); return; }
+  }
+  const promptAyahObj = data.ayahs.find(a => a.n === sambungPromptAyahN);
+  // target = next ayah in same surah
+  const promptIdx = data.ayahs.findIndex(a => a.n === sambungPromptAyahN);
+  const targetAyahObj = data.ayahs[promptIdx + 1];
+  sambungTargetAyahN = targetAyahObj.n;
+
+  document.getElementById('sambungAyahInfo').textContent = `${data.name} • Ayat ${sambungPromptAyahN}`;
+  document.getElementById('sambungAyahText').textContent = promptAyahObj.words.join(' ');
+
+  setSambungDot('idle', '🔊 Sistem sedang membaca...');
+  document.getElementById('sambungMicBtn').disabled = true;
+  document.getElementById('sambungMicLabel').textContent = 'Tunggu...';
+  document.getElementById('sambungMicSub').textContent = 'Sistem sedang membaca';
+
+  playSambungAudio(sambungPromptSurah, sambungPromptAyahN, () => {
+    if (!sambungActive) return;
+    sambungWaitingForUser = true;
+    setSambungDot('idle', '🎙️ Sambung ayat ' + sambungTargetAyahN + ' — tekan mikrofon');
+    document.getElementById('sambungMicBtn').disabled = false;
+    document.getElementById('sambungMicLabel').textContent = 'Sambung Ayat ' + sambungTargetAyahN;
+    document.getElementById('sambungMicSub').textContent = 'Tekan untuk bicara';
+  });
+}
+
+function playSambungAudio(surahNum, ayahNum, onDone) {
+  if (sambungCurrentAudio) { sambungCurrentAudio.pause(); sambungCurrentAudio = null; }
+  const url = getAudioUrl(surahNum, ayahNum);
+  const audio = new Audio(url);
+  sambungCurrentAudio = audio;
+  const replayBtn = document.getElementById('sambungReplayBtn');
+  if (replayBtn) replayBtn.disabled = true;
+
+  audio.onended = () => {
+    sambungCurrentAudio = null;
+    if (replayBtn) replayBtn.disabled = false;
+    if (onDone) onDone();
+  };
+  audio.onerror = () => {
+    sambungCurrentAudio = null;
+    if (replayBtn) replayBtn.disabled = false;
+    setSambungDot('warn', '⚠️ Audio gagal dimuat — langsung sambung');
+    if (onDone) onDone();
+  };
+  audio.play().catch(() => {
+    if (replayBtn) replayBtn.disabled = false;
+    if (onDone) onDone();
+  });
+}
+
+function sambungReplayAudio() {
+  if (!sambungActive) return;
+  setSambungDot('idle', '🔊 Memutar ulang...');
+  document.getElementById('sambungMicBtn').disabled = true;
+  sambungWaitingForUser = false;
+  stopSambungRec();
+  playSambungAudio(sambungPromptSurah, sambungPromptAyahN, () => {
+    if (!sambungActive) return;
+    sambungWaitingForUser = true;
+    setSambungDot('idle', '🎙️ Sambung ayat ' + sambungTargetAyahN);
+    document.getElementById('sambungMicBtn').disabled = false;
+  });
+}
+
+async function toggleSambungSession() {
+  if (!sambungWaitingForUser) return;
+  if (sambungRecRunning) {
+    stopSambungRec();
+    processSambungBuffer();
+  } else {
+    // Ensure mic permission first (once only)
+    const ok = await ensureMicPermission();
+    if (!ok) {
+      setSambungDot('warn', '❌ Izinkan akses mikrofon');
+      return;
+    }
+    startSambungRec();
+  }
+}
+
+function startSambungRec() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { setSambungDot('warn', '❌ Gunakan Chrome'); return; }
+
+  sambungBuffer = [];
+  if (!sambungRec) {
+    sambungRec = new SR();
+    sambungRec.lang = 'ar-SA';
+    sambungRec.continuous = true;
+    sambungRec.interimResults = true;
+    sambungRec.maxAlternatives = 3;
+
+    sambungRec.onresult = (e) => {
+      let finalText = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) finalText += e.results[i][0].transcript + ' ';
+      }
+      if (finalText.trim()) {
+        sambungBuffer.push(finalText.trim());
+        document.getElementById('sambungTranscript').textContent = sambungBuffer.join(' ');
+        clearTimeout(sambungSilenceTimeout);
+        sambungSilenceTimeout = setTimeout(processSambungBuffer, 1500);
+      }
+    };
+
+    sambungRec.onend = () => {
+      sambungRecRunning = false;
+      document.getElementById('sambungMicBtn').textContent = '🎙️';
+      document.getElementById('sambungMicBtn').style.background = '';
+      document.getElementById('sambungMicSub').textContent = 'Tekan untuk bicara';
+    };
+
+    sambungRec.onerror = (e) => {
+      sambungRecRunning = false;
+      if (e.error === 'not-allowed') {
+        setSambungDot('warn', '❌ Izinkan akses mikrofon');
+        globalMicStream = null; // reset so next attempt asks again
+      } else if (e.error !== 'no-speech' && e.error !== 'aborted') {
+        setSambungDot('warn', '⚠️ Error SR: ' + e.error);
+      }
+    };
+  }
+
+  try {
+    sambungRec.start();
+    sambungRecRunning = true;
+    document.getElementById('sambungMicBtn').textContent = '⏹️';
+    document.getElementById('sambungMicBtn').style.background = 'rgba(239,107,90,0.3)';
+    setSambungDot('live', '🎙️ Sedang mendengarkan...');
+    document.getElementById('sambungMicSub').textContent = 'Tekan lagi untuk selesai';
+  } catch(e) {
+    setSambungDot('warn', '❌ Gagal mulai mic');
+  }
+}
+
+function stopSambungRec() {
+  if (sambungRec && sambungRecRunning) {
+    try { sambungRec.stop(); } catch(e) {}
+    sambungRecRunning = false;
+  }
+  clearTimeout(sambungSilenceTimeout);
+  const btn = document.getElementById('sambungMicBtn');
+  if (btn) { btn.textContent = '🎙️'; btn.style.background = ''; }
+}
+
+function processSambungBuffer() {
+  clearTimeout(sambungSilenceTimeout);
+  stopSambungRec();
+  sambungWaitingForUser = false;
+  if (!sambungActive) return;
+
+  const spokenRaw = sambungBuffer.join(' ').trim();
+  sambungBuffer = [];
+
+  if (!spokenRaw) {
+    setSambungDot('warn', '⚠️ Tidak ada bacaan terdeteksi');
+    sambungWaitingForUser = true;
+    return;
+  }
+
+  const data = SURAHS[sambungTargetSurah];
+  const targetAyah = data.ayahs.find(a => a.n === sambungTargetAyahN);
+  if (!targetAyah) return;
+
+  const result = validateSambung(spokenRaw, targetAyah.words);
+  showSambungResult(result, targetAyah.words);
+}
+
+function validateSambung(spokenRaw, refWords) {
+  const spokenTokens = spokenRaw.trim().split(/\s+/).filter(Boolean);
+  if (!spokenTokens.length) return { ok: false, score: 0, detail: 'Tidak ada bacaan' };
+
+  // First word gate — must match
+  const firstRefNorm = normalizeArabic(refWords[0]);
+  const firstWS = wordSim(spokenTokens[0], firstRefNorm);
+  if (firstWS < MATCH_THRESHOLD) {
+    return { ok: false, score: 0, detail: 'Kata pertama tidak cocok' };
+  }
+
+  // Count sequential matches
+  let matched = 0;
+  let si = 0;
+  for (let wi = 0; wi < refWords.length && si < spokenTokens.length; wi++) {
+    const refNorm = normalizeArabic(refWords[wi]);
+    const ws = wordSim(spokenTokens[si], refNorm);
+    if (ws >= MATCH_THRESHOLD) {
+      matched++; si++;
+    } else if (wi + 1 < refWords.length) {
+      // try bigram
+      const bg = refNorm + normalizeArabic(refWords[wi + 1]);
+      const bgWS = simNorm(normalizeArabic(spokenTokens[si]), bg);
+      if (bgWS >= 0.72) { matched += 2; si++; wi++; }
+      else break;
+    } else break;
+  }
+
+  const minRequired = Math.max(1, Math.ceil(refWords.length * 0.5));
+  const ok = matched >= minRequired;
+  return { ok, score: matched / refWords.length, matched, total: refWords.length, detail: `${matched}/${refWords.length} kata cocok` };
+}
+
+function showSambungResult(result, refWords) {
+  const data = SURAHS[sambungTargetSurah];
+  const resultDiv  = document.getElementById('sambungResult');
+  const msgDiv     = document.getElementById('sambungResultMsg');
+  const expectedDiv = document.getElementById('sambungExpected');
+  const labelDiv   = document.getElementById('sambungResultLabel');
+
+  expectedDiv.textContent = refWords.join(' ');
+
+  if (result.ok) {
+    sambungScoreOk++;
+    labelDiv.textContent = `✅ Benar — Ayat ${sambungTargetAyahN} ${data.name}`;
+    msgDiv.textContent = `Masyaa Allah! ${result.detail}`;
+    msgDiv.style.cssText = 'font-size:13px;font-weight:600;text-align:center;padding:10px;border-radius:8px;background:rgba(93,186,125,0.15);color:#5dba7d;border:1px solid rgba(93,186,125,0.3)';
+    setSambungDot('ok', '✅ Sambungan benar!');
+    playCorrectSound();
+  } else {
+    sambungScoreErr++;
+    labelDiv.textContent = `❌ Salah — Ayat ${sambungTargetAyahN} ${data.name}`;
+    msgDiv.textContent = result.score === 0 ? `Bukan ayat yang tepat — ${result.detail}` : `Kurang tepat — ${result.detail}`;
+    msgDiv.style.cssText = 'font-size:13px;font-weight:600;text-align:center;padding:10px;border-radius:8px;background:rgba(239,107,90,0.15);color:#ef6b5a;border:1px solid rgba(239,107,90,0.3)';
+    setSambungDot('warn', '❌ Sambungan salah');
+    playWrongSound();
+  }
+
+  resultDiv.style.display = 'block';
+  updateSambungScore();
+  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function updateSambungScore() {
+  document.getElementById('sambungOk').textContent = sambungScoreOk;
+  document.getElementById('sambungErr').textContent = sambungScoreErr;
+  document.getElementById('sambungTotal').textContent = sambungScoreOk + sambungScoreErr;
+}
+
+function setSambungDot(type, text) {
+  const dot = document.getElementById('sambungDot');
+  const txt = document.getElementById('sambungText');
+  if (!dot || !txt) return;
+  dot.className = 'sdot';
+  if (type === 'ok')        { dot.style.background = '#5dba7d'; dot.style.animation = ''; }
+  else if (type === 'warn') { dot.style.background = '#ef6b5a'; dot.style.animation = ''; }
+  else if (type === 'live') { dot.style.background = '#f59e0b'; dot.style.animation = 'pulse 1s infinite'; }
+  else                      { dot.style.background = 'rgba(255,255,255,0.2)'; dot.style.animation = ''; }
+  txt.textContent = text;
+}
+
+
+window.addEventListener('DOMContentLoaded', () => {
+  init();
+  initSambungSelects();
+});
 </script>
 </body>
 </html>
