@@ -750,30 +750,33 @@ body::after {
 }
 
 /* Voice / Audio toggle row */
-.mobile-tab-row {
+/* Mobile panel header bar — replaces tab row */
+.mobile-panel-header {
   display: flex;
-  padding: 10px 14px 6px;
-  gap: 0;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px 8px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
-.mobile-tab-btn {
-  flex: 1;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: none;
-  background: transparent;
-  color: rgba(240,234,216,0.45);
-  font-family: var(--font-ui);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  letter-spacing: 0.3px;
-}
-.mobile-tab-btn.active {
-  background: var(--accent);
-  color: #000;
+.mobile-panel-header-title {
+  font-size: 13px;
   font-weight: 700;
-  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--font-ui);
+  letter-spacing: -0.2px;
+}
+.mobile-panel-header-badge {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-glow);
+  border: 1px solid rgba(29,185,84,0.25);
+  border-radius: 100px;
+  padding: 2px 8px;
 }
 
 /* Content panels */
@@ -781,7 +784,7 @@ body::after {
   display: none;
   flex-direction: column;
   gap: 10px;
-  padding: 4px 14px 12px;
+  padding: 10px 14px 12px;
   max-height: 55vh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -1017,23 +1020,25 @@ body::after {
 }
 
 /* Drawer nav items */
-.drawer-nav { padding: 12px 10px; flex: 1; }
+.drawer-nav { padding: 10px 8px; flex: 1; }
 .drawer-nav-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 14px;
   width: 100%;
-  padding: 13px 16px;
+  padding: 11px 14px;
   border-radius: 10px;
   border: none;
   background: transparent;
   color: var(--muted);
   font-family: var(--font-ui);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   text-align: left;
   cursor: pointer;
   transition: all 0.2s;
   margin-bottom: 2px;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.1px;
 }
 .drawer-nav-item:hover { background: var(--hover); color: var(--text); }
 .drawer-nav-item.nav-active {
@@ -1041,7 +1046,11 @@ body::after {
   color: var(--accent);
   font-weight: 700;
   border-left: 3px solid var(--accent);
-  padding-left: 13px;
+  padding-left: 11px;
+}
+.drawer-nav-icon {
+  width: 18px; height: 18px;
+  flex-shrink: 0;
 }
 
 /* Sambung Ayat full-screen view (replaces mushaf on mobile) */
@@ -1638,10 +1647,8 @@ body::after {
 /* Status info row */
 .start-info { font-size: 10.5px; padding: 5px; }
 
-/* Mobile tab */
-.mobile-tab-row { padding: 8px 12px 4px; }
-.mobile-tab-btn { padding: 9px 10px; font-size: 13px; }
-.mobile-panel-content { padding: 2px 12px 10px; gap: 8px; }
+/* Mobile panel */
+.mobile-panel-content { padding: 10px 14px 12px; gap: 8px; }
 .mobile-mic-area { padding: 4px 0 2px; gap: 6px; }
 .mobile-audio-grid { gap: 7px; }
 </style>
@@ -4960,14 +4967,11 @@ window.addEventListener('DOMContentLoaded', () => {
 //  prefix: mb / mobile
 // ═══════════════════════════════════════════════════════════════════════
 
-// ── Tab switching ────────────────────────────────────────────────────────
+// ── Tab switching (legacy — now driven by mbDrawerNav) ──────────────────
 function mbSwitchTab(tab) {
-  ['voice','audio','sambung'].forEach(t => {
-    document.getElementById('mb-tab-'+t).classList.toggle('active', t===tab);
-    const p = document.getElementById('mb-panel-'+t);
-    if (p) p.classList.toggle('active', t===tab);
-  });
-  if (tab === 'sambung') mbInitSambungList();
+  if (tab === 'voice') mbShowPanel('voice', 'Cek Hafalan', 'Voice');
+  else if (tab === 'audio') mbShowPanel('audio', 'Audio Repeat', 'Audio');
+  else if (tab === 'sambung') { mbOpenSambungView(); }
 }
 
 // ── Mirror desktop state → mobile ────────────────────────────────────────
@@ -4987,7 +4991,7 @@ function mbMirrorState() {
   // Mic button state
   const dMic = document.getElementById('btnMic');
   const mMic = document.getElementById('mb-btnMic');
-  if (dMic && mMic) { mMic.textContent = dMic.textContent; mMic.className = dMic.className; }
+  if (dMic && mMic) { mMic.innerHTML = dMic.innerHTML; mMic.className = dMic.className; }
   mbMirrorEl('micLabel','mb-micLabel','textContent');
   mbMirrorEl('micSub',  'mb-micSub',  'textContent');
   // Wave
@@ -5467,20 +5471,39 @@ function mbCloseDrawer() {
 
 function mbDrawerNav(item) {
   mbCloseDrawer();
-  // Update active state
-  ['murojaah','sambung','setoran'].forEach(n => {
+  ['murojaah','audio','sambung','setoran'].forEach(n => {
     document.getElementById('drawer-nav-'+n)?.classList.toggle('nav-active', n===item);
   });
+
+  navToHash(item);
+
   if (item === 'murojaah') {
     mbCloseSambungView();
+    mbShowPanel('voice', 'Cek Hafalan', 'Voice');
+  } else if (item === 'audio') {
+    mbCloseSambungView();
+    mbShowPanel('audio', 'Audio Repeat', 'Audio');
   } else if (item === 'sambung') {
     mbOpenSambungView();
   } else if (item === 'setoran') {
-    // placeholder
-    alert('Fitur Setoran segera hadir 🕌');
+    alert('Fitur Setoran segera hadir');
     document.getElementById('drawer-nav-murojaah').classList.add('nav-active');
     document.getElementById('drawer-nav-setoran').classList.remove('nav-active');
+    navToHash('murojaah');
   }
+}
+
+function mbShowPanel(panelId, title, badge) {
+  // Hide all panels
+  ['voice','audio'].forEach(p => {
+    const el = document.getElementById('mb-panel-'+p);
+    if (el) el.classList.toggle('active', p === panelId);
+  });
+  // Update header
+  const titleEl = document.getElementById('mb-panelTitle');
+  const badgeEl = document.getElementById('mb-panelBadge');
+  if (titleEl) titleEl.textContent = title;
+  if (badgeEl) badgeEl.textContent = badge;
 }
 
 function mbOpenSambungView() {
@@ -5491,9 +5514,11 @@ function mbOpenSambungView() {
 function mbCloseSambungView() {
   document.getElementById('mobileSambungView').classList.remove('sambung-view-open');
   document.getElementById('mobileFixedPanel').style.display='';
-  // re-activate murojaah in drawer
   document.getElementById('drawer-nav-murojaah')?.classList.add('nav-active');
   document.getElementById('drawer-nav-sambung')?.classList.remove('nav-active');
+  document.getElementById('drawer-nav-audio')?.classList.remove('nav-active');
+  mbShowPanel('voice', 'Cek Hafalan', 'Voice');
+  navToHash('murojaah');
 }
 
 // ── Sambung View: Init surah list ────────────────────────────────────────
@@ -5797,6 +5822,20 @@ const SNAV_CONFIG = {
   setoran:  { title: '✅ Setoran', subtitle: 'Rekam Pencapaian', tab: null }
 };
 
+// Hash ↔ nav item mapping
+const HASH_MAP = {
+  'murojaah':  'cekhafalan',
+  'audio':     'audiorepeat',
+  'sambung':   'sambungayat',
+  'setoran':   'setoran',
+};
+const HASH_REVERSE = Object.fromEntries(Object.entries(HASH_MAP).map(([k,v])=>[v,k]));
+
+function navToHash(item) {
+  const h = HASH_MAP[item] || item;
+  if (location.hash !== '#' + h) history.pushState(null, '', '#' + h);
+}
+
 function snavSwitch(item) {
   ['murojaah','audio','sambung','setoran'].forEach(n => {
     document.getElementById('snav-'+n)?.classList.toggle('snav-active', n===item);
@@ -5808,8 +5847,9 @@ function snavSwitch(item) {
     document.getElementById('rpanelSubtitle').textContent = cfg.subtitle;
   }
 
+  navToHash(item);
+
   if (item === 'setoran') {
-    // Show placeholder in right panel
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.getElementById('tabcontent-setoran')?.classList.add('active');
     return;
@@ -5818,16 +5858,51 @@ function snavSwitch(item) {
   if (cfg?.tab) switchTab(cfg.tab);
 }
 
-// On desktop init
+// On desktop init + hash routing
 document.addEventListener('DOMContentLoaded', () => {
-  if (window.innerWidth > 768) {
-    snavSwitch('murojaah');
-  }
   // Set user avatar initial
   const name = document.getElementById('sidebarName').textContent.trim();
   const av = document.getElementById('sidebarAvatar');
   if (av && name) av.textContent = name[0].toLowerCase();
+
+  // Navigate to correct section based on URL hash
+  applyHash();
 });
+
+// Handle browser back/forward
+window.addEventListener('popstate', applyHash);
+window.addEventListener('hashchange', applyHash);
+
+function applyHash() {
+  const raw = location.hash.replace('#', '').toLowerCase();
+  const item = HASH_REVERSE[raw] || 'murojaah';
+  const isMobile = window.innerWidth <= 768;
+
+  if (isMobile) {
+    // sync drawer nav active state
+    ['murojaah','audio','sambung','setoran'].forEach(n => {
+      document.getElementById('drawer-nav-'+n)?.classList.toggle('nav-active', n===item);
+    });
+    if (item === 'sambung') {
+      mbOpenSambungView();
+    } else {
+      mbCloseSambungView();
+      if (item === 'audio') mbShowPanel('audio', 'Audio Repeat', 'Audio');
+      else mbShowPanel('voice', 'Cek Hafalan', 'Voice');
+    }
+  } else {
+    // desktop
+    if (item === 'sambung') {
+      ['murojaah','audio','sambung','setoran'].forEach(n => {
+        document.getElementById('snav-'+n)?.classList.toggle('snav-active', n===item);
+      });
+      sfpOpen();
+    } else {
+      sfpClose();
+      snavSwitch(item);
+    }
+  }
+}
 
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -5863,6 +5938,7 @@ window.snavSwitch = function(item) {
     ['murojaah','audio','sambung','setoran'].forEach(n => {
       document.getElementById('snav-'+n)?.classList.toggle('snav-active', n===item);
     });
+    navToHash('sambung');
     sfpOpen();
     return;
   }
@@ -6191,26 +6267,25 @@ function toggleWaqfLegend() {
 
 <!-- ═══════════════════════════════════════════════════════════
      MOBILE FIXED BOTTOM PANEL  (hidden on desktop via CSS)
-     Shows Voice / Audio / Sambung tabs fixed at screen bottom
      ═══════════════════════════════════════════════════════════ -->
 <div class="mobile-fixed-panel" id="mobileFixedPanel">
 
-  <!-- Tab Toggle Row: Voice | Audio only -->
-  <div class="mobile-tab-row">
-    <button class="mobile-tab-btn active" id="mb-tab-voice" onclick="mbSwitchTab('voice')">Voice</button>
-    <button class="mobile-tab-btn" id="mb-tab-audio" onclick="mbSwitchTab('audio')">Audio</button>
+  <!-- Panel header bar — title changes per active nav -->
+  <div class="mobile-panel-header">
+    <div class="mobile-panel-header-title" id="mb-panelTitle">Cek Hafalan</div>
+    <span class="mobile-panel-header-badge" id="mb-panelBadge">Voice</span>
   </div>
 
-  <!-- ── VOICE PANEL ── -->
+  <!-- ── VOICE PANEL (Cek Hafalan) ── shown by default -->
   <div class="mobile-panel-content active" id="mb-panel-voice">
     <!-- Retry Banner -->
     <div class="mobile-retry-banner" id="mb-retryBanner">
-      <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#ef6b5a;font-weight:700" id="mb-retryAyahNum">AYAT —</div>
-      <div style="font-size:11px;color:#ef6b5a;font-weight:600">⚠️ ULANGI DARI KURSOR KUNING ↑</div>
+      <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--sem-err);font-weight:700" id="mb-retryAyahNum">AYAT —</div>
+      <div style="font-size:11px;color:var(--sem-err);font-weight:600">ULANGI DARI KURSOR KUNING ↑</div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:2px">
-        <span style="font-size:11px;color:rgba(240,234,216,0.5)">Kata salah:</span>
-        <span style="font-family:'UthmanicHafs','Scheherazade New',serif;font-size:18px;direction:rtl;color:#ef6b5a" id="mb-retryWord">—</span>
-        <button onclick="skipWrongWord()" style="margin-left:auto;padding:5px 10px;background:rgba(239,107,90,.15);border:1px solid rgba(239,107,90,.35);border-radius:6px;color:#ef6b5a;font-size:11px;cursor:pointer;font-family:'Inter',sans-serif">Lewati →</button>
+        <span style="font-size:11px;color:var(--muted)">Kata salah:</span>
+        <span style="font-family:'UthmanicHafs','Scheherazade New',serif;font-size:18px;direction:rtl;color:var(--sem-err)" id="mb-retryWord">—</span>
+        <button onclick="skipWrongWord()" style="margin-left:auto;padding:5px 10px;background:rgba(224,92,92,.12);border:1px solid rgba(224,92,92,.3);border-radius:6px;color:var(--sem-err);font-size:11px;cursor:pointer;font-family:var(--font-ui);font-weight:600">Lewati →</button>
       </div>
     </div>
 
@@ -6231,15 +6306,15 @@ function toggleWaqfLegend() {
     <!-- Stats row -->
     <div class="mobile-stat-row">
       <div class="mobile-stat-item">
-        <div class="mobile-sv" style="color:#5dba7d" id="mb-stOk">0</div>
+        <div class="mobile-sv" style="color:var(--sem-ok)" id="mb-stOk">0</div>
         <div class="mobile-sl">Benar</div>
       </div>
       <div class="mobile-stat-item">
-        <div class="mobile-sv" style="color:#ef6b5a" id="mb-stErr">0</div>
+        <div class="mobile-sv" style="color:var(--sem-err)" id="mb-stErr">0</div>
         <div class="mobile-sl">Salah</div>
       </div>
       <div class="mobile-stat-item">
-        <div class="mobile-sv" style="color:#C9A84C" id="mb-stPos">0</div>
+        <div class="mobile-sv" style="color:var(--gold)" id="mb-stPos">0</div>
         <div class="mobile-sl">Kata ke</div>
       </div>
     </div>
@@ -6257,7 +6332,7 @@ function toggleWaqfLegend() {
     </div>
   </div><!-- /mb-panel-voice -->
 
-  <!-- ── AUDIO PANEL ── -->
+  <!-- ── AUDIO REPEAT PANEL ── hidden by default, shown when nav = audio -->
   <div class="mobile-panel-content" id="mb-panel-audio">
     <div class="mobile-audio-grid">
       <div>
@@ -6284,7 +6359,6 @@ function toggleWaqfLegend() {
     <div class="mobile-audio-status" id="mb-audioStatus">Siap memutar audio</div>
   </div><!-- /mb-panel-audio -->
 
-
 </div><!-- /mobileFixedPanel -->
 
 
@@ -6300,12 +6374,27 @@ function toggleWaqfLegend() {
   </div>
   <nav class="drawer-nav">
     <button class="drawer-nav-item nav-active" id="drawer-nav-murojaah" onclick="mbDrawerNav('murojaah')">
-      Murojaah
+      <span class="drawer-nav-icon icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+      </span>
+      Cek Hafalan
+    </button>
+    <button class="drawer-nav-item" id="drawer-nav-audio" onclick="mbDrawerNav('audio')">
+      <span class="drawer-nav-icon icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      </span>
+      Audio Repeat
     </button>
     <button class="drawer-nav-item" id="drawer-nav-sambung" onclick="mbDrawerNav('sambung')">
+      <span class="drawer-nav-icon icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      </span>
       Sambung Ayat
     </button>
     <button class="drawer-nav-item" id="drawer-nav-setoran" onclick="mbDrawerNav('setoran')">
+      <span class="drawer-nav-icon icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </span>
       Setoran
     </button>
   </nav>
