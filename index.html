@@ -2670,6 +2670,7 @@ let lastTranscriptTime = 0;
 let silenceTimeout = null;
 let transcriptBuffer = [];
 let recInstanceId = 0; // increments each time a new SR instance is created
+let globalLastFinalIdx = -1; // persists across SR restarts — mobile Chrome accumulates results
 let currentAyahIndex = 0;
 let autoAdvanceEnabled = true;
 let sessionRunStart = -1;   // titik awal sesi baca aktif (untuk retry return)
@@ -3529,10 +3530,6 @@ function setupRec() {
 
   // Each instance gets a unique ID captured in closure — prevents stale callbacks
   const thisInstanceId = ++recInstanceId;
-  // Use closure-local lastFinalIdx — NOT rec._lastFinalIdx (rec gets reassigned on restart!)
-  let lastFinalIdx = -1;
-  // Track last interim text to detect if SR is replaying old results
-  let lastInterimText = '';
 
   rec.onresult = (e) => {
     // Ignore results from a stale (already-replaced) SR instance
@@ -3547,8 +3544,9 @@ function setupRec() {
       const r = e.results[i];
       if (r.isFinal) {
         // Skip already-processed final results (critical for mobile SR restarts)
-        if (i <= lastFinalIdx) continue;
-        lastFinalIdx = i;
+        // globalLastFinalIdx persists across restarts — mobile Chrome result list is cumulative
+        if (i <= globalLastFinalIdx) continue;
+        globalLastFinalIdx = i;
         for (let a = 0; a < Math.min(r.length, 3); a++) {
           const alt = r[a].transcript.trim();
           if (alt) { newFinalText += alt + ' '; break; }
@@ -4243,10 +4241,10 @@ function startSession() {
 
   // Setup rec jika belum ada
   if (!rec) setupRec();
-  if (rec) rec._lastFinalIdx = -1; // reset duplicate-prevention index
 
   sessionActive = true;
   transcriptBuffer = [];
+  globalLastFinalIdx = -1; // reset on new session start
   lastTranscriptTime = Date.now();
   sessionRunStart = cursor;
   
@@ -4378,6 +4376,7 @@ function resetSession() {
   setMicOff();
   correctCount = 0; wrongCount = 0; cursor = 0; currentAyahIndex = 0;
   processingResult = false; sessionRunStart = -1;
+  globalLastFinalIdx = -1;
   allWords.forEach(w => { 
     if (w.el.className && w.el.className.includes('w ')) {
       w.el.className = 'w idle'; 
@@ -4398,6 +4397,7 @@ async function loadSurah() {
   correctCount = 0; wrongCount = 0; cursor = 0; currentAyahIndex = 0;
   processingResult = false; sessionRunStart = -1;
   transcriptBuffer = [];
+  globalLastFinalIdx = -1;
   clearTimeout(silenceTimeout);
   
   if (audioPlaying) stopAudioPlayer();
