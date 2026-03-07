@@ -3532,6 +3532,26 @@ function setupRec() {
   const thisInstanceId = ++recInstanceId;
 
   rec.onresult = (e) => {
+    // === MOBILE DEBUG LOG ===
+    const dbg = [];
+    dbg.push('🔴 onresult fired | instanceId=' + thisInstanceId + ' globalId=' + recInstanceId);
+    dbg.push('   e.resultIndex=' + e.resultIndex + ' e.results.length=' + e.results.length + ' globalLastFinalIdx=' + globalLastFinalIdx);
+    for (let _i = 0; _i < e.results.length; _i++) {
+      const _r = e.results[_i];
+      dbg.push('   [' + _i + '] isFinal=' + _r.isFinal + ' text="' + (_r[0] ? _r[0].transcript : '') + '"');
+    }
+    console.log(dbg.join('\n'));
+    // Show debug in UI overlay
+    let dbgEl = document.getElementById('_srDebug');
+    if (!dbgEl) {
+      dbgEl = document.createElement('div');
+      dbgEl.id = '_srDebug';
+      dbgEl.style.cssText = 'position:fixed;top:0;left:0;right:0;background:rgba(0,0,0,0.85);color:#0f0;font-size:10px;padding:4px;z-index:99999;max-height:40vh;overflow-y:auto;white-space:pre;font-family:monospace;';
+      document.body.appendChild(dbgEl);
+    }
+    dbgEl.textContent = dbg.join('\n') + '\n---\n' + (dbgEl.textContent || '').slice(0, 800);
+    // === END DEBUG ===
+
     // Ignore results from a stale (already-replaced) SR instance
     if (thisInstanceId !== recInstanceId) return;
     if (!sessionActive || processingResult) return;
