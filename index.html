@@ -5974,6 +5974,7 @@ function sfpStop() {
 async function sfpNext() {
   sfpCancelCountdown();
   sfpStopRec(); sfp.waiting=false; sfp.resultState=null;
+  sfp.buffer=[]; sfp._accumulatedText=''; // clear for new question
   // Reset UI
   const t=document.getElementById('sfp-transcript'); if(t){t.textContent='—';t.className='sfp-transcript-box';}
   document.getElementById('sfp-hintBox').classList.remove('sfp-show');
@@ -6082,41 +6083,48 @@ function sfpActionClick() {
 
 function sfpStartRec(clearBuf=false) {
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){sfpSetDot('warn','❌ Gunakan Chrome');return;}
-  if(clearBuf) { sfp.buffer=[]; sfp._lastFinalIdx=-1; } // fresh attempt = reset everything
+  if(clearBuf) { sfp.buffer=[]; sfp._accumulatedText=''; } // full reset for new question
   if(sfp.rec){try{sfp.rec.abort();}catch(e){} sfp.rec=null;}
   sfp.rec=new SR(); sfp.rec.lang='ar-SA'; sfp.rec.continuous=true;
-  sfp.rec.interimResults=true; sfp.rec.maxAlternatives=3;
-  sfp._lastFinalIdx = -1; // always reset on new SR object
+  sfp.rec.interimResults=true; sfp.rec.maxAlternatives=1;
+  // NOTE: do NOT reset sfp._accumulatedText here — keeps dedup working across SR restarts
+
   sfp.rec.onresult=e=>{
-    let ft='',interim='';
-    for(let i=e.resultIndex;i<e.results.length;i++){
-      if(e.results[i].isFinal){
-        // Only process if we haven't seen this index before
-        if(i > sfp._lastFinalIdx){
-          sfp._lastFinalIdx = i;
-          ft += e.results[i][0].transcript + ' ';
-        }
-      } else {
-        interim += e.results[i][0].transcript;
-      }
+    let ft='', interim='';
+    for(let i=e.resultIndex; i<e.results.length; i++){
+      const r=e.results[i];
+      const text=(r[0].transcript||'').trim();
+      if(!text) continue;
+      if(r.isFinal){ ft += text + ' '; }
+      else { interim = text; }
     }
+
     if(ft.trim()){
       const newText = ft.trim();
-      // Dedup: don't push if identical to last buffer entry (mobile SR sometimes re-fires)
-      const lastBuf = sfp.buffer[sfp.buffer.length - 1] || '';
-      if(newText !== lastBuf) sfp.buffer.push(newText);
+      // Robust dedup: skip if this exact text (or a substring of it) was already accumulated
+      // Mobile SR on restart re-delivers all previous finals — we check against full history
+      const already = sfp._accumulatedText || '';
+      const newNorm = newText.replace(/\s+/g,' ').trim();
+      const accNorm = already.replace(/\s+/g,' ').trim();
+
+      // Skip if new text is already contained in accumulated (duplicate on restart)
+      if(accNorm.includes(newNorm)) {
+        // already have this — skip
+      } else {
+        sfp.buffer.push(newText);
+        sfp._accumulatedText = (already + ' ' + newText).trim();
+      }
+
       const t=document.getElementById('sfp-transcript');
-      t.textContent=sfp.buffer.join(' '); t.className='sfp-transcript-box live';
+      t.textContent=(sfp._accumulatedText||'—'); t.className='sfp-transcript-box live';
       clearTimeout(sfp.silTimer); sfp.silTimer=setTimeout(sfpProcessBuffer,2000);
     } else if(interim){
       document.getElementById('sfp-transcript').textContent=interim+' ⏳';
     }
   };
+
   sfp.rec.onend=()=>{
     sfp.recRunning=false;
-    // On mobile, don't auto-restart from onend (not in user gesture context)
-    // continuous=true should keep it open; onend only fires on error/stop
-    // If still waiting after unexpected stop, show re-tap prompt
     if(sfp.active && sfp.waiting && !sfp.resultState){
       sfpSetActionBtn('ready','🎙 Tap untuk lanjutkan', false);
       sfpSetDot('live','Tap mic untuk lanjutkan');
@@ -6124,10 +6132,9 @@ function sfpStartRec(clearBuf=false) {
   };
   sfp.rec.onerror=e=>{
     sfp.recRunning=false;
-    if(e.error==='not-allowed' || e.error==='permission-denied'){
+    if(e.error==='not-allowed'||e.error==='permission-denied'){
       sfpSetDot('warn','❌ Izinkan mikrofon di pengaturan browser');
     } else if(e.error==='no-speech'){
-      // timeout — show re-tap
       if(sfp.active && sfp.waiting && !sfp.resultState){
         sfpSetActionBtn('ready','🎙 Tap untuk coba lagi', false);
         sfpSetDot('live','Tidak terdengar — tap untuk coba lagi');
@@ -6150,7 +6157,8 @@ function sfpStopRec() {
 function sfpProcessBuffer() {
   clearTimeout(sfp.silTimer); sfpStopRec(); sfp.waiting=false;
   if(!sfp.active) return;
-  const spoken=sfp.buffer.join(' ').trim(); sfp.buffer=[];
+  const spoken=(sfp._accumulatedText||sfp.buffer.join(' ')).trim();
+  sfp.buffer=[]; sfp._accumulatedText=''; // full reset
   if(!spoken){sfpSetDot('warn','⚠️ Tidak ada bacaan');sfp.waiting=true;return;}
   const data=SURAHS[sfp.targetSurah]; const t=data.ayahs.find(a=>a.n===sfp.targetAyah); if(!t) return;
   const result=validateSambung(spoken,t.words); sfpShowResult(result,t.words);
