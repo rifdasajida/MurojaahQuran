@@ -3533,7 +3533,9 @@ function setupRec() {
 
   rec.onresult = (e) => {
     // Ignore results from a stale (already-replaced) SR instance
-    if (rec._instanceId !== recInstanceId) return;
+    // MUST use closure-captured thisInstanceId, not rec._instanceId
+    // because rec gets reassigned to the new instance after restart
+    if (thisInstanceId !== recInstanceId) return;
     if (!sessionActive || processingResult) return;
     if (window.srWarmingUp) return;
 
@@ -3601,23 +3603,26 @@ function setupRec() {
     if (hasEnoughWords) {
       // We have enough — wait a short moment for any trailing words, then process
       silenceTimeout = setTimeout(() => {
+        if (thisInstanceId !== recInstanceId) return; // stale instance
         processBufferedTranscripts();
       }, 600);
     } else {
       // Not enough words yet — wait longer for user to keep reading
       silenceTimeout = setTimeout(() => {
+        if (thisInstanceId !== recInstanceId) return; // stale instance
         processBufferedTranscripts();
       }, 2000);
     }
   };
 
   rec.onerror = (e) => {
+    if (thisInstanceId !== recInstanceId) return; // stale instance, ignore
     if (e.error === 'not-allowed') {
       log('❌ Izinkan akses mikrofon di Settings browser', true);
       setMicOff();
       sessionActive = false;
       recRunning = false;
-      rec = null; // Reset so next attempt creates fresh instance
+      rec = null;
     } else if (e.error === 'no-speech') {
       // Normal — keep listening
     } else if (e.error === 'aborted') {
@@ -3625,11 +3630,12 @@ function setupRec() {
     } else {
       log('⚠️ Mic error: ' + e.error + ' — coba tekan mic lagi');
       recRunning = false;
-      rec = null; // Reset for fresh start
+      rec = null;
     }
   };
 
   rec.onend = () => {
+    if (thisInstanceId !== recInstanceId) return; // stale instance, ignore
     recRunning = false;
     if (sessionActive) {
       // Flush any pending buffer before creating new instance to avoid duplication
