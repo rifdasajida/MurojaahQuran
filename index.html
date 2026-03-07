@@ -2289,7 +2289,7 @@ body::after {
           </button>
 
           <!-- Countdown (auto-next) -->
-          <div class="sfp-countdown-wrap" id="sfp-countdownWrap">
+          <div class="sfp-countdown-wrap" id="sfp-countdownWrap" style="display:none">
             <span id="sfp-countdownLabel" style="white-space:nowrap">Lanjut dalam 3...</span>
             <div class="sfp-countdown-bar-track">
               <div class="sfp-countdown-bar-fill" id="sfp-countdownBar"></div>
@@ -3380,7 +3380,7 @@ function hasFaWaConflict(spoken, refNorm) {
   return editDist(sRoot, rRoot) <= 1;
 }
 
-const MATCH_THRESHOLD = 0.72;
+const MATCH_THRESHOLD = 0.68;
 
 // ─── Extract main vowels (harakat) from Arabic text ──────────────────────────
 // Returns array of vowel chars per consonant position
@@ -3513,18 +3513,18 @@ function isSimilarWord(w1, w2) {
 // ════════════════════════════════════════════════════════════
 //  SMART SPEECH RECOGNITION
 // ════════════════════════════════════════════════════════════
-function setupRec() {
-  if (rec) return true;
+function createRec() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) return false;
+  if (!SR) return null;
 
-  rec = new SR();
-  rec.lang = 'ar-SA';
-  rec.continuous = true;
-  rec.interimResults = true; // Enable interim results for better responsiveness
-  rec.maxAlternatives = 5; // Increased for better matching
+  const r = new SR();
+  r.lang = 'ar-SA';
+  r.continuous = true;
+  r.interimResults = true;
+  r.maxAlternatives = 3;
+  r._lastFinalIdx = -1;
 
-  rec.onstart = () => {
+  r.onstart = () => {
     recRunning = true;
     document.getElementById('btnMic').classList.add('live');
     document.getElementById('micLabel').textContent = 'Mendengarkan...';
@@ -3534,36 +3534,28 @@ function setupRec() {
     log('🧠 Smart Recognition aktif — baca dengan natural, sistem akan mengikuti');
   };
 
-  rec.onresult = (e) => {
+  r.onresult = (e) => {
     if (!sessionActive || processingResult) return;
     if (window.srWarmingUp) return;
-
-    // Track highest processed final index to prevent re-processing on SR restart
-    if (typeof rec._lastFinalIdx === 'undefined') rec._lastFinalIdx = -1;
 
     let newFinalText = '';
     let interimText = '';
 
     for (let i = e.resultIndex; i < e.results.length; i++) {
-      const r = e.results[i];
-      if (r.isFinal) {
-        // Skip if we already processed this index (happens on mobile SR restart)
-        if (i <= rec._lastFinalIdx) continue;
-        rec._lastFinalIdx = i;
-        // Pick best non-empty alternative
-        for (let a = 0; a < Math.min(r.length, 3); a++) {
-          const alt = r[a].transcript.trim();
+      const res = e.results[i];
+      if (res.isFinal) {
+        if (i <= r._lastFinalIdx) continue;
+        r._lastFinalIdx = i;
+        for (let a = 0; a < Math.min(res.length, 3); a++) {
+          const alt = res[a].transcript.trim();
           if (alt) { newFinalText += alt + ' '; break; }
         }
       } else {
-        for (let a = 0; a < Math.min(r.length, 1); a++) {
-          const alt = r[a].transcript.trim();
-          if (alt) { interimText = alt; break; }
-        }
+        const alt = res[0].transcript.trim();
+        if (alt) interimText = alt;
       }
     }
 
-    // Show interim in UI (no processing)
     if (interimText && !newFinalText) {
       document.getElementById('tText').textContent = interimText + ' ⏳';
       document.getElementById('tText').classList.add('live');
@@ -3572,7 +3564,6 @@ function setupRec() {
 
     if (!newFinalText.trim()) return;
 
-    // Accumulate final text into buffer
     const clean = newFinalText.trim();
     document.getElementById('tText').textContent = clean;
     document.getElementById('tText').classList.add('live');
@@ -3580,11 +3571,8 @@ function setupRec() {
     lastTranscriptTime = Date.now();
 
     const wordCount = transcriptBuffer.join(' ').trim().split(/\s+/).length;
-
-    // Clear any existing timeout
     clearTimeout(silenceTimeout);
 
-    // Determine current ayah word count to know how many words to wait for
     const currentAyahIdx = cursor < allWords.length ? allWords[cursor].ayahIndex : -1;
     let ayahWordCount = 0;
     if (currentAyahIdx >= 0) {
@@ -3594,61 +3582,51 @@ function setupRec() {
       }
     }
 
-    // Only process if we have enough words OR after a real silence pause
-    // Minimum: 3 words OR ≥50% of current ayah words collected
     const minWords = Math.max(3, Math.floor(ayahWordCount * 0.5));
     const hasEnoughWords = wordCount >= minWords;
 
-    if (hasEnoughWords) {
-      // We have enough — wait a short moment for any trailing words, then process
-      silenceTimeout = setTimeout(() => {
-        processBufferedTranscripts();
-      }, 600);
-    } else {
-      // Not enough words yet — wait longer for user to keep reading
-      silenceTimeout = setTimeout(() => {
-        processBufferedTranscripts();
-      }, 2000);
-    }
+    silenceTimeout = setTimeout(() => {
+      processBufferedTranscripts();
+    }, hasEnoughWords ? 600 : 2000);
   };
 
-  rec.onerror = (e) => {
+  r.onerror = (e) => {
     if (e.error === 'not-allowed') {
       log('❌ Izinkan akses mikrofon di Settings browser', true);
       setMicOff();
       sessionActive = false;
       recRunning = false;
-      rec = null; // Reset so next attempt creates fresh instance
-    } else if (e.error === 'no-speech') {
-      // Normal — keep listening
-    } else if (e.error === 'aborted') {
-      // Normal stop
-    } else {
-      log('⚠️ Mic error: ' + e.error + ' — coba tekan mic lagi');
-      recRunning = false;
-      rec = null; // Reset for fresh start
-    }
-  };
-
-  rec.onend = () => {
-    recRunning = false;
-    if (sessionActive) {
-      // Must create fresh SR instance — mobile cannot restart stopped rec
       rec = null;
-      setupRec();
-      if (rec) rec._lastFinalIdx = -1; // fresh instance = fresh index
-      setTimeout(() => {
-        if (sessionActive && rec) {
-          try { rec.start(); recRunning = true; }
-          catch(e) { console.error('Restart failed:', e); }
-        }
-      }, 300);
+    } else if (e.error === 'no-speech' || e.error === 'aborted') {
+      // normal — onend will handle restart
     } else {
-      setMicOff();
+      log('⚠️ Mic error: ' + e.error);
+      recRunning = false;
+      rec = null;
     }
   };
 
-  return true;
+  r.onend = () => {
+    recRunning = false;
+    if (!sessionActive) { setMicOff(); return; }
+    // Auto-restart: create fresh instance and start
+    rec = createRec();
+    if (!rec) return;
+    setTimeout(() => {
+      if (sessionActive && rec) {
+        try { rec.start(); }
+        catch(e) { console.error('Restart failed:', e); }
+      }
+    }, 200);
+  };
+
+  return r;
+}
+
+function setupRec() {
+  if (rec) return true;
+  rec = createRec();
+  return !!rec;
 }
 
 // ════════════════════════════════════════════════════════════
@@ -3745,39 +3723,31 @@ function processBufferedTranscripts() {
   //
   // This catches "user reads ayah N+1 while cursor at ayah N" without blocking
   // legitimate cases like SR missing a word at start of an utterance mid-ayah.
-  if (remainingWords.length > 0) {
-    const firstRefNorm = remainingWords[0].norm;
-    const firstSpoken = spokenTokens[0];
-    const firstWS = wordSim(firstSpoken, firstRefNorm);
-    
-    // Try bigram: ref[0]+ref[1] vs spoken[0]
-    let bigramWS = 0;
-    if (remainingWords.length >= 2) {
-      const bg = remainingWords[0].norm + remainingWords[1].norm;
-      bigramWS = Math.max(...spokenCandidates(firstSpoken).map(c => simNorm(c, bg)),
-                          simNorm(normalizeArabic(firstSpoken), bg));
+  // ── FIRST-WORD ALIGNMENT ─────────────────────────────────────────────────────
+  // SR sometimes prepends noise/bismillah. Try offset 0..2 only.
+  // If none align well → mark as wrong position.
+  let bestStartOffset = 0;
+  {
+    let bestOffsetScore = -1;
+    const maxOffset = Math.min(3, spokenTokens.length);
+    for (let off = 0; off < maxOffset; off++) {
+      const spk = spokenTokens[off];
+      const ws0 = wordSim(spk, remainingWords[0].norm);
+      let bg0 = 0;
+      if (remainingWords.length >= 2) {
+        const bg = remainingWords[0].norm + remainingWords[1].norm;
+        bg0 = Math.max(...spokenCandidates(spk).map(c => simNorm(c, bg)),
+                       simNorm(normalizeArabic(spk), bg));
+      }
+      const score = Math.max(ws0, bg0 * 0.9);
+      if (score > bestOffsetScore) { bestOffsetScore = score; bestStartOffset = off; }
     }
 
-    // Is cursor at the very first word of this ayah?
-    const isAtAyahStart = cursor === 0 || 
-      (cursor > 0 && allWords[cursor - 1].ayahIndex !== currentAyahIdx);
-    
-    let firstWordMatches = firstWS >= MATCH_THRESHOLD || bigramWS >= 0.72;
-    
-    // Mid-ayah: also try next 1-2 ref words (SR may have missed a word)
-    if (!firstWordMatches && !isAtAyahStart && remainingWords.length >= 2) {
-      const ws1 = wordSim(firstSpoken, remainingWords[1].norm);
-      if (ws1 >= MATCH_THRESHOLD) firstWordMatches = true;
-      if (!firstWordMatches && remainingWords.length >= 3) {
-        const ws2 = wordSim(firstSpoken, remainingWords[2].norm);
-        if (ws2 >= MATCH_THRESHOLD) firstWordMatches = true;
-      }
-    }
-    
-    console.log(`   🔑 First-word gate: spoken="${firstSpoken}" vs ref="${firstRefNorm}" → ws=${firstWS.toFixed(2)}, bigram=${bigramWS.toFixed(2)}, ayahStart=${isAtAyahStart}, pass=${firstWordMatches}`);
-    
-    if (!firstWordMatches) {
-      console.log(`❌ First-word gate FAILED — user reading wrong position`);
+    console.log(`   🔑 Best start offset: ${bestStartOffset} (score=${bestOffsetScore.toFixed(2)})`);
+
+    // If no good alignment found → user reading wrong position → ERROR
+    if (bestOffsetScore < 0.45) {
+      console.log(`❌ Alignment failed (score=${bestOffsetScore.toFixed(2)}) — wrong position`);
       const cursorWord = allWords[cursor];
       if (cursorWord && cursorWord.el.className !== 'w correct') {
         cursorWord.el.className = 'w wrong';
@@ -3785,7 +3755,7 @@ function processBufferedTranscripts() {
       }
       playWrongSound();
       enterRetryMode(cursor);
-      setDot('warn', '⚠️ Posisi salah');
+      setDot('warn', '⚠️ Posisi bacaan tidak sesuai');
       matchStats.mismatches++;
       updateStats();
       processingResult = false;
@@ -3799,7 +3769,7 @@ function processBufferedTranscripts() {
   let firstWrongIdx = -1;
   let lastCorrectCursor = cursor;
 
-  let si = 0;
+  let si = bestStartOffset; // start from best alignment offset
   let refSkipped = 0;
   const MAX_LEADING_SKIP = 0; // No leading skip — must match from current cursor position
 
@@ -3885,7 +3855,7 @@ function processBufferedTranscripts() {
           if (bgWS > bestBigramWS) { bestBigramWS = bgWS; bestBigramSI = t; }
         }
         
-        if (bestBigramWS >= 0.72) {
+        if (bestBigramWS >= 0.66) {
           console.log(`   🔗 Bigram: "${spokenTokens[bestBigramSI]}" ~ "${wObj.norm}+${wObj2.norm}" (${bestBigramWS.toFixed(2)})`);
           wObj.el.className = 'w correct';
           wObj2.el.className = 'w correct';
@@ -3909,7 +3879,7 @@ function processBufferedTranscripts() {
       lastCorrectCursor = remainingWords[wi].idx + 1;
       matchedAny = true;
       refSkipped = 0;
-    } else if (bestWS >= 0.65) {
+    } else if (bestWS >= 0.60) {
       // Partial match — SR quirk on long/complex Quranic words only
       wObj.el.className = 'w correct';
       correctCount++; correctInBatch++;
@@ -4229,41 +4199,27 @@ function startSession() {
     return;
   }
 
-  // Setup rec jika belum ada
-  if (!rec) setupRec();
-  if (rec) rec._lastFinalIdx = -1; // reset duplicate-prevention index
-
   sessionActive = true;
   transcriptBuffer = [];
   lastTranscriptTime = Date.now();
   sessionRunStart = cursor;
-  
-  window.srWarmingUp = true;
-  setTimeout(() => {
-    window.srWarmingUp = false;
-    log('✅ Siap — mulai membaca sekarang');
-  }, 500);
 
-  if (!recRunning) {
-    try {
-      // SYNC: call rec.start() directly in the click handler — required for mobile
-      rec.start();
-      log('🎤 Memulai mikrofon...');
-    } catch(e) {
-      if (e.name === 'InvalidStateError') {
-        rec = null;
-        setupRec();
-        try { rec.start(); log('🎤 Memulai mikrofon...'); } catch(e2) { log('⚠️ Error: ' + e2.message, true); sessionActive = false; }
-      } else {
-        log('⚠️ Error: ' + e.message, true);
-        sessionActive = false;
-      }
-    }
-  } else {
-    setDot('rec', 'Smart tracking aktif');
-    document.getElementById('wave').classList.add('show');
-    document.getElementById('btnMic').classList.add('live');
-    log('Melanjutkan sesi — baca dengan natural');
+  window.srWarmingUp = true;
+  setTimeout(() => { window.srWarmingUp = false; log('✅ Siap — mulai membaca sekarang'); }, 500);
+
+  // Always create a fresh rec instance to avoid stale state
+  if (rec) { try { rec.abort(); } catch(e) {} rec = null; }
+  recRunning = false;
+  rec = createRec();
+  if (!rec) { log('❌ Browser tidak support SR', true); sessionActive = false; return; }
+
+  try {
+    rec.start();
+    log('🎤 Memulai mikrofon...');
+  } catch(e) {
+    log('⚠️ Error: ' + e.message, true);
+    sessionActive = false;
+    rec = null;
   }
 }
 
@@ -4271,6 +4227,8 @@ function stopSession() {
   sessionActive = false;
   clearTimeout(silenceTimeout);
   transcriptBuffer = [];
+  if (rec) { try { rec.abort(); } catch(e) {} rec = null; }
+  recRunning = false;
   setMicOff();
 }
 
@@ -5208,66 +5166,87 @@ function validateSambung(spokenRaw, refWords) {
   const spokenTokens = spokenRaw.trim().split(/\s+/).filter(Boolean);
   if (!spokenTokens.length) return { ok: false, score: 0, detail: 'Tidak ada bacaan' };
 
-  // First word gate — use flexible matching with candidates
-  const firstRefNorm = normalizeArabic(refWords[0]);
-  const firstWS = wordSim(spokenTokens[0], firstRefNorm);
-  // Also try bigram for first word (handles tajweed merging)
-  let firstBigramWS = 0;
-  if (refWords.length >= 2) {
-    const bg = firstRefNorm + normalizeArabic(refWords[1]);
-    firstBigramWS = Math.max(
-      ...spokenCandidates(spokenTokens[0]).map(c => simNorm(c, bg)),
-      simNorm(normalizeArabic(spokenTokens[0]), bg)
-    );
-  }
-  const SAMBUNG_FIRST_THRESHOLD = 0.62; // more lenient than tracking mode
-  if (firstWS < SAMBUNG_FIRST_THRESHOLD && firstBigramWS < 0.68) {
-    return { ok: false, score: 0, detail: 'Kata pertama tidak cocok' };
-  }
+  const WORD_THRESHOLD = 0.58; // more lenient — mobile SR often slightly off
+  const BIGRAM_THRESHOLD = 0.62;
 
-  // Count sequential matches using full candidate system
-  let matched = 0;
-  let si = 0;
-  const SAMBUNG_THRESHOLD = 0.65; // more lenient than main tracking
-  for (let wi = 0; wi < refWords.length && si < spokenTokens.length; wi++) {
-    const refNorm = normalizeArabic(refWords[wi]);
+  // Normalize all ref words upfront
+  const refNorms = refWords.map(w => normalizeArabic(w));
 
-    // Try bigram first (ref[wi]+ref[wi+1] vs spoken[si])
-    if (wi + 1 < refWords.length) {
-      const bg = refNorm + normalizeArabic(refWords[wi + 1]);
-      const bgWS = Math.max(
-        ...spokenCandidates(spokenTokens[si]).map(c => simNorm(c, bg)),
-        simNorm(normalizeArabic(spokenTokens[si]), bg)
-      );
-      if (bgWS >= 0.68) { matched += 2; si++; wi++; continue; }
-    }
+  // ── Try to find best alignment: where in spokenTokens does the ayah start?
+  // Mobile SR often prepends noise/bismillah at start — find best starting offset
+  let bestScore = 0;
+  let bestMatched = 0;
 
-    // Single word match using full candidate system
-    const ws = wordSim(spokenTokens[si], refNorm);
-    if (ws >= SAMBUNG_THRESHOLD) {
-      matched++; si++;
-    } else {
-      // Allow lookahead: SR may skip a short word
-      if (wi + 1 < refWords.length) {
-        const wsNext = wordSim(spokenTokens[si], normalizeArabic(refWords[wi + 1]));
-        if (wsNext >= SAMBUNG_THRESHOLD) {
-          // ref[wi] was short/silent — skip ref word, count it as matched
-          matched++; // partial credit for ref[wi]
-          wi++;
-          matched++; si++; // count ref[wi+1] matched
-          continue;
+  const maxStartOffset = Math.min(3, spokenTokens.length - 1); // try first 4 spoken tokens as start
+
+  for (let startOffset = 0; startOffset <= maxStartOffset; startOffset++) {
+    let matched = 0;
+    let si = startOffset;
+
+    for (let wi = 0; wi < refNorms.length && si < spokenTokens.length; wi++) {
+      // Try bigram (ref[wi]+ref[wi+1] vs spoken[si])
+      if (wi + 1 < refNorms.length) {
+        const bg = refNorms[wi] + refNorms[wi + 1];
+        const bgScores = [
+          simNorm(normalizeArabic(spokenTokens[si]), bg),
+          ...spokenCandidates(spokenTokens[si]).map(c => simNorm(c, bg))
+        ];
+        if (Math.max(...bgScores) >= BIGRAM_THRESHOLD) {
+          matched += 2; si++; wi++; continue;
         }
       }
-      break;
+
+      // Single word match
+      const ws = wordSim(spokenTokens[si], refNorms[wi]);
+      if (ws >= WORD_THRESHOLD) {
+        matched++; si++;
+      } else {
+        // Lookahead 1: ref word might have been silently skipped by SR
+        if (wi + 1 < refNorms.length) {
+          const wsNext = wordSim(spokenTokens[si], refNorms[wi + 1]);
+          if (wsNext >= WORD_THRESHOLD) {
+            matched += 1; // partial credit for skipped ref word
+            wi++;
+            matched++; si++;
+            continue;
+          }
+        }
+        // Lookahead 2: spoken word might be noise — try skipping spoken token
+        if (si + 1 < spokenTokens.length) {
+          const wsSkip = wordSim(spokenTokens[si + 1], refNorms[wi]);
+          if (wsSkip >= WORD_THRESHOLD) {
+            matched++; si += 2; // skip noisy spoken token
+            continue;
+          }
+        }
+        // No match — but don't break immediately, try to re-sync
+        // Skip this ref word and continue (handles SR swallowing words mid-ayah)
+        if (matched > 0) continue; // only skip-ref after we've gotten at least 1 match
+        break;
+      }
+    }
+
+    const score = matched / refNorms.length;
+    if (score > bestScore) {
+      bestScore = score;
+      bestMatched = matched;
     }
   }
 
-  // More lenient: require at least 40% match (was 50%)
-  // Short ayahs (1-3 words): require all words
-  const minPct = refWords.length <= 3 ? 0.75 : 0.40;
-  const minRequired = Math.max(1, Math.ceil(refWords.length * minPct));
-  const ok = matched >= minRequired;
-  return { ok, score: matched / refWords.length, matched, total: refWords.length, detail: `${matched}/${refWords.length} kata cocok` };
+  // Thresholds: short ayahs need more coverage, long ones can be partial
+  const minPct = refWords.length <= 2 ? 0.80
+               : refWords.length <= 4 ? 0.65
+               : refWords.length <= 7 ? 0.50
+               : 0.40;
+
+  const ok = bestScore >= minPct;
+  return {
+    ok,
+    score: bestScore,
+    matched: bestMatched,
+    total: refWords.length,
+    detail: `${bestMatched}/${refWords.length} kata cocok`
+  };
 }
 
 let sambungCountdownTimer = null;
@@ -5933,15 +5912,19 @@ async function sfpStart() {
   if (btn) { btn.textContent='⏳ Memuat...'; btn.disabled=true; }
   await Promise.all(Array.from(cbs).map(c=>loadDynamicSurahSilent(parseInt(c.value))));
   if (btn) { btn.textContent='🎲 Mulai Sambung Ayat'; btn.disabled=false; }
-  sfp.ranges=[]; let err=false;
+  sfp.ranges=[]; let skipped=0;
   cbs.forEach(cb=>{
-    const num=parseInt(cb.value),data=SURAHS[num]; if(!data){err=true;return;}
+    const num=parseInt(cb.value),data=SURAHS[num]; if(!data) return;
     const fr=parseInt(document.getElementById(`sfpfrom_${num}`)?.value||1);
     const to=parseInt(document.getElementById(`sfpto_${num}`)?.value||data.ayahs.length);
-    if(fr<1||to>data.ayahs.length||fr>=to){alert(`Range tidak valid untuk ${data.name}`);err=true;return;}
+    // Need at least 2 ayahs: prompt ayah + answer ayah
+    if(fr<1||to>data.ayahs.length||to-fr<1){ skipped++; return; }
     sfp.ranges.push({surahNum:num,fromAyah:fr,toAyah:to});
   });
-  if(err||!sfp.ranges.length) return;
+  if(!sfp.ranges.length){
+    alert(skipped ? 'Semua surah yang dipilih hanya punya 1 ayat dalam range. Pilih range minimal 2 ayat.' : 'Tidak ada surah valid.');
+    return;
+  }
   sfp.ok=0; sfp.err=0; sfp.active=true; sfp.resultState=null; sfp.countdownActive=false;
   document.getElementById('sfp-setup').style.display='none';
   document.getElementById('sfp-active').style.display='flex';
@@ -6191,7 +6174,7 @@ function sfpShowResult(result,refWords) {
     sfpSetDot('ok','Benar ✓');
     sfpSetActionBtn('next','Lanjutkan  →', false);
     playCorrectSound();
-    sfpStartCountdown(3);
+    // No auto-countdown — user taps Lanjutkan manually
   } else {
     sfp.err++; sfp.resultState='err';
     expected.className='sfp-result-arabic sfp-err sfp-show';
@@ -6269,7 +6252,7 @@ function sfpLewati() {
     sfp.resultState='skip';
     sfpSetActionBtn('next','Lanjutkan  →', false);
     sfpSetDot('idle','Dilewati');
-    sfpStartCountdown(3);
+    // No auto-countdown — user taps manually
     return;
   }
   sfpNext();
