@@ -3528,64 +3528,79 @@ function setupRec() {
 
   rec.onresult = (e) => {
     if (!sessionActive || processingResult) return;
-    if (window.srWarmingUp) {
-      console.log('🔇 Warm-up period — ignoring result');
-      return;
-    }
-    
-    const lastIdx = e.results.length - 1;
-    const result = e.results[lastIdx];
-    
-    // Try all alternatives if available (not just [0])
-    let transcript = '';
-    let foundValidTranscript = false;
-    
-    for (let i = 0; i < Math.min(result.length, 3); i++) {
-      const alt = result[i].transcript.trim();
-      if (alt && alt.length > 0) {
-        transcript = alt;
-        foundValidTranscript = true;
-        if (i > 0) console.log(`📝 Using alternative ${i}: "${alt}"`);
-        break;
+    if (window.srWarmingUp) return;
+
+    // Track highest processed final index to prevent re-processing on SR restart
+    if (typeof rec._lastFinalIdx === 'undefined') rec._lastFinalIdx = -1;
+
+    let newFinalText = '';
+    let interimText = '';
+
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const r = e.results[i];
+      if (r.isFinal) {
+        // Skip if we already processed this index (happens on mobile SR restart)
+        if (i <= rec._lastFinalIdx) continue;
+        rec._lastFinalIdx = i;
+        // Pick best non-empty alternative
+        for (let a = 0; a < Math.min(r.length, 3); a++) {
+          const alt = r[a].transcript.trim();
+          if (alt) { newFinalText += alt + ' '; break; }
+        }
+      } else {
+        for (let a = 0; a < Math.min(r.length, 1); a++) {
+          const alt = r[a].transcript.trim();
+          if (alt) { interimText = alt; break; }
+        }
       }
     }
-    
-    // If no valid transcript found, skip
-    if (!foundValidTranscript) {
-      console.warn('⚠️ All alternatives empty — SR heard noise/silence');
-      return;
-    }
-    
-    // Show interim results in real-time
-    if (!result.isFinal) {
-      document.getElementById('tText').textContent = transcript + ' ⏳';
+
+    // Show interim in UI (no processing)
+    if (interimText && !newFinalText) {
+      document.getElementById('tText').textContent = interimText + ' ⏳';
       document.getElementById('tText').classList.add('live');
-      console.log(`🎤 Interim: "${transcript.slice(0, 30)}..."`);
       return;
     }
-    
-    // Final result processing
-    document.getElementById('tText').textContent = transcript;
+
+    if (!newFinalText.trim()) return;
+
+    // Accumulate final text into buffer
+    const clean = newFinalText.trim();
+    document.getElementById('tText').textContent = clean;
     document.getElementById('tText').classList.add('live');
-    setTimeout(() => document.getElementById('tText').classList.remove('live'), 2000);
-    
-    console.log(`✅ SR Final: "${transcript}" (buffer now: ${transcriptBuffer.length + 1} chunks)`);
-    
+    transcriptBuffer.push(clean);
     lastTranscriptTime = Date.now();
-    transcriptBuffer.push(transcript);
-    
-    // Clear silence timeout and set new one
+
+    const wordCount = transcriptBuffer.join(' ').trim().split(/\s+/).length;
+
+    // Clear any existing timeout
     clearTimeout(silenceTimeout);
-    silenceTimeout = setTimeout(() => {
-      console.log(`⏱️ 10ms silence reached — processing buffer of ${transcriptBuffer.length} chunks`);
-      processBufferedTranscripts();
-    }, 10); // 10ms — very fast response
-    
-    // Also process immediately if buffer gets large
-    if (transcriptBuffer.length >= 3) {
-      console.log(`📦 Buffer full (${transcriptBuffer.length} chunks) — processing immediately`);
-      clearTimeout(silenceTimeout);
-      processBufferedTranscripts();
+
+    // Determine current ayah word count to know how many words to wait for
+    const currentAyahIdx = cursor < allWords.length ? allWords[cursor].ayahIndex : -1;
+    let ayahWordCount = 0;
+    if (currentAyahIdx >= 0) {
+      for (let i = cursor; i < allWords.length; i++) {
+        if (allWords[i].ayahIndex !== currentAyahIdx) break;
+        ayahWordCount++;
+      }
+    }
+
+    // Only process if we have enough words OR after a real silence pause
+    // Minimum: 3 words OR ≥50% of current ayah words collected
+    const minWords = Math.max(3, Math.floor(ayahWordCount * 0.5));
+    const hasEnoughWords = wordCount >= minWords;
+
+    if (hasEnoughWords) {
+      // We have enough — wait a short moment for any trailing words, then process
+      silenceTimeout = setTimeout(() => {
+        processBufferedTranscripts();
+      }, 600);
+    } else {
+      // Not enough words yet — wait longer for user to keep reading
+      silenceTimeout = setTimeout(() => {
+        processBufferedTranscripts();
+      }, 2000);
     }
   };
 
@@ -3613,6 +3628,7 @@ function setupRec() {
       // Must create fresh SR instance — mobile cannot restart stopped rec
       rec = null;
       setupRec();
+      if (rec) rec._lastFinalIdx = -1; // fresh instance = fresh index
       setTimeout(() => {
         if (sessionActive && rec) {
           try { rec.start(); recRunning = true; }
@@ -4207,6 +4223,7 @@ function startSession() {
 
   // Setup rec jika belum ada
   if (!rec) setupRec();
+  if (rec) rec._lastFinalIdx = -1; // reset duplicate-prevention index
 
   sessionActive = true;
   transcriptBuffer = [];
@@ -6065,11 +6082,11 @@ function sfpActionClick() {
 
 function sfpStartRec(clearBuf=false) {
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){sfpSetDot('warn','❌ Gunakan Chrome');return;}
-  if(clearBuf) sfp.buffer=[];  // only clear when explicitly starting fresh
+  if(clearBuf) { sfp.buffer=[]; sfp._lastFinalIdx=-1; } // fresh attempt = reset everything
   if(sfp.rec){try{sfp.rec.abort();}catch(e){} sfp.rec=null;}
   sfp.rec=new SR(); sfp.rec.lang='ar-SA'; sfp.rec.continuous=true;
   sfp.rec.interimResults=true; sfp.rec.maxAlternatives=3;
-  sfp._lastFinalIdx = -1; // track last processed final result index
+  sfp._lastFinalIdx = -1; // always reset on new SR object
   sfp.rec.onresult=e=>{
     let ft='',interim='';
     for(let i=e.resultIndex;i<e.results.length;i++){
@@ -6084,7 +6101,10 @@ function sfpStartRec(clearBuf=false) {
       }
     }
     if(ft.trim()){
-      sfp.buffer.push(ft.trim());
+      const newText = ft.trim();
+      // Dedup: don't push if identical to last buffer entry (mobile SR sometimes re-fires)
+      const lastBuf = sfp.buffer[sfp.buffer.length - 1] || '';
+      if(newText !== lastBuf) sfp.buffer.push(newText);
       const t=document.getElementById('sfp-transcript');
       t.textContent=sfp.buffer.join(' '); t.className='sfp-transcript-box live';
       clearTimeout(sfp.silTimer); sfp.silTimer=setTimeout(sfpProcessBuffer,2000);
