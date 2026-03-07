@@ -723,7 +723,7 @@ body::after {
   .mushaf-body {
     flex: 1 !important;
     overflow-y: auto !important;
-    padding: 16px 16px calc(env(safe-area-inset-bottom, 0px) + 200px) 16px !important;
+    padding: 16px 16px calc(env(safe-area-inset-bottom, 0px) + 155px) 16px !important;
     -webkit-overflow-scrolling: touch !important;
   }
 
@@ -755,20 +755,20 @@ body::after {
 .mobile-panel-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 14px 8px;
+  gap: 10px;
+  padding: 6px 11px 5px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
 .mobile-panel-header-title {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--text);
   font-family: var(--font-ui);
-  letter-spacing: -0.2px;
+  letter-spacing: -0.1px;
 }
 .mobile-panel-header-badge {
-  font-size: 9px;
+  font-size: 8px;
   font-family: var(--font-mono);
   font-weight: 500;
   letter-spacing: 1.5px;
@@ -777,16 +777,16 @@ body::after {
   background: var(--accent-glow);
   border: 1px solid rgba(29,185,84,0.25);
   border-radius: 100px;
-  padding: 2px 8px;
+  padding: 2px 7px;
 }
 
 /* Content panels */
 .mobile-panel-content {
   display: none;
   flex-direction: column;
-  gap: 10px;
-  padding: 10px 14px 12px;
-  max-height: 55vh;
+  gap: 6px;
+  padding: 7px 11px 9px;
+  max-height: 48vh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -816,34 +816,34 @@ body::after {
 .mobile-audio-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 6px;
 }
 .mobile-audio-label {
-  font-size: 9px;
+  font-size: 8px;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.2px;
   color: var(--accent-mid);
   font-weight: 600;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
   font-family: var(--font-mono);
 }
 
 /* Putar audio button */
 .mobile-play-btn {
   width: 100%;
-  padding: 13px;
+  padding: 10px;
   border-radius: 100px;
   border: none;
   background: var(--accent);
   color: #000;
   font-family: var(--font-ui);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 7px;
   transition: all 0.2s;
   letter-spacing: 0.3px;
 }
@@ -876,14 +876,14 @@ body::after {
 
 /* Logbar small */
 .mobile-log {
-  font-size: 11px;
+  font-size: 10px;
   font-family: var(--font-mono);
   color: rgba(37,211,102,.85);
-  padding: 6px 10px;
+  padding: 5px 9px;
   background: rgba(0,0,0,.2);
   border: 1px solid rgba(37,211,102,.1);
-  border-radius: 8px;
-  min-height: 28px;
+  border-radius: 6px;
+  min-height: 24px;
   line-height: 1.4;
 }
 .mobile-log.err { color: rgba(224,92,92,.9); border-color: rgba(224,92,92,.15); }
@@ -893,13 +893,13 @@ body::after {
 .mobile-prog-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg,var(--accent),var(--accent2)); transition: width .5s ease; }
 
 /* Mini action buttons */
-.mobile-btn-row { display: flex; gap: 6px; }
+.mobile-btn-row { display: flex; gap: 5px; }
 .mobile-btn {
-  flex: 1; padding: 8px 6px; border-radius: 7px;
+  flex: 1; padding: 6px 5px; border-radius: 6px;
   border: 1px solid rgba(255,255,255,0.07);
   background: rgba(0,0,0,.2);
   color: #F0EAD8; font-family: 'Inter',sans-serif;
-  font-size: 11px; font-weight: 500; cursor: pointer;
+  font-size: 10px; font-weight: 500; cursor: pointer;
   transition: all .2s; text-align: center;
 }
 .mobile-btn:active { border-color: #C9A84C; }
@@ -911,16 +911,16 @@ body::after {
   background: var(--card2);
   border: 1px solid var(--border);
   color: var(--text);
-  border-radius: 8px;
-  padding: 9px 10px;
-  font-size: 14px;
+  border-radius: 7px;
+  padding: 7px 8px;
+  font-size: 12px;
   width: 100%;
   text-align: center;
   font-family: var(--font-mono);
   font-weight: 500;
   -webkit-appearance: none;
 }
-.mobile-audio-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); outline: none; }
+.mobile-audio-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); outline: none; }
 
 /* Audio status */
 .mobile-audio-status {
@@ -947,7 +947,7 @@ body::after {
   .mobile-drawer-overlay { display: block; }
   /* mushaf body bottom padding accounts for 2-tab panel now */
   .mushaf-body {
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 190px) !important;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 150px) !important;
   }
 }
 
@@ -1429,6 +1429,18 @@ body::after {
   color: var(--muted);
   border: 1px solid var(--border);
 }
+/* State: ready — waiting for user to tap mic */
+.sfp-action-btn.state-ready {
+  background: var(--accent);
+  color: #000;
+  border: 1px solid transparent;
+  box-shadow: 0 0 0 6px rgba(29,185,84,0.12);
+  animation: sfp-ready-pulse 1.8s ease-in-out infinite;
+}
+@keyframes sfp-ready-pulse {
+  0%,100% { box-shadow: 0 0 0 6px rgba(29,185,84,0.12); }
+  50%      { box-shadow: 0 0 0 14px rgba(29,185,84,0.05); }
+}
 /* State: listening (recording) */
 .sfp-action-btn.state-listening {
   background: rgba(239,107,90,0.18);
@@ -1517,7 +1529,7 @@ body::after {
     display: flex !important;
     position: absolute;
     inset: 0;
-    z-index: 5;
+    z-index: 10;
     width: 100%;
     border-right: none;
     height: 100vh;
@@ -1539,6 +1551,7 @@ body::after {
   }
   .sfp-right-header {
     padding: 12px 16px;
+    display: none; /* shown via JS only when session active */
   }
   .sfp-right-body {
     padding: 16px;
@@ -1569,7 +1582,6 @@ body::after {
   .sfp-desktop-header-content {
     display: none;
   }
-  /* Show hamburger in sfp-left on mobile */
   #sfpLeftHamburger {
     display: flex !important;
   }
@@ -2132,10 +2144,9 @@ body::after {
       <!-- ── LEFT: Setup panel ── -->
       <div class="sfp-left">
         <div class="sfp-left-header">
-          <!-- Mobile hamburger row -->
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-            <button onclick="mbOpenDrawer()" id="sfpLeftHamburger" style="display:none;align-items:center;justify-content:center;width:32px;height:32px;background:none;border:none;cursor:pointer;color:var(--text);padding:0;flex-shrink:0">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <button onclick="mbOpenDrawer()" id="sfpLeftHamburger" style="display:none;align-items:center;justify-content:center;width:28px;height:28px;background:none;border:none;cursor:pointer;color:var(--text);padding:0;flex-shrink:0">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
                 <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
               </svg>
             </button>
@@ -2194,22 +2205,22 @@ body::after {
       <!-- ── RIGHT: Main interaction ── -->
       <div class="sfp-right" id="sfp-right">
 
-        <!-- TOP STRIP: surah info + replay -->
+        <!-- TOP STRIP: surah info + replay — only shown when session active (JS controlled on mobile) -->
         <div class="sfp-right-header" id="sfp-header">
-          <!-- Mobile: hamburger + title + setup btn -->
+          <!-- Mobile: hamburger + sistem membaca info + putar ulang -->
           <div class="sfp-mobile-header-row" style="width:100%;justify-content:space-between">
             <div style="display:flex;align-items:center;gap:10px">
-              <button onclick="mbOpenDrawer()" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;flex-shrink:0;background:none;border:none;cursor:pointer;color:var(--text);padding:0">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <button onclick="mbOpenDrawer()" style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;background:none;border:none;cursor:pointer;color:var(--text);padding:0;flex-shrink:0">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
                   <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
                 </svg>
               </button>
               <div>
-                <div style="font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold)">SISTEM MEMBACA</div>
-                <div style="font-size:12px;color:var(--muted)" id="sfp-promptInfo">—</div>
+                <div style="font-size:8px;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold)">SISTEM MEMBACA</div>
+                <div style="font-size:11px;color:var(--muted)" id="sfp-promptInfo">—</div>
               </div>
             </div>
-            <button id="sfp-replayBtn" onclick="sfpReplay()" style="padding:6px 12px;background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:50px;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--font-ui)">
+            <button id="sfp-replayBtn" onclick="sfpReplay()" style="padding:5px 11px;background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:50px;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--font-ui)">
               Putar Ulang
             </button>
           </div>
@@ -5348,6 +5359,7 @@ window.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     mbInitVoiceSelectors();
     mbInitAudioSelectors();
+    mbSetupObserver(); // ← FIX: was never called!
   }, 300);
 });
 
@@ -5498,16 +5510,39 @@ function mbMirrorState() {
   const mbpf = document.getElementById('mb-progFill');
   if (pf && mbpf) mbpf.style.width = pf.style.width;
   mbMirrorEl('logBar',  'mb-logBar',  'textContent');
-  mbMirrorEl('logBar',  'mb-logBar',  'className');
-  // Mic button state
+  // Map desktop log-bar class to mobile-log class
+  const lb = document.getElementById('logBar'), mlb = document.getElementById('mb-logBar');
+  if (lb && mlb) mlb.className = 'mobile-log' + (lb.classList.contains('err') ? ' err' : '');
+  // Mic button state - mirror class and inner HTML
   const dMic = document.getElementById('btnMic');
   const mMic = document.getElementById('mb-btnMic');
-  if (dMic && mMic) { mMic.innerHTML = dMic.innerHTML; mMic.className = dMic.className; }
-  mbMirrorEl('micLabel','mb-micLabel','textContent');
-  mbMirrorEl('micSub',  'mb-micSub',  'textContent');
+  if (dMic && mMic) { 
+    mMic.innerHTML = dMic.innerHTML; 
+    // Mirror live state directly
+    if (dMic.classList.contains('live')) {
+      mMic.style.background = 'var(--sem-err)';
+      mMic.style.color = 'white';
+      mMic.style.animation = 'mpulse 1.5s ease-in-out infinite';
+      mMic.style.boxShadow = '0 4px 22px rgba(224,92,92,0.5)';
+    } else {
+      mMic.style.background = 'var(--accent)';
+      mMic.style.color = '#000';
+      mMic.style.animation = '';
+      mMic.style.boxShadow = '0 4px 16px rgba(29,185,84,0.3)';
+    }
+  }
+  const mbLabel = document.getElementById('mb-micLabel');
+  const dLabel = document.getElementById('micLabel');
+  if (mbLabel && dLabel) mbLabel.textContent = dLabel.textContent;
+  const mbSub = document.getElementById('mb-micSub');
+  const dSub = document.getElementById('micSub');
+  if (mbSub && dSub) mbSub.textContent = dSub.textContent;
   // Wave
   const dw = document.getElementById('wave'), mw = document.getElementById('mb-wave');
-  if (dw && mw) mw.classList.toggle('show', dw.classList.contains('show'));
+  if (dw && mw) {
+    const isShow = dw.classList.contains('show');
+    mw.style.opacity = isShow ? '1' : '0';
+  }
   // Retry banner
   const dr = document.getElementById('retryBanner'), mr = document.getElementById('mb-retryBanner');
   if (dr && mr) {
@@ -5899,6 +5934,8 @@ async function sfpStart() {
   if (window.innerWidth <= 768) {
     const left = document.querySelector('.sfp-left');
     if (left) left.classList.add('sfp-left-hidden');
+    const hdr = document.getElementById('sfp-header');
+    if (hdr) hdr.style.display = 'flex';
   }
   sfpUpdScore(); sfpNext();
 }
@@ -5921,6 +5958,8 @@ function sfpStop() {
   if (window.innerWidth <= 768) {
     const left = document.querySelector('.sfp-left');
     if (left) left.classList.remove('sfp-left-hidden');
+    const hdr = document.getElementById('sfp-header');
+    if (hdr) hdr.style.display = 'none';
   }
 }
 
@@ -5961,10 +6000,9 @@ async function sfpNext() {
     if(!sfp.active) return;
     sfp.waiting=true;
     document.getElementById('sfp-replayBtn').disabled=false;
-  const rbe=document.getElementById('sfp-replayBtn-desktop');if(rbe)rbe.disabled=false;
-    sfpSetDot('live','Mendengarkan...');
-    sfpSetActionBtn('listening','Sedang Mendengarkan', false);
-    sfpStartRec(true); // AUTO-START — fresh question
+    const rbe=document.getElementById('sfp-replayBtn-desktop');if(rbe)rbe.disabled=false;
+    sfpSetDot('live','Siap — tekan mic untuk jawab');
+    sfpSetActionBtn('ready','🎙 Mulai Jawab', false); // user must tap to start
   });
 }
 
@@ -5994,9 +6032,9 @@ function sfpReplay() {
     sfp.waiting=true;
     document.getElementById('sfp-replayBtn').disabled=false;
   const rbe=document.getElementById('sfp-replayBtn-desktop');if(rbe)rbe.disabled=false;
-    sfpSetDot('live','Mendengarkan...');
-    sfpSetActionBtn('listening','Sedang Mendengarkan', false);
-    sfpStartRec(true); // replay = fresh attempt
+    sfpSetDot('live','Siap — tekan mic untuk jawab');
+    sfpSetActionBtn('ready','🎙 Mulai Jawab', false);
+    // User must tap button to start recording
   });
 }
 
@@ -6021,7 +6059,15 @@ async function sfpActionClick() {
     sfpStartRec(true); // Coba Lagi = fresh attempt
     return;
   }
-  // Normal: toggle recording
+  // State ready → user explicitly starts recording
+  if(!sfp.recRunning && sfp.waiting) {
+    const ok=await ensureMicPermission(); if(!ok){sfpSetDot('warn','❌ Izinkan mikrofon');return;}
+    sfpSetActionBtn('listening','Sedang Mendengarkan', false);
+    sfpSetDot('live','Mendengarkan...');
+    sfpStartRec(true);
+    return;
+  }
+  // Normal: toggle recording (stop = process buffer)
   if(!sfp.waiting) return;
   if(sfp.recRunning){sfpStopRec();sfpProcessBuffer();return;}
   const ok=await ensureMicPermission(); if(!ok){sfpSetDot('warn','❌ Izinkan mikrofon');return;}
@@ -6034,17 +6080,25 @@ function sfpStartRec(clearBuf=false) {
   if(sfp.rec){try{sfp.rec.abort();}catch(e){} sfp.rec=null;}
   sfp.rec=new SR(); sfp.rec.lang='ar-SA'; sfp.rec.continuous=true;
   sfp.rec.interimResults=true; sfp.rec.maxAlternatives=3;
+  sfp._lastFinalIdx = -1; // track last processed final result index
   sfp.rec.onresult=e=>{
     let ft='',interim='';
     for(let i=e.resultIndex;i<e.results.length;i++){
-      if(e.results[i].isFinal) ft+=e.results[i][0].transcript+' ';
-      else interim+=e.results[i][0].transcript;
+      if(e.results[i].isFinal){
+        // Only process if we haven't seen this index before
+        if(i > sfp._lastFinalIdx){
+          sfp._lastFinalIdx = i;
+          ft += e.results[i][0].transcript + ' ';
+        }
+      } else {
+        interim += e.results[i][0].transcript;
+      }
     }
     if(ft.trim()){
       sfp.buffer.push(ft.trim());
       const t=document.getElementById('sfp-transcript');
       t.textContent=sfp.buffer.join(' '); t.className='sfp-transcript-box live';
-      clearTimeout(sfp.silTimer); sfp.silTimer=setTimeout(sfpProcessBuffer,2000); // 2s silence = done
+      clearTimeout(sfp.silTimer); sfp.silTimer=setTimeout(sfpProcessBuffer,2000);
     } else if(interim){
       document.getElementById('sfp-transcript').textContent=interim+' ⏳';
     }
@@ -6126,6 +6180,7 @@ function sfpSetActionBtn(state, label, disabled) {
   // Update icon
   const icons={
     idle:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>',
+    ready:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>',
     listening:'<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>',
     next:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>',
     retry:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
@@ -6243,13 +6298,8 @@ function toggleWaqfLegend() {
      ═══════════════════════════════════════════════════════════ -->
 <div class="mobile-fixed-panel" id="mobileFixedPanel">
 
-  <!-- Panel header bar — hamburger + title -->
-  <div class="mobile-panel-header" style="display:flex;align-items:center;gap:10px">
-    <button id="mobileHamburger2" onclick="mbOpenDrawer()" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;background:none;border:none;cursor:pointer;color:var(--text);padding:0;flex-shrink:0">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-      </svg>
-    </button>
+  <!-- Panel header bar — title only, no hamburger -->
+  <div class="mobile-panel-header" style="display:flex;align-items:center;justify-content:center;gap:8px">
     <div class="mobile-panel-header-title" id="mb-panelTitle">Cek Hafalan</div>
   </div>
 
@@ -6257,90 +6307,86 @@ function toggleWaqfLegend() {
   <div class="mobile-panel-content active" id="mb-panel-voice">
 
     <!-- Surah + Mulai dari Ayat row -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:2px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
       <div>
         <div class="mobile-audio-label">Pilih Surah</div>
         <div style="position:relative">
-          <select id="mb-surahSel" onchange="mbSyncSurah()" style="width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 30px 9px 12px;font-family:var(--font-ui);font-size:13px;font-weight:500;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none">
+          <select id="mb-surahSel" onchange="mbSyncSurah()" style="width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:5px 20px 5px 8px;font-family:var(--font-ui);font-size:11px;font-weight:500;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none">
           </select>
-          <span style="position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+          <span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted)"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
         </div>
       </div>
       <div>
         <div class="mobile-audio-label">Mulai dari Ayat</div>
         <div style="position:relative">
-          <select id="mb-ayatSel" onchange="mbSyncAyat()" style="width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 30px 9px 12px;font-family:var(--font-ui);font-size:13px;font-weight:500;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none">
+          <select id="mb-ayatSel" onchange="mbSyncAyat()" style="width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:5px 20px 5px 8px;font-family:var(--font-ui);font-size:11px;font-weight:500;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none">
           </select>
-          <span style="position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+          <span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted)"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
         </div>
       </div>
     </div>
 
     <!-- Retry Banner -->
     <div class="mobile-retry-banner" id="mb-retryBanner">
-      <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--sem-err);font-weight:700" id="mb-retryAyahNum">AYAT —</div>
-      <div style="font-size:11px;color:var(--sem-err);font-weight:600">ULANGI DARI KURSOR KUNING ↑</div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:2px">
-        <span style="font-size:11px;color:var(--muted)">Kata salah:</span>
-        <span style="font-family:'UthmanicHafs','Scheherazade New',serif;font-size:18px;direction:rtl;color:var(--sem-err)" id="mb-retryWord">—</span>
-        <button onclick="skipWrongWord()" style="margin-left:auto;padding:5px 10px;background:rgba(224,92,92,.12);border:1px solid rgba(224,92,92,.3);border-radius:6px;color:var(--sem-err);font-size:11px;cursor:pointer;font-family:var(--font-ui);font-weight:600">Lewati →</button>
+      <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--sem-err);font-weight:700" id="mb-retryAyahNum">AYAT —</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:1px">
+        <span style="font-size:10px;color:var(--muted)">Kata salah:</span>
+        <span style="font-family:'UthmanicHafs','Scheherazade New',serif;font-size:15px;direction:rtl;color:var(--sem-err)" id="mb-retryWord">—</span>
+        <button onclick="skipWrongWord()" style="margin-left:auto;padding:3px 7px;background:rgba(224,92,92,.12);border:1px solid rgba(224,92,92,.3);border-radius:5px;color:var(--sem-err);font-size:10px;cursor:pointer;font-family:var(--font-ui);font-weight:600">Lewati →</button>
       </div>
     </div>
 
-    <!-- Mic -->
-    <div class="mobile-mic-area">
-      <div class="wave" id="mb-wave">
-        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
-        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
-        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
-      </div>
-      <button class="btn-mic" id="mb-btnMic" onclick="toggleSession()" style="width:72px;height:72px"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
-      <div class="mic-label" style="text-align:center">
-        <strong id="mb-micLabel">Mulai Sesi</strong>
-        <span id="mb-micSub" style="font-size:11px">Tekan untuk aktifkan mikrofon</span>
-      </div>
-    </div>
-
-    <!-- Status section (mirrors desktop) -->
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;gap:6px">
-      <div style="display:flex;align-items:center;gap:7px">
-        <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--accent-mid);font-weight:600;font-family:var(--font-mono)">STATUS</span>
+    <!-- Status -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 10px;display:flex;flex-direction:column;gap:4px">
+      <div style="display:flex;align-items:center;gap:5px">
+        <span style="font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent-mid);font-weight:600;font-family:var(--font-mono)">STATUS</span>
         <div class="sdot" id="mb-sdot"></div>
-        <span style="font-size:11px;color:var(--muted)" id="mb-stext">Belum aktif</span>
+        <span style="font-size:10px;color:var(--muted)" id="mb-stext">Belum aktif</span>
       </div>
-      <div class="t-box" style="margin:0">
-        <div class="t-arabic" id="mb-tText" style="font-size:18px;min-height:28px">—</div>
+      <div style="background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:6px;padding:5px 9px;min-height:26px">
+        <div style="font-family:'Amiri',serif;font-size:14px;direction:rtl;text-align:right;color:var(--text);line-height:1.4" id="mb-tText">—</div>
       </div>
-      <div class="mobile-log" id="mb-logBar" style="margin:0">Smart Recognition siap</div>
+      <div class="mobile-log" id="mb-logBar">Smart Recognition siap</div>
     </div>
     <div class="mobile-prog-bg"><div class="mobile-prog-fill" id="mb-progFill" style="width:0%"></div></div>
-    <!-- Hidden stat counters (still mirrored by JS) -->
     <span id="mb-stOk" style="display:none">0</span>
     <span id="mb-stErr" style="display:none">0</span>
     <span id="mb-stPos" style="display:none">0</span>
 
-    <!-- Action buttons: Ulangi + Skip Ayat only -->
+    <!-- Mic pill button — centered, below status -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:5px">
+      <div class="wave" id="mb-wave" style="height:16px;opacity:0;transition:opacity .3s">
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+      </div>
+      <button id="mb-btnMic" onclick="toggleSession()" style="width:100%;max-width:320px;height:38px;border-radius:100px;border:none;background:var(--accent);color:#000;font-family:var(--font-ui);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .25s;box-shadow:0 3px 10px rgba(29,185,84,0.3);letter-spacing:0.1px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+        <span id="mb-micLabel">Mulai Sesi</span>
+      </button>
+    </div>
+    <span id="mb-micSub" style="display:none"></span>
+
+    <!-- Action buttons -->
     <div class="mobile-btn-row">
-      <button class="mobile-btn red" onclick="resetSession()">Ulangi</button>
-      <button class="mobile-btn" onclick="skipForward()">Skip Ayat</button>
+      <button class="mobile-btn red" onclick="resetSession()">↺ Ulangi</button>
+      <button class="mobile-btn" onclick="skipForward()">Skip Ayat →</button>
     </div>
   </div><!-- /mb-panel-voice -->
 
-  <!-- ── AUDIO REPEAT PANEL ── hidden by default, shown when nav = audio -->
+  <!-- ── AUDIO REPEAT PANEL ── hidden by default -->
   <div class="mobile-panel-content" id="mb-panel-audio">
 
-    <!-- Pilih Surah — full width -->
-    <div style="margin-bottom:8px">
+    <div>
       <div class="mobile-audio-label">Pilih Surah</div>
       <div style="position:relative">
-        <select id="mb-audioSurahSel" onchange="mbSyncAudioSurah()" style="width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 30px 9px 12px;font-family:var(--font-ui);font-size:13px;font-weight:500;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none">
+        <select id="mb-audioSurahSel" onchange="mbSyncAudioSurah()" style="width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:5px 20px 5px 8px;font-family:var(--font-ui);font-size:11px;font-weight:500;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none">
         </select>
-        <span style="position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+        <span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted)"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
     </div>
 
-    <!-- Dari + Sampai berjejeran -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
       <div>
         <div class="mobile-audio-label">Dari Ayat</div>
         <input type="number" class="mobile-audio-input" id="mb-audioStart" value="1" min="1">
@@ -6351,19 +6397,18 @@ function toggleWaqfLegend() {
       </div>
     </div>
 
-    <!-- Pengulangan + Jeda berjejeran -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
       <div>
-        <div class="mobile-audio-label">Pengulangan (kali)</div>
+        <div class="mobile-audio-label">Ulang (kali)</div>
         <input type="number" class="mobile-audio-input" id="mb-audioRepeat" value="3" min="1" max="100">
       </div>
       <div>
-        <div class="mobile-audio-label">Jeda Ayat (detik)</div>
+        <div class="mobile-audio-label">Jeda (detik)</div>
         <input type="number" class="mobile-audio-input" id="mb-audioPause" value="2" min="0" max="10" step="0.5">
       </div>
     </div>
     <button class="mobile-play-btn" id="mb-audioPlayBtn" onclick="mbToggleAudio()">
-      <span id="mb-audioPlayIcon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
+      <span id="mb-audioPlayIcon"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
       <span id="mb-audioPlayText">Putar Audio</span>
     </button>
     <div class="mobile-audio-status" id="mb-audioStatus">Siap memutar audio</div>
