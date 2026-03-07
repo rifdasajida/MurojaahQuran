@@ -1548,18 +1548,26 @@ body::after {
   }
   .sfp-right {
     height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
   .sfp-right-header {
     padding: 12px 16px;
     display: none; /* shown via JS only when session active */
+    flex-shrink: 0;
   }
   .sfp-right-body {
     padding: 16px;
     gap: 14px;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
   }
   .sfp-right-footer {
     padding: 14px 16px;
     gap: 10px;
+    flex-shrink: 0; /* never compress — always visible */
   }
   .sfp-prompt-arabic {
     font-size: clamp(24px, 7vw, 38px) !important;
@@ -6011,7 +6019,7 @@ async function sfpNext() {
     document.getElementById('sfp-replayBtn').disabled=false;
     const rbe=document.getElementById('sfp-replayBtn-desktop');if(rbe)rbe.disabled=false;
     sfpSetDot('live','Siap — tekan mic untuk jawab');
-    sfpSetActionBtn('ready','🎙 Mulai Jawab', false); // user must tap to start
+    sfpSetActionBtn('ready','Mulai Jawab', false); // user must tap to start
   });
 }
 
@@ -6042,7 +6050,7 @@ function sfpReplay() {
     document.getElementById('sfp-replayBtn').disabled=false;
   const rbe=document.getElementById('sfp-replayBtn-desktop');if(rbe)rbe.disabled=false;
     sfpSetDot('live','Siap — tekan mic untuk jawab');
-    sfpSetActionBtn('ready','🎙 Mulai Jawab', false);
+    sfpSetActionBtn('ready','Mulai Jawab', false);
     // User must tap button to start recording
   });
 }
@@ -6120,7 +6128,7 @@ function sfpStartRec(clearBuf=false) {
       return;
     }
     if(sfp.active && sfp.waiting && !sfp.resultState){
-      sfpSetActionBtn('ready','🎙 Tap untuk lanjutkan', false);
+      sfpSetActionBtn('ready','Tap untuk lanjutkan', false);
       sfpSetDot('live','Tap mic untuk lanjutkan');
     }
   };
@@ -6131,7 +6139,7 @@ function sfpStartRec(clearBuf=false) {
       sfpSetDot('warn','❌ Izinkan mikrofon di pengaturan browser');
     } else if(e.error==='no-speech'){
       if(sfp.active && sfp.waiting && !sfp.resultState){
-        sfpSetActionBtn('ready','🎙 Tap untuk coba lagi', false);
+        sfpSetActionBtn('ready','Tap untuk coba lagi', false);
         sfpSetDot('live','Tidak terdengar — tap untuk coba lagi');
       }
     }
