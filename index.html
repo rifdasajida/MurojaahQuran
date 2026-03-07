@@ -2220,9 +2220,15 @@ body::after {
                 <div style="font-size:11px;color:var(--muted)" id="sfp-promptInfo">—</div>
               </div>
             </div>
-            <button id="sfp-replayBtn" onclick="sfpReplay()" style="padding:5px 11px;background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:50px;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--font-ui)">
-              Putar Ulang
-            </button>
+            <div style="display:flex;align-items:center;gap:6px">
+              <button onclick="sfpStop()" style="padding:5px 10px;background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:50px;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--font-ui);display:flex;align-items:center;gap:5px">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                Ganti Surah
+              </button>
+              <button id="sfp-replayBtn" onclick="sfpReplay()" style="padding:5px 11px;background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:50px;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--font-ui)">
+                Putar Ulang
+              </button>
+            </div>
           </div>
           <!-- Desktop: original layout -->
           <div class="sfp-desktop-header-content">
@@ -3602,26 +3608,18 @@ function setupRec() {
   };
 
   rec.onend = () => {
-    if (sessionActive && recRunning) {
-      // Auto-restart to keep listening
+    recRunning = false;
+    if (sessionActive) {
+      // Must create fresh SR instance — mobile cannot restart stopped rec
+      rec = null;
+      setupRec();
       setTimeout(() => {
-        if (sessionActive && recRunning) {
-          // Create fresh instance if needed
-          if (!rec) { setupRec(); }
-          try {
-            rec.start();
-          } catch(e) {
-            if (e.name === 'InvalidStateError') {
-              rec = null; setupRec();
-              try { rec.start(); } catch(e2) { console.error('Restart failed:', e2); }
-            } else {
-              console.error('Restart error:', e);
-            }
-          }
+        if (sessionActive && rec) {
+          try { rec.start(); recRunning = true; }
+          catch(e) { console.error('Restart failed:', e); }
         }
-      }, 150);
+      }, 300);
     } else {
-      recRunning = false;
       setMicOff();
     }
   };
@@ -4195,7 +4193,7 @@ function toggleSession() {
   else startSession();
 }
 
-async function startSession() {
+function startSession() {
   if (displayMode === 'madani') {
     log('ℹ️ Mode Mushaf Madani: gunakan untuk membaca, bukan tracking');
     return;
@@ -4223,10 +4221,10 @@ async function startSession() {
 
   if (!recRunning) {
     try {
+      // SYNC: call rec.start() directly in the click handler — required for mobile
       rec.start();
       log('🎤 Memulai mikrofon...');
     } catch(e) {
-      // If InvalidStateError, create fresh rec and retry
       if (e.name === 'InvalidStateError') {
         rec = null;
         setupRec();
@@ -4241,13 +4239,6 @@ async function startSession() {
     document.getElementById('wave').classList.add('show');
     document.getElementById('btnMic').classList.add('live');
     log('Melanjutkan sesi — baca dengan natural');
-  }
-
-  // Request getUserMedia in background (non-blocking) to keep permission alive
-  if (!globalMicStream) {
-    navigator.mediaDevices?.getUserMedia({ audio: true })
-      .then(s => { globalMicStream = s; })
-      .catch(() => {}); // ignore — SR already handles permission
   }
 }
 
@@ -6039,7 +6030,7 @@ function sfpReplay() {
 }
 
 async function sfpToggleRec() { sfpActionClick(); }
-async function sfpActionClick() {
+function sfpActionClick() {
   // If countdown active → cancel + skip to next
   if(sfp.countdownActive) { sfpCancelCountdown(); sfpNext(); return; }
   // If correct result shown → go next
@@ -6056,12 +6047,11 @@ async function sfpActionClick() {
     if(!sfp.waiting){sfp.waiting=true;}
     sfpSetActionBtn('listening','Sedang Mendengarkan', false);
     sfpSetDot('live','Mendengarkan...');
-    sfpStartRec(true); // Coba Lagi = fresh attempt
+    sfpStartRec(true);
     return;
   }
-  // State ready → user explicitly starts recording
+  // State ready → user explicitly starts recording (SYNC — required for mobile)
   if(!sfp.recRunning && sfp.waiting) {
-    const ok=await ensureMicPermission(); if(!ok){sfpSetDot('warn','❌ Izinkan mikrofon');return;}
     sfpSetActionBtn('listening','Sedang Mendengarkan', false);
     sfpSetDot('live','Mendengarkan...');
     sfpStartRec(true);
@@ -6070,7 +6060,6 @@ async function sfpActionClick() {
   // Normal: toggle recording (stop = process buffer)
   if(!sfp.waiting) return;
   if(sfp.recRunning){sfpStopRec();sfpProcessBuffer();return;}
-  const ok=await ensureMicPermission(); if(!ok){sfpSetDot('warn','❌ Izinkan mikrofon');return;}
   sfpStartRec();
 }
 
@@ -6105,12 +6094,26 @@ function sfpStartRec(clearBuf=false) {
   };
   sfp.rec.onend=()=>{
     sfp.recRunning=false;
-    // Auto-restart if still waiting and no result yet
+    // On mobile, don't auto-restart from onend (not in user gesture context)
+    // continuous=true should keep it open; onend only fires on error/stop
+    // If still waiting after unexpected stop, show re-tap prompt
     if(sfp.active && sfp.waiting && !sfp.resultState){
-      setTimeout(()=>{if(sfp.active&&sfp.waiting&&!sfp.resultState) sfpStartRec();},150);
+      sfpSetActionBtn('ready','🎙 Tap untuk lanjutkan', false);
+      sfpSetDot('live','Tap mic untuk lanjutkan');
     }
   };
-  sfp.rec.onerror=e=>{sfp.recRunning=false;if(e.error==='not-allowed'){sfpSetDot('warn','❌ Izinkan mikrofon');globalMicStream=null;}};
+  sfp.rec.onerror=e=>{
+    sfp.recRunning=false;
+    if(e.error==='not-allowed' || e.error==='permission-denied'){
+      sfpSetDot('warn','❌ Izinkan mikrofon di pengaturan browser');
+    } else if(e.error==='no-speech'){
+      // timeout — show re-tap
+      if(sfp.active && sfp.waiting && !sfp.resultState){
+        sfpSetActionBtn('ready','🎙 Tap untuk coba lagi', false);
+        sfpSetDot('live','Tidak terdengar — tap untuk coba lagi');
+      }
+    }
+  };
   try{
     sfp.rec.start(); sfp.recRunning=true;
     sfpSetActionBtn('listening','Sedang Mendengarkan', false);
