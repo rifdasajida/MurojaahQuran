@@ -460,9 +460,10 @@ body::after {
   overflow-y: auto;
   padding: 16px 18px 24px;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 .tab-content.active { display: flex; }
+#tabcontent-voice { justify-content: flex-start; }
 
 /* ── RETRY BANNER ── */
 .retry-banner {
@@ -1126,68 +1127,38 @@ body::after {
 .sidebar-appbar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 24px 16px 12px;
+  padding: 28px 20px 16px;
   flex-shrink: 0;
 }
-.sidebar-appbar-icon {
-  font-size: 22px;
-  line-height: 1;
-}
-.sidebar-appbar-title {
-  font-family: var(--font-ui);
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--text);
-  letter-spacing: -0.4px;
-}
-
-/* User profile card */
-.sidebar-profile {
-  margin: 8px 8px 4px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 8px;
-  padding: 10px 12px;
+.sidebar-brand {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-  transition: background 0.2s;
-  cursor: pointer;
+  width: 100%;
+  gap: 2px;
 }
-.sidebar-profile:hover { background: rgba(255,255,255,0.1); }
-.sidebar-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--accent-dark);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-ui);
-  font-size: 13px;
+.sidebar-brand-arabic {
+  font-family: 'Amiri', serif;
+  font-size: 28px;
   font-weight: 700;
-  color: #FFFFFF;
-  flex-shrink: 0;
+  color: var(--gold-light);
+  letter-spacing: 0.5px;
+  line-height: 1.2;
 }
-.sidebar-profile-info { overflow: hidden; }
-.sidebar-profile-name {
-  font-family: var(--font-ui);
-  font-size: 13px;
+.sidebar-brand-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
   font-weight: 600;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin-top: 2px;
 }
-.sidebar-profile-email {
-  font-family: var(--font-ui);
-  font-size: 11px;
-  color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-top: 1px;
+.sidebar-brand-divider {
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dark), transparent);
+  margin-top: 10px;
 }
 
 /* Nav items */
@@ -1195,14 +1166,14 @@ body::after {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 8px 8px;
+  padding: 6px 8px;
   flex: 1;
 }
 .sidebar-nav-item {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 10px 12px;
+  gap: 12px;
+  padding: 9px 12px;
   border-radius: 6px;
   border: none;
   background: transparent;
@@ -1210,7 +1181,7 @@ body::after {
   cursor: pointer;
   transition: all 0.15s;
   font-family: var(--font-ui);
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 500;
   text-align: left;
   width: 100%;
@@ -1227,17 +1198,19 @@ body::after {
   padding-left: 9px;
 }
 .sidebar-nav-icon {
-  width: 20px;
+  width: 18px;
+  height: 18px;
   text-align: center;
-  font-size: 16px;
   flex-shrink: 0;
 }
 
+#mushafSurahCtrl { display: none !important; }
 /* Hide the old horizontal tab-bar on desktop */
 @media (min-width: 769px) {
   .tab-bar { display: none !important; }
   .ctrl-header { display: none !important; }
   .ctrl-panel { border-left: 1px solid var(--border); }
+  #mushafSurahCtrl { display: none !important; }
 }
 
 /* Right panel section header */
@@ -1253,10 +1226,13 @@ body::after {
 }
 .rpanel-title {
   font-family: var(--font-ui);
-  font-size: 15px;
+  font-size: 16px;
   color: var(--text);
   font-weight: 800;
   letter-spacing: -0.3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .rpanel-subtitle {
   font-size: 10px;
@@ -1272,268 +1248,351 @@ body::after {
   position: fixed;
   top: 0; left: 260px; right: 0; bottom: 0;
   z-index: 50;
-  flex-direction: column;
   background: var(--bg);
   overflow: hidden;
 }
-.sambung-fullpage.sfp-open {
-  display: flex;
-}
+.sambung-fullpage.sfp-open { display: block; }
 @media (max-width: 768px) {
-  .sambung-fullpage { display: none !important; }
+  .sambung-fullpage { left: 0 !important; z-index: 200 !important; }
 }
 
-/* Two-column layout inside: left=setup/active, right=arabic display */
 .sfp-layout {
   display: grid;
-  grid-template-columns: 420px 1fr;
-  height: 100%;
+  grid-template-columns: 320px 1fr;
+  height: 100vh;
   overflow: hidden;
 }
 
-/* Left control panel */
+/* ── LEFT: setup panel ── */
 .sfp-left {
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--border);
   height: 100vh;
   overflow: hidden;
+  background: var(--bg-elevated);
 }
 .sfp-left-header {
-  padding: 20px 24px 16px;
+  padding: 18px 20px 14px;
   border-bottom: 1px solid var(--border);
-  background: var(--bg-elevated);
   flex-shrink: 0;
 }
 .sfp-left-title {
-  font-family: 'Inter', serif;
-  font-size: 22px;
+  font-size: 18px;
   color: var(--text);
   font-weight: 700;
+  letter-spacing: -0.3px;
 }
 .sfp-left-sub {
   font-size: 10px;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: rgba(201,168,76,0.45);
-  margin-top: 3px;
+  color: rgba(201,168,76,0.5);
+  margin-top: 2px;
 }
 .sfp-left-body {
   flex: 1;
   overflow-y: auto;
-  padding: 18px 24px 24px;
+  padding: 16px 20px 20px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,0.07) transparent;
 }
 
-/* Right display panel */
+/* ── RIGHT: main interaction area ── */
 .sfp-right {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Top strip: surah info */
+.sfp-right-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 32px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.15);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+/* Center: arabic + mic */
+.sfp-right-body {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 64px;
-  gap: 24px;
-  background: var(--bg);
-  overflow-y: auto;
-}
-.sfp-right-idle {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  opacity: 0.35;
-  text-align: center;
-}
-.sfp-right-idle-icon {
-  font-size: 72px;
-  line-height: 1;
-}
-.sfp-right-idle-text {
-  font-family: 'Amiri', serif;
-  font-size: 18px;
-  color: var(--text);
+  gap: 28px;
+  padding: 32px 48px;
+  overflow: hidden;
 }
 
-/* Prompt ayah display (big, centered) */
-.sfp-prompt-box {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  max-width: 640px;
-}
-.sfp-prompt-box.sfp-show { display: flex; }
-.sfp-prompt-label {
-  font-size: 10px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--gold);
-  font-weight: 600;
-}
-.sfp-prompt-info {
-  font-size: 12px;
-  color: var(--muted);
-}
+/* Arabic display: the big text in center */
 .sfp-prompt-arabic {
   font-family: 'UthmanicHafs', 'Scheherazade New', serif;
-  font-size: clamp(28px, 3.5vw, 46px);
+  font-size: clamp(32px, 4vw, 56px);
   line-height: 2;
   direction: rtl;
   text-align: center;
   color: var(--text);
-  padding: 20px 24px;
-  background: rgba(0,0,0,0.2);
-  border: 1px solid var(--border);
-  border-radius: 16px;
   width: 100%;
+  max-width: 820px;
+  transition: opacity 0.3s;
 }
-.sfp-prompt-replay {
-  padding: 8px 24px;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.3);
-  border-radius: 50px;
-  color: var(--text);
-  font-size: 13px;
-  cursor: pointer;
-  font-family: var(--font-ui);
-  transition: all 0.2s;
-}
-.sfp-prompt-replay:hover { background: rgba(201,168,76,0.2); }
+.sfp-prompt-arabic.sfp-dimmed { opacity: 0.3; }
 
-/* Mic area centered */
-.sfp-mic-area {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
+/* Answer display (shown after result) */
+.sfp-result-arabic {
+  font-family: 'UthmanicHafs', 'Scheherazade New', serif;
+  font-size: clamp(24px, 3vw, 42px);
+  line-height: 2;
+  direction: rtl;
+  text-align: center;
+  color: var(--text);
+  width: 100%;
+  max-width: 820px;
+  padding: 16px 24px;
+  border-radius: 14px;
+  display: none;
 }
+.sfp-result-arabic.sfp-ok  { background: rgba(29,185,84,0.08); border: 1px solid rgba(29,185,84,0.2); }
+.sfp-result-arabic.sfp-err { background: rgba(239,107,90,0.08); border: 1px solid rgba(239,107,90,0.2); }
+.sfp-result-arabic.sfp-show { display: block; }
 
 /* Hint box */
 .sfp-hint-box {
   display: none;
-  background: rgba(201,168,76,0.08);
-  border: 1px solid rgba(201,168,76,0.3);
+  background: rgba(201,168,76,0.07);
+  border: 1px solid rgba(201,168,76,0.25);
   border-radius: 12px;
-  padding: 12px 20px;
+  padding: 10px 20px;
   text-align: center;
   width: 100%;
-  max-width: 480px;
+  max-width: 500px;
 }
 .sfp-hint-box.sfp-show { display: block; }
 .sfp-hint-arabic {
   font-family: 'UthmanicHafs', 'Scheherazade New', serif;
-  font-size: 32px;
-  line-height: 1.8;
+  font-size: 30px;
+  line-height: 1.9;
   color: var(--gold-light);
   direction: rtl;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
-/* Result overlay on right panel */
-.sfp-result-box {
-  display: none;
+/* Bottom strip: mic + controls */
+.sfp-right-footer {
+  border-top: 1px solid var(--border);
+  padding: 20px 32px;
+  display: flex;
   flex-direction: column;
   align-items: center;
   gap: 14px;
-  width: 100%;
-  max-width: 560px;
-}
-.sfp-result-box.sfp-show { display: flex; }
-.sfp-result-expected {
-  font-family: 'UthmanicHafs', 'Scheherazade New', serif;
-  font-size: clamp(22px, 2.8vw, 36px);
-  line-height: 2;
-  direction: rtl;
-  text-align: center;
-  color: var(--text);
-  padding: 16px 20px;
-  background: rgba(0,0,0,0.2);
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  width: 100%;
-}
-.sfp-result-msg {
-  font-size: 15px;
-  font-weight: 600;
-  text-align: center;
-  padding: 12px 24px;
-  border-radius: 10px;
-  width: 100%;
-}
-.sfp-result-actions {
-  display: flex;
-  gap: 10px;
-  width: 100%;
-}
-.sfp-result-actions button {
-  flex: 1;
-  padding: 13px;
-  border-radius: 10px;
-  font-family: var(--font-ui);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s;
+  flex-shrink: 0;
+  background: rgba(0,0,0,0.12);
 }
 
-/* Score cards on right */
-.sfp-score-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  width: 100%;
-  max-width: 400px;
-}
-.sfp-score-card {
-  padding: 14px;
-  border-radius: 12px;
-  text-align: center;
-  border: 1px solid;
-}
-.sfp-score-val {
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1;
-}
-.sfp-score-lbl {
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  margin-top: 4px;
-  opacity: 0.6;
-}
-
-/* Status bar */
-.sfp-status-bar {
+/* ── THE MIC/ACTION BUTTON: centerpiece ── */
+.sfp-action-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: rgba(0,0,0,0.2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  width: 100%;
-  max-width: 400px;
+  gap: 12px;
+  padding: 0 28px;
+  height: 64px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 700;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  min-width: 220px;
+  justify-content: center;
+  letter-spacing: 0.2px;
+  position: relative;
+  overflow: hidden;
 }
-.sfp-transcript-box {
-  padding: 10px 16px;
-  background: rgba(0,0,0,0.15);
+.sfp-action-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+.sfp-action-btn:not(:disabled):hover { transform: scale(1.04); }
+.sfp-action-btn:not(:disabled):active { transform: scale(0.97); }
+
+/* State: idle (mic) */
+.sfp-action-btn.state-idle {
+  background: var(--card);
+  color: var(--muted);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  min-height: 44px;
-  width: 100%;
-  max-width: 480px;
+}
+/* State: listening (recording) */
+.sfp-action-btn.state-listening {
+  background: rgba(239,107,90,0.18);
+  color: #ef6b5a;
+  border: 1px solid rgba(239,107,90,0.4);
+  box-shadow: 0 0 0 6px rgba(239,107,90,0.08);
+  animation: sfp-pulse 2s infinite;
+}
+/* State: next (correct answer) */
+.sfp-action-btn.state-next {
+  background: var(--accent);
+  color: #000;
+  box-shadow: 0 4px 24px rgba(29,185,84,0.3);
+}
+/* State: retry (wrong answer) */
+.sfp-action-btn.state-retry {
+  background: rgba(239,107,90,0.15);
+  color: #ef6b5a;
+  border: 1px solid rgba(239,107,90,0.35);
+}
+@keyframes sfp-pulse {
+  0%,100% { box-shadow: 0 0 0 6px rgba(239,107,90,0.08); }
+  50%      { box-shadow: 0 0 0 12px rgba(239,107,90,0.04); }
+}
+
+/* Transcript */
+.sfp-transcript-box {
   direction: rtl;
-  text-align: right;
-  font-family: 'Amiri', serif;
+  text-align: center;
+  font-family: 'UthmanicHafs', 'Scheherazade New', serif;
   font-size: 20px;
-  color: var(--text);
+  color: var(--muted);
+  min-height: 28px;
+  transition: color 0.2s;
+}
+.sfp-transcript-box.live { color: var(--text); }
+
+/* Score pills */
+.sfp-score-pills {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.sfp-score-pill {
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Result label */
+.sfp-result-label {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* Countdown ring */
+.sfp-countdown-wrap {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.sfp-countdown-wrap.show { display: flex; }
+.sfp-countdown-bar-track {
+  width: 120px;
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.sfp-countdown-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  width: 100%;
+  border-radius: 3px;
+}
+/* ── Mobile responsive for Sambung Fullpage ── */
+@media (max-width: 768px) {
+  .sfp-layout {
+    grid-template-columns: 1fr;
+  }
+  .sfp-left {
+    display: flex !important;
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    width: 100%;
+    border-right: none;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--bg);
+  }
+  .sfp-left.sfp-left-hidden {
+    display: none !important;
+  }
+  .sfp-left .sfp-left-body {
+    overflow-y: auto;
+    padding: 12px 16px 100px;
+  }
+  .sfp-left .sfp-left-header {
+    padding: 14px 16px 10px;
+  }
+  .sfp-right {
+    height: 100vh;
+  }
+  .sfp-right-header {
+    padding: 12px 16px;
+  }
+  .sfp-right-body {
+    padding: 16px;
+    gap: 14px;
+  }
+  .sfp-right-footer {
+    padding: 14px 16px;
+    gap: 10px;
+  }
+  .sfp-prompt-arabic {
+    font-size: clamp(24px, 7vw, 38px) !important;
+  }
+  .sfp-result-arabic {
+    font-size: clamp(20px, 5.5vw, 30px) !important;
+  }
+}
+
+/* ── Mobile sfp header: hamburger + title ── */
+.sfp-mobile-header-row {
+  display: none;
+}
+@media (max-width: 768px) {
+  .sfp-mobile-header-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .sfp-desktop-header-content {
+    display: none;
+  }
+  /* Show hamburger in sfp-left on mobile */
+  #sfpLeftHamburger {
+    display: flex !important;
+  }
+}
+@media (min-width: 769px) {
+  .sfp-mobile-header-row { display: none !important; }
+  .sfp-desktop-header-content { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+  #sfpLeftHamburger { display: none !important; }
+}
+
+
+/* Status dot */
+.sfp-status-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.sfp-status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  flex-shrink: 0;
+  transition: background 0.3s;
 }
 
 /* ── WAQF MARKS ──────────────────────────────────────────────────────── */
@@ -1601,6 +1660,42 @@ body::after {
 
 /* Mic button sizing handled in base .btn-mic rule */
 
+/* Audio field groups */
+.audio-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.audio-field-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent-mid);
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+.audio-field-input {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-mono);
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+}
+.audio-field-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.audio-field-input::-webkit-inner-spin-button,
+.audio-field-input::-webkit-outer-spin-button { opacity: 0.4; }
 /* Padding fixes — tighten everything up */
 .sidebar-appbar { padding: 20px 16px 8px; }
 .sidebar-profile { margin: 4px 8px 0; padding: 9px 12px; }
@@ -1658,22 +1753,12 @@ body::after {
   <!-- ══════ DESKTOP LEFT SIDEBAR ══════ -->
   <div class="desktop-sidebar" id="desktopSidebar">
 
-    <!-- App Title -->
+    <!-- App Title: مراجعة + HAFALAN TRACKER -->
     <div class="sidebar-appbar">
-      <span class="sidebar-appbar-icon icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent)">
-          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-        </svg>
-      </span>
-      <span class="sidebar-appbar-title">Quran Tracker</span>
-    </div>
-
-    <!-- User Profile Card -->
-    <div class="sidebar-profile">
-      <div class="sidebar-avatar" id="sidebarAvatar">?</div>
-      <div class="sidebar-profile-info">
-        <div class="sidebar-profile-name" id="sidebarName">Hafidz</div>
-        <div class="sidebar-profile-email" id="sidebarEmail">—</div>
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-arabic">مراجعة</div>
+        <div class="sidebar-brand-sub">HAFALAN TRACKER</div>
+        <div class="sidebar-brand-divider"></div>
       </div>
     </div>
 
@@ -1682,7 +1767,7 @@ body::after {
       <button class="sidebar-nav-item snav-active" id="snav-murojaah" onclick="snavSwitch('murojaah')">
         <span class="sidebar-nav-icon icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/>
+            <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>
           </svg>
         </span>
         Cek Hafalan
@@ -1703,14 +1788,6 @@ body::after {
         </span>
         Sambung Ayat
       </button>
-      <button class="sidebar-nav-item" id="snav-setoran" onclick="snavSwitch('setoran')">
-        <span class="sidebar-nav-icon icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-          </svg>
-        </span>
-        Setoran
-      </button>
     </nav>
   </div>
 
@@ -1723,14 +1800,14 @@ body::after {
             <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
           </svg>
         </button>
-        <div class="mushaf-title-area">
-          <span class="mushaf-label">Halaman</span>
-          <span class="mushaf-surah" id="pageTitle">Al-Qalam</span>
-          <span class="page-info" id="pageInfo">—</span>
+        <div class="mushaf-title-area" style="flex:1;text-align:center;align-items:center">
+          <span class="mushaf-surah" id="pageTitle" style="font-size:clamp(18px,2.2vw,26px);color:var(--gold-light)">Al-Qalam</span>
+          <span class="page-info" id="pageInfo" style="text-align:center">—</span>
         </div>
       </div>
 
-      <div class="mushaf-controls">
+      <!-- Surah selector - hidden on desktop, shown on mobile -->
+      <div class="mushaf-controls" id="mushafSurahCtrl">
         <div class="control-group" style="flex:1">
           <div class="control-group-label">Pilih Surah</div>
           <select id="surahSel" onchange="loadSurah()"></select>
@@ -1766,21 +1843,47 @@ body::after {
 
     <!-- RIGHT PANEL HEADER (desktop only) -->
     <div class="rpanel-header" id="rpanelHeader">
-      <div class="rpanel-title" id="rpanelTitle">مراجعة</div>
+      <div class="rpanel-title">
+        <span id="rpanelIcon" style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:var(--card2);border-radius:5px;flex-shrink:0">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+        </span>
+        <span id="rpanelTitle">Cek Hafalan</span>
+      </div>
       <div class="rpanel-subtitle" id="rpanelSubtitle">Voice Tracking</div>
     </div>
 
     <!-- TAB: VOICE -->
     <div class="tab-content active" id="tabcontent-voice">
 
+      <!-- SURAH & AYAT SELECTORS -->
+      <div class="sec" style="padding:14px 16px">
+        <div class="sec-label">Pilih Surah</div>
+        <div style="position:relative;margin-bottom:12px">
+          <select id="surahSelRight" onchange="syncSurahFromRight()" style="width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 36px 10px 14px;font-family:var(--font-ui);font-size:13px;font-weight:500;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;transition:border-color 0.2s">
+          </select>
+          <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+
+        <div class="sec-label">Mulai dari Ayat</div>
+        <div style="position:relative">
+          <select id="ayatSelRight" onchange="syncAyatFromRight()" style="width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 36px 10px 14px;font-family:var(--font-ui);font-size:13px;font-weight:500;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;transition:border-color 0.2s">
+          </select>
+          <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+      </div>
+
       <!-- MIC -->
-      <div class="mic-center">
+      <div class="mic-center" style="padding:14px 0 10px">
         <div class="wave" id="wave">
           <div class="wb"></div><div class="wb"></div><div class="wb"></div>
           <div class="wb"></div><div class="wb"></div><div class="wb"></div>
           <div class="wb"></div><div class="wb"></div><div class="wb"></div>
         </div>
-        <button class="btn-mic" id="btnMic" onclick="toggleSession()">
+        <button class="btn-mic" id="btnMic" onclick="toggleSession()" style="width:88px;height:88px">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/>
           </svg>
@@ -1789,7 +1892,6 @@ body::after {
           <strong id="micLabel">Mulai Sesi</strong>
           <span id="micSub">Tekan untuk aktifkan mikrofon</span>
         </div>
-        <div class="mode-note">Smart tracking: otomatis mengikuti bacaan Anda</div>
       </div>
 
       <!-- RETRY BANNER (hidden by default) -->
@@ -1803,35 +1905,21 @@ body::after {
         <button class="retry-skip-btn" onclick="skipWrongWord()">Lewati ayat ini →</button>
       </div>
 
-      <!-- START POSITION -->
-      <div class="sec">
-        <div class="sec-label">📍 Mulai Dari Ayat</div>
-        <div class="start-position-controls">
-          <div class="start-input-group">
-            <label class="start-label">Ayat ke</label>
-            <input type="number" id="startAyahNum" class="start-input" value="1" min="1" onchange="updateStartPosition()">
-          </div>
-          <button class="btn-set-start" onclick="goToStartPosition()">
-            📍 Pindah ke Posisi Ini
-          </button>
-        </div>
-        <div class="start-info" id="startInfo">Akan mulai dari ayat 1</div>
-      </div>
-
       <!-- STATUS -->
-      <div class="sec">
-        <div class="sec-label">Status</div>
-        <div class="status-row" style="margin-bottom:8px">
+      <div class="sec" style="padding:12px 16px">
+        <div class="status-dot-row" style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--accent-mid);font-weight:600;font-family:var(--font-mono)">STATUS</span>
           <div class="sdot" id="sdot"></div>
-          <span class="stext" id="stext">Belum aktif</span>
+          <span class="stext" id="stext" style="font-size:11px;color:var(--muted)">Belum aktif</span>
         </div>
         <div class="t-box">
           <div class="t-arabic" id="tText">—</div>
         </div>
+        <div class="log-bar" id="logBar" style="margin-top:8px;font-size:10.5px;padding:6px 10px">Smart Recognition siap</div>
       </div>
 
-      <!-- STATS -->
-      <div class="sec">
+      <!-- STATS (hidden until session starts) -->
+      <div class="sec" id="statsSection" style="display:none">
         <div class="sec-label">Statistik Sesi</div>
         <div class="stats-grid">
           <div class="stat"><div class="sv g" id="stOk">0</div><div class="sl">✓ Benar</div></div>
@@ -1841,51 +1929,76 @@ body::after {
         <div class="prog-bar-bg"><div class="prog-bar-fill" id="progFill" style="width:0%"></div></div>
       </div>
 
-      <!-- LOG -->
-      <div class="log-bar" id="logBar">Smart Recognition siap</div>
-
-      <!-- BUTTONS -->
-      <div class="btn-row">
-        <button class="btn-sm red" onclick="resetSession()">Reset</button>
-        <button class="btn-sm green" onclick="markCorrect()">Benar</button>
-        <button class="btn-sm" onclick="jumpBack()">-5 Kata</button>
-        <button class="btn-sm" onclick="skipForward()">Skip</button>
+      <!-- BOTTOM ACTION BUTTONS -->
+      <div class="btn-row" style="margin-top:auto;padding-top:4px">
+        <button class="btn-sm" onclick="resetSession()">Ulangi</button>
+        <button class="btn-sm" onclick="skipForward()">Skip Ayat</button>
       </div>
+
+      <!-- HIDDEN START POSITION inputs (for compatibility) -->
+      <input type="hidden" id="startAyahNum" value="1">
 
     </div><!-- end tab-voice -->
 
     <!-- TAB: AUDIO -->
     <div class="tab-content" id="tabcontent-audio">
-      <div class="audio-player-sec" style="border:none; background:none; padding: 18px 18px 0;">
-        <div class="sec-label">Audio Muroja'ah</div>
-        <div class="audio-controls">
-          <div class="audio-row">
-            <div>
-              <div class="audio-label">Dari Ayat</div>
-              <input type="number" id="audioStartAyah" class="audio-input" value="1" min="1">
-            </div>
-            <div>
-              <div class="audio-label">Sampai Ayat</div>
-              <input type="number" id="audioEndAyah" class="audio-input" value="5" min="1">
-            </div>
-          </div>
-          <div>
-            <div class="audio-label">Jumlah Pengulangan</div>
-            <input type="number" id="audioRepeatCount" class="audio-input" value="3" min="1" max="100">
-          </div>
-          <div>
-            <div class="audio-label">Jeda Antar Ayat (detik)</div>
-            <input type="number" id="audioPause" class="audio-input" value="2" min="0" max="10" step="0.5">
-          </div>
-          <button class="play-btn" id="audioPlayBtn" onclick="toggleAudioPlayer()">
-            <span id="audioPlayIcon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            </span>
-            <span id="audioPlayText">Putar Audio</span>
-          </button>
-          <div class="audio-status" id="audioStatus">Siap memutar audio</div>
+      <!-- Header -->
+      <div style="display:flex;align-items:center;gap:10px;padding-bottom:4px;border-bottom:1px solid var(--border)">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:var(--card2);border-radius:6px;flex-shrink:0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        </span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);letter-spacing:-0.2px">Audio Repeat</div>
+          <div style="font-size:10px;color:var(--muted2);font-family:var(--font-mono)">Muroja'ah Player</div>
         </div>
       </div>
+
+      <!-- Pilih Surah -->
+      <div class="audio-field-group">
+        <div class="audio-field-label">PILIH SURAH</div>
+        <div style="position:relative">
+          <select id="audioSurahSel" onchange="syncAudioSurah()" style="width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:11px 36px 11px 14px;font-family:var(--font-ui);font-size:13px;font-weight:500;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;transition:border-color 0.2s">
+          </select>
+          <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+      </div>
+
+      <!-- Dari / Sampai Ayat -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="audio-field-group">
+          <div class="audio-field-label">DARI AYAT</div>
+          <input type="number" id="audioStartAyah" class="audio-field-input" value="1" min="1">
+        </div>
+        <div class="audio-field-group">
+          <div class="audio-field-label">SAMPAI AYAT</div>
+          <input type="number" id="audioEndAyah" class="audio-field-input" value="5" min="1">
+        </div>
+      </div>
+
+      <!-- Jumlah Pengulangan -->
+      <div class="audio-field-group">
+        <div class="audio-field-label">JUMLAH PENGULANGAN</div>
+        <input type="number" id="audioRepeatCount" class="audio-field-input" value="3" min="1" max="100">
+      </div>
+
+      <!-- Jeda Antar Ayat -->
+      <div class="audio-field-group">
+        <div class="audio-field-label">JEDA ANTAR AYAT (DETIK)</div>
+        <input type="number" id="audioPause" class="audio-field-input" value="2" min="0" max="10" step="0.5">
+      </div>
+
+      <!-- Play Button -->
+      <button class="play-btn" id="audioPlayBtn" onclick="toggleAudioPlayer()" style="margin-top:4px">
+        <span id="audioPlayIcon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </span>
+        <span id="audioPlayText">Putar Audio</span>
+      </button>
+
+      <!-- Status -->
+      <div class="audio-status" id="audioStatus">Siap memutar audio</div>
     </div><!-- end tab-audio -->
 
     <!-- TAB: SAMBUNG AYAT -->
@@ -1915,70 +2028,79 @@ body::after {
       </div>
 
       <!-- SAMBUNG STATE: ACTIVE -->
-      <div id="sambungActive" style="display:none;flex-direction:column;gap:12px">
+      <div id="sambungActive" style="display:none;flex-direction:column;gap:0">
 
-        <!-- Ayat yang dibacakan sistem -->
-        <div class="sec" id="sambungPromptSec">
-          <div class="sec-label" style="color:var(--gold)">Sistem Membaca</div>
-          <div id="sambungAyahInfo" style="font-size:11px;color:var(--muted);margin-bottom:6px">—</div>
-          <div id="sambungAyahText" style="font-family:'UthmanicHafs','Scheherazade New',serif;font-size:26px;line-height:1.9;direction:rtl;text-align:right;color:var(--text);padding:10px 12px;background:rgba(0,0,0,0.2);border-radius:10px;border:1px solid var(--border)">—</div>
-          <button id="sambungReplayBtn" onclick="sambungReplayAudio()" style="margin-top:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(201,168,76,0.3);border-radius:8px;color:var(--gold-light);font-size:12px;padding:7px 14px;cursor:pointer;width:100%">
-            Putar Ulang
-          </button>
-        </div>
-
-        <!-- Status validasi user -->
-        <div class="sec">
-          <div class="sec-label">Status</div>
-          <div class="status-row" style="margin-bottom:8px">
-            <div class="sdot" id="sambungDot"></div>
-            <span class="stext" id="sambungText">Siap — tekan mikrofon untuk sambung</span>
-          </div>
-          <div class="t-box" style="min-height:40px">
-            <div class="t-arabic" id="sambungTranscript">—</div>
+        <!-- ── COMPACT HEADER: surah info + score ── -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px 8px;border-bottom:1px solid var(--border);flex-shrink:0">
+          <div id="sambungAyahInfo" style="font-size:11px;color:var(--muted);letter-spacing:0.4px">—</div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <span style="font-size:11px;color:var(--sem-ok);font-weight:600"><span id="sambungOk">0</span> ✓</span>
+            <span style="font-size:11px;color:var(--sem-err);font-weight:600"><span id="sambungErr">0</span> ✗</span>
+            <span style="font-size:11px;color:var(--muted)"><span id="sambungTotal">0</span> total</span>
           </div>
         </div>
 
-        <!-- Hint display (hidden by default) -->
-        <div id="sambungHintBox" style="display:none;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.35);border-radius:10px;padding:10px 14px;text-align:right">
-          <div style="font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;text-align:left">Hint — 2 kata pertama:</div>
-          <div id="sambungHintText" style="font-family:'UthmanicHafs','Scheherazade New',serif;font-size:28px;line-height:1.8;color:var(--gold-light);direction:rtl">—</div>
-        </div>
+        <!-- ── MAIN CARD: semua dalam satu view, no scroll ── -->
+        <div style="padding:16px;display:flex;flex-direction:column;gap:14px;flex:1">
 
-        <!-- Mic button -->
-        <div class="mic-center" style="padding:8px 0">
-          <button class="btn-mic" id="sambungMicBtn" onclick="toggleSambungSession()" style="width:64px;height:64px"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
-          <div class="mic-label">
-            <strong id="sambungMicLabel">Sambung Ayat</strong>
-            <span id="sambungMicSub">Tekan untuk bicara</span>
+          <!-- Ayat prompt sistem -->
+          <div style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:12px 14px">
+            <div style="font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+              <span>📖 Sistem Membaca</span>
+              <button id="sambungReplayBtn" onclick="sambungReplayAudio()" style="background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);border-radius:6px;color:var(--gold-light);font-size:10px;padding:3px 8px;cursor:pointer">▶ Putar Ulang</button>
+            </div>
+            <div id="sambungAyahText" style="font-family:'UthmanicHafs','Scheherazade New',serif;font-size:24px;line-height:1.85;direction:rtl;text-align:right;color:var(--text)">—</div>
           </div>
-        </div>
 
-        <!-- Lewati & Hint buttons -->
-        <div style="display:flex;gap:8px;padding:0 4px">
-          <button onclick="sambungLewati()" style="flex:1;padding:9px;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s" onmouseover="this.style.color='var(--text)';this.style.borderColor='rgba(201,168,76,0.4)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">Lewati</button>
-          <button onclick="sambungHint()" style="flex:1;padding:9px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);border-radius:8px;color:var(--gold);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s" onmouseover="this.style.background='rgba(255,255,255,0.07)'" onmouseout="this.style.background='rgba(201,168,76,0.08)'">Hint</button>
-        </div>
+          <!-- Hint box (hidden by default) -->
+          <div id="sambungHintBox" style="display:none;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);border-radius:10px;padding:10px 14px;text-align:right">
+            <div style="font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;text-align:left">Hint — 2 kata pertama:</div>
+            <div id="sambungHintText" style="font-family:'UthmanicHafs','Scheherazade New',serif;font-size:26px;line-height:1.8;color:var(--gold-light);direction:rtl">—</div>
+          </div>
 
-        <!-- Hasil -->
-        <div id="sambungResult" style="display:none" class="sec">
-          <div class="sec-label" id="sambungResultLabel">Hasil</div>
-          <div id="sambungExpected" style="font-family:'UthmanicHafs','Scheherazade New',serif;font-size:22px;direction:rtl;text-align:right;line-height:1.9;padding:10px 12px;background:rgba(0,0,0,0.2);border-radius:10px;border:1px solid var(--border);margin-bottom:8px">—</div>
-          <div id="sambungResultMsg" style="font-size:13px;font-weight:600;text-align:center;padding:10px;border-radius:8px;margin-bottom:8px">—</div>
+          <!-- ── MIC AREA: center of attention ── -->
+          <div id="sambungMicArea" style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 0">
+
+            <!-- Transcript live -->
+            <div id="sambungTranscript" style="font-family:'UthmanicHafs','Scheherazade New',serif;font-size:18px;direction:rtl;text-align:center;color:var(--muted);min-height:28px;transition:color 0.3s">—</div>
+
+            <!-- Big mic button -->
+            <button class="btn-mic" id="sambungMicBtn" onclick="sambungManualMicToggle()" style="width:72px;height:72px;font-size:0">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+            </button>
+
+            <!-- Status label under mic -->
+            <div style="display:flex;align-items:center;gap:6px">
+              <div class="sdot" id="sambungDot" style="width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.2);flex-shrink:0"></div>
+              <span class="stext" id="sambungText" style="font-size:12px;color:var(--muted)">Menunggu audio...</span>
+            </div>
+
+            <!-- Countdown bar (auto-next) -->
+            <div id="sambungCountdownWrap" style="display:none;width:100%;max-width:200px">
+              <div style="font-size:11px;color:var(--accent);text-align:center;margin-bottom:4px" id="sambungCountdownLabel">Soal berikutnya dalam 3...</div>
+              <div style="height:3px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden">
+                <div id="sambungCountdownBar" style="height:100%;background:var(--accent);width:100%;transition:width linear"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feedback card (shown after answer) -->
+          <div id="sambungResult" style="display:none;border-radius:12px;overflow:hidden">
+            <div id="sambungResultMsg" style="font-size:13px;font-weight:600;text-align:center;padding:10px 14px">—</div>
+            <div style="padding:10px 14px;border-top:1px solid rgba(255,255,255,0.06)">
+              <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px" id="sambungResultLabel">Jawaban</div>
+              <div id="sambungExpected" style="font-family:'UthmanicHafs','Scheherazade New',serif;font-size:20px;direction:rtl;text-align:right;line-height:1.85;color:var(--text)">—</div>
+            </div>
+          </div>
+
+          <!-- Action buttons (hanya lewati + hint, soal baru = otomatis) -->
           <div style="display:flex;gap:8px">
-            <button onclick="nextSambung()" style="flex:1;padding:10px;background:var(--accent);border:none;border-radius:50px;color:#000;font-weight:600;cursor:pointer;font-size:13px">Soal Baru</button>
-            <button onclick="stopSambungMode()" style="flex:1;padding:10px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:8px;color:var(--muted);cursor:pointer;font-size:13px">Selesai</button>
+            <button onclick="sambungLewati()" style="flex:1;padding:9px;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Lewati</button>
+            <button onclick="sambungHint()" style="flex:1;padding:9px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);border-radius:8px;color:var(--gold);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s">Hint</button>
+            <button onclick="stopSambungMode()" style="flex:1;padding:9px;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Selesai</button>
           </div>
-        </div>
 
-        <!-- Skor sesi -->
-        <div class="sec">
-          <div class="sec-label">Skor Sesi</div>
-          <div class="stats-grid">
-            <div class="stat"><div class="sv g" id="sambungOk">0</div><div class="sl">✓ Benar</div></div>
-            <div class="stat"><div class="sv r" id="sambungErr">0</div><div class="sl">✗ Salah</div></div>
-            <div class="stat"><div class="sv b" id="sambungTotal">0</div><div class="sl">Total</div></div>
-          </div>
+        </div>
         </div>
 
         <button onclick="stopSambungMode()" style="background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;padding:8px;cursor:pointer">
@@ -2007,131 +2129,154 @@ body::after {
   <div class="sambung-fullpage" id="sambungFullPage">
     <div class="sfp-layout">
 
-      <!-- LEFT: Controls -->
+      <!-- ── LEFT: Setup panel ── -->
       <div class="sfp-left">
         <div class="sfp-left-header">
-          <div class="sfp-left-title">Sambung Ayat</div>
-          <div class="sfp-left-sub">Latihan Menyambung</div>
+          <!-- Mobile hamburger row -->
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+            <button onclick="mbOpenDrawer()" id="sfpLeftHamburger" style="display:none;align-items:center;justify-content:center;width:32px;height:32px;background:none;border:none;cursor:pointer;color:var(--text);padding:0;flex-shrink:0">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+              </svg>
+            </button>
+            <div>
+              <div class="sfp-left-title">Sambung Ayat</div>
+              <div class="sfp-left-sub">Latihan Menyambung</div>
+            </div>
+          </div>
         </div>
         <div class="sfp-left-body" id="sfpLeftBody">
 
-          <!-- ── SETUP STATE ── -->
+          <!-- SETUP STATE -->
           <div id="sfp-setup">
             <div class="mode-note" style="margin-bottom:14px">Sistem membaca 1 ayat acak, kamu sambung ayat berikutnya 🎯</div>
-
             <div style="font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.8px">Pilih Surah</div>
             <div id="sfp-surahList" style="display:flex;flex-direction:column;background:rgba(0,0,0,0.15);border:1px solid var(--border);border-radius:12px;overflow:hidden;max-height:300px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.07) transparent"></div>
             <div id="sfp-rangeConfig" style="margin-top:10px;display:flex;flex-direction:column;gap:8px"></div>
-
-            <button class="btn-set-start" style="margin-top:14px;width:100%;padding:13px;font-size:14px" onclick="sfpStart()">
-              Mulai Sambung Ayat
-            </button>
+            <button class="btn-set-start" style="margin-top:14px;width:100%;padding:13px;font-size:14px" onclick="sfpStart()">Mulai Sambung Ayat</button>
           </div>
 
-          <!-- ── ACTIVE STATE ── -->
-          <div id="sfp-active" style="display:none;flex-direction:column;gap:14px">
-            <!-- Mic -->
-            <div class="mic-center" style="padding:14px 0">
-              <div class="wave" id="sfp-wave">
-                <div class="wb"></div><div class="wb"></div><div class="wb"></div>
-                <div class="wb"></div><div class="wb"></div><div class="wb"></div>
-                <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+          <!-- ACTIVE STATE: minimal info, main action on right -->
+          <div id="sfp-active" style="display:none;flex-direction:column;gap:16px">
+
+            <!-- Score -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+              <div style="text-align:center;padding:10px;background:rgba(29,185,84,0.08);border:1px solid rgba(29,185,84,0.15);border-radius:10px">
+                <div style="font-size:22px;font-weight:700;color:var(--accent)" id="sfp-scoreOk">0</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:2px">✓ Benar</div>
               </div>
-              <button class="btn-mic" id="sfp-micBtn" onclick="sfpToggleRec()" style="width:72px;height:72px"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
-              <div class="mic-label">
-                <strong id="sfp-micLabel">Sambung Ayat</strong>
-                <span id="sfp-micSub">Tekan untuk bicara</span>
+              <div style="text-align:center;padding:10px;background:rgba(239,107,90,0.08);border:1px solid rgba(239,107,90,0.15);border-radius:10px">
+                <div style="font-size:22px;font-weight:700;color:#ef6b5a" id="sfp-scoreErr">0</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:2px">✗ Salah</div>
+              </div>
+              <div style="text-align:center;padding:10px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px">
+                <div style="font-size:22px;font-weight:700;color:var(--text)" id="sfp-scoreTotal">0</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:2px">Total</div>
               </div>
             </div>
 
             <!-- Status -->
-            <div class="sec">
-              <div class="sec-label">Status</div>
-              <div class="status-row" style="margin-bottom:8px">
-                <div class="sdot" id="sfp-dot"></div>
-                <span class="stext" id="sfp-statusText">Siap — tekan mikrofon</span>
-              </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:9px">
+              <div class="sfp-status-dot" id="sfp-dot"></div>
+              <span style="font-size:12px;color:var(--muted)" id="sfp-statusText">Siap</span>
             </div>
 
-            <!-- Action buttons -->
-            <div style="display:flex;gap:8px">
-              <button onclick="sfpLewati()" style="flex:1;padding:11px;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:9px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Lewati</button>
-              <button onclick="sfpHint()" style="flex:1;padding:11px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);border-radius:9px;color:var(--gold);font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s" onmouseover="this.style.background='rgba(255,255,255,0.07)'" onmouseout="this.style.background='rgba(201,168,76,0.08)'">Hint</button>
-            </div>
+            <div style="flex:1"></div>
 
-            <!-- Score -->
-            <div class="sec">
-              <div class="sec-label">Skor Sesi</div>
-              <div class="stats-grid">
-                <div class="stat"><div class="sv g" id="sfp-scoreOk">0</div><div class="sl">✓ Benar</div></div>
-                <div class="stat"><div class="sv r" id="sfp-scoreErr">0</div><div class="sl">✗ Salah</div></div>
-                <div class="stat"><div class="sv b" id="sfp-scoreTotal">0</div><div class="sl">Total</div></div>
-              </div>
-            </div>
-
-            <button onclick="sfpStop()" style="background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;padding:10px;cursor:pointer;width:100%;font-family:'Inter',sans-serif">
+            <button onclick="sfpStop()" style="background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;padding:10px;cursor:pointer;width:100%;font-family:var(--font-ui);transition:all 0.2s" onmouseover="this.style.borderColor='rgba(255,255,255,0.2)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
               ← Pengaturan
             </button>
           </div>
 
-        </div><!-- /sfpLeftBody -->
+        </div>
       </div><!-- /sfp-left -->
 
-      <!-- RIGHT: Ayat display + result -->
+      <!-- ── RIGHT: Main interaction ── -->
       <div class="sfp-right" id="sfp-right">
 
-        <!-- Idle placeholder -->
-        <div class="sfp-right-idle" id="sfp-idle">
-          <div class="sfp-right-idle-icon"><svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
-          <div class="sfp-right-idle-text">Pilih surah dan mulai<br>sesi Sambung Ayat</div>
+        <!-- TOP STRIP: surah info + replay -->
+        <div class="sfp-right-header" id="sfp-header">
+          <!-- Mobile: hamburger + title + setup btn -->
+          <div class="sfp-mobile-header-row" style="width:100%;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:10px">
+              <button onclick="mbOpenDrawer()" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;flex-shrink:0;background:none;border:none;cursor:pointer;color:var(--text);padding:0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+              </button>
+              <div>
+                <div style="font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold)">SISTEM MEMBACA</div>
+                <div style="font-size:12px;color:var(--muted)" id="sfp-promptInfo">—</div>
+              </div>
+            </div>
+            <button id="sfp-replayBtn" onclick="sfpReplay()" style="padding:6px 12px;background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:50px;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--font-ui)">
+              Putar Ulang
+            </button>
+          </div>
+          <!-- Desktop: original layout -->
+          <div class="sfp-desktop-header-content">
+            <div>
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold);margin-bottom:2px">SISTEM MEMBACA</div>
+              <div style="font-size:14px;color:var(--muted)" id="sfp-promptInfo-desktop">—</div>
+            </div>
+            <button id="sfp-replayBtn-desktop" onclick="sfpReplay()" style="padding:8px 18px;background:transparent;border:1px solid rgba(255,255,255,0.15);border-radius:50px;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--font-ui);transition:all 0.2s" onmouseover="this.style.borderColor='rgba(201,168,76,0.5)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)';this.style.color='var(--muted)'">
+              Putar Ulang
+            </button>
+          </div>
         </div>
 
-        <!-- Prompt display -->
-        <div class="sfp-prompt-box" id="sfp-promptBox">
-          <div class="sfp-prompt-label">Sistem Membaca</div>
-          <div class="sfp-prompt-info" id="sfp-promptInfo">—</div>
-          <div class="sfp-prompt-arabic" id="sfp-promptArabic">—</div>
-          <button class="sfp-prompt-replay" id="sfp-replayBtn" onclick="sfpReplay()">Putar Ulang</button>
+        <!-- BODY: big arabic + hint + result arabic -->
+        <div class="sfp-right-body" id="sfp-body">
 
-          <!-- Status + Transcript -->
-          <div class="sfp-status-bar">
-            <div class="sdot" id="sfp-dot2" style="flex-shrink:0"></div>
-            <span style="font-size:12px;color:var(--muted)" id="sfp-statusText2">Siap</span>
+          <!-- Idle state -->
+          <div id="sfp-idle" style="display:flex;flex-direction:column;align-items:center;gap:12px;opacity:0.3;text-align:center">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <div style="font-size:16px;color:var(--text)">Pilih surah dan mulai<br>sesi Sambung Ayat</div>
           </div>
-          <div class="sfp-transcript-box" id="sfp-transcript">—</div>
 
-          <!-- Hint -->
+          <!-- Prompt ayah (big text) -->
+          <div class="sfp-prompt-arabic" id="sfp-promptArabic" style="display:none">—</div>
+
+          <!-- Hint box -->
           <div class="sfp-hint-box" id="sfp-hintBox">
-            <div style="font-size:9px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-weight:600;text-align:left">Hint — 2 kata pertama:</div>
+            <div style="font-size:9px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-weight:600;text-align:left;margin-bottom:2px">Hint — 2 kata pertama:</div>
             <div class="sfp-hint-arabic" id="sfp-hintText">—</div>
           </div>
+
+          <!-- Result: correct/wrong answer displayed -->
+          <div class="sfp-result-arabic" id="sfp-expected">—</div>
+
+          <!-- Result message pill -->
+          <div id="sfp-resultMsg" style="display:none;font-size:14px;font-weight:600;padding:8px 20px;border-radius:50px;text-align:center"></div>
+
         </div>
 
-        <!-- Result -->
-        <div class="sfp-result-box" id="sfp-resultBox">
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold)" id="sfp-resultLabel">Hasil</div>
-          <div class="sfp-result-expected" id="sfp-expected">—</div>
-          <div class="sfp-result-msg" id="sfp-resultMsg">—</div>
-          <div class="sfp-result-actions">
-            <button onclick="sfpNext()" style="background:var(--accent);color:#000;border-radius:50px;font-weight:700;letter-spacing:0.5px">Soal Baru</button>
-            <button onclick="sfpStop()" style="background:rgba(0,0,0,0.3);border:1px solid var(--border);color:var(--muted)">Selesai</button>
-          </div>
-        </div>
+        <!-- FOOTER: transcript + THE action button + secondary actions -->
+        <div class="sfp-right-footer">
 
-        <!-- Score cards (visible during active) -->
-        <div class="sfp-score-grid" id="sfp-scoreGrid" style="display:none">
-          <div class="sfp-score-card" style="background:rgba(93,186,125,0.1);border-color:rgba(93,186,125,0.2);color:#5dba7d">
-            <div class="sfp-score-val" id="sfp-sc-ok">0</div>
-            <div class="sfp-score-lbl">✓ Benar</div>
+          <!-- Live transcript -->
+          <div class="sfp-transcript-box" id="sfp-transcript">—</div>
+
+          <!-- THE main action button — changes state -->
+          <button class="sfp-action-btn state-idle" id="sfp-actionBtn" onclick="sfpActionClick()" disabled>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+            <span id="sfp-actionLabel">Menunggu...</span>
+          </button>
+
+          <!-- Countdown (auto-next) -->
+          <div class="sfp-countdown-wrap" id="sfp-countdownWrap">
+            <span id="sfp-countdownLabel" style="white-space:nowrap">Lanjut dalam 3...</span>
+            <div class="sfp-countdown-bar-track">
+              <div class="sfp-countdown-bar-fill" id="sfp-countdownBar"></div>
+            </div>
           </div>
-          <div class="sfp-score-card" style="background:rgba(239,107,90,0.1);border-color:rgba(239,107,90,0.2);color:#ef6b5a">
-            <div class="sfp-score-val" id="sfp-sc-err">0</div>
-            <div class="sfp-score-lbl">✗ Salah</div>
+
+          <!-- Secondary actions -->
+          <div style="display:flex;gap:10px;width:100%;max-width:400px">
+            <button onclick="sfpLewati()" style="flex:1;padding:9px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-ui);transition:all 0.2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Lewati</button>
+            <button onclick="sfpHint()" style="flex:1;padding:9px;background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.2);border-radius:8px;color:var(--gold);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-ui);transition:all 0.2s">Hint</button>
           </div>
-          <div class="sfp-score-card" style="background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.2);color:#C9A84C">
-            <div class="sfp-score-val" id="sfp-sc-total">0</div>
-            <div class="sfp-score-lbl">Total</div>
-          </div>
+
         </div>
 
       </div><!-- /sfp-right -->
@@ -3099,7 +3244,17 @@ function spokenCandidates(spoken) {
   // ── ين/ون confusion ─────────────────────────────────────────────────────────
   if (s.endsWith('ين')) { c.add(s.slice(0, -2) + 'ون'); }
   if (s.endsWith('ون')) { c.add(s.slice(0, -2) + 'ين'); }
-  
+
+  // ── ع↔و confusion at word start (SR mishears ع with damma as و) ───────────
+  // عُتُلٍّ → SR: وتل/وتلم  |  عَلَى → SR: على (fine)  |  عِنْد → SR: عند (fine)
+  // Only swap when word has >= 3 chars to prevent false matches on short words
+  if (s.startsWith('و') && s.length >= 3) {
+    c.add('ع' + s.slice(1)); // و→ع: وتل → عتل
+  }
+  if (s.startsWith('ع') && s.length >= 3) {
+    c.add('و' + s.slice(1)); // ع→و: عتل → وتل (for ref-side lookup)
+  }
+
   return [...c].filter(Boolean);
 }
 
@@ -3242,7 +3397,7 @@ function harakatPenalty(spokenRaw, refRaw) {
   
   // Need at least 2 vowels in each to make a meaningful comparison
   // Short words or words without harakat: no penalty
-  if (spokenVowels.length < 1 || refVowels.length < 1) return 1.0;
+  if (spokenVowels.length < 2 || refVowels.length < 2) return 1.0;
   
   // Compare up to min(len) vowels
   const compareLen = Math.min(spokenVowels.length, refVowels.length, 4);
@@ -3253,14 +3408,16 @@ function harakatPenalty(spokenRaw, refRaw) {
   
   const mismatchRate = mismatches / compareLen;
   
-  // Penalty scale: 
-  // 0% mismatch = 1.0 (no penalty)
-  // 50%+ mismatch = 0.60 (significant penalty, pushes below MATCH_THRESHOLD)
-  // 100% mismatch = 0.50 (heavy penalty)
-  if (mismatchRate === 0) return 1.0;
-  if (mismatchRate <= 0.25) return 0.92; // minor mismatch (1 of 4 vowels)
-  if (mismatchRate <= 0.5)  return 0.78; // moderate — "Am" vs "Im" in 2-vowel word
-  return 0.65; // heavy mismatch
+  // LENIENT penalty — SR Arab often uses slightly different harakat conventions.
+  // Only penalize clear, consistent mismatch (like أَ vs إِ on every vowel).
+  // 0-25% mismatch = no penalty (1 vowel off is normal SR variance)
+  // 26-50% mismatch = very light penalty
+  // 51-75% mismatch = moderate penalty
+  // 76%+ mismatch = heavier penalty (still doesn't block if consonants match well)
+  if (mismatchRate <= 0.25) return 1.0;
+  if (mismatchRate <= 0.50) return 0.92;
+  if (mismatchRate <= 0.75) return 0.82;
+  return 0.72; // Even heavy mismatch stays borderline — consonant match can compensate
 }
 
 // ─── Main word similarity ─────────────────────────────────────────────────────
@@ -3345,7 +3502,6 @@ function setupRec() {
   rec.onstart = () => {
     recRunning = true;
     document.getElementById('btnMic').classList.add('live');
-    document.getElementById('btnMic').textContent = '⏸️';
     document.getElementById('micLabel').textContent = 'Mendengarkan...';
     document.getElementById('micSub').textContent = 'Otomatis mengikuti bacaan Anda';
     setDot('rec', 'Smart tracking aktif');
@@ -3418,14 +3574,19 @@ function setupRec() {
 
   rec.onerror = (e) => {
     if (e.error === 'not-allowed') {
-      log('❌ Izinkan akses mikrofon di browser', true);
+      log('❌ Izinkan akses mikrofon di Settings browser', true);
       setMicOff();
       sessionActive = false;
       recRunning = false;
+      rec = null; // Reset so next attempt creates fresh instance
     } else if (e.error === 'no-speech') {
-      // Don't show error for no-speech, just continue
-    } else if (e.error !== 'aborted') {
-      log('⚠️ Error: ' + e.error);
+      // Normal — keep listening
+    } else if (e.error === 'aborted') {
+      // Normal stop
+    } else {
+      log('⚠️ Mic error: ' + e.error + ' — coba tekan mic lagi');
+      recRunning = false;
+      rec = null; // Reset for fresh start
     }
   };
 
@@ -3434,16 +3595,22 @@ function setupRec() {
       // Auto-restart to keep listening
       setTimeout(() => {
         if (sessionActive && recRunning) {
+          // Create fresh instance if needed
+          if (!rec) { setupRec(); }
           try {
             rec.start();
           } catch(e) {
-            if (e.name !== 'InvalidStateError') {
+            if (e.name === 'InvalidStateError') {
+              rec = null; setupRec();
+              try { rec.start(); } catch(e2) { console.error('Restart failed:', e2); }
+            } else {
               console.error('Restart error:', e);
             }
           }
         }
-      }, 100);
+      }, 150);
     } else {
+      recRunning = false;
       setMicOff();
     }
   };
@@ -3525,8 +3692,8 @@ function processBufferedTranscripts() {
   // We distinguish two cases:
   //   A) Very short transcript (1-2 tokens) with low score → might be noise, wait
   //   B) Longer transcript with low score → user definitely reading wrong place → ERROR
-  const isLikelyNoise = windowScore < 0.30 && spokenTokens.length <= 2;
-  const isWrongPosition = windowScore < 0.20 && spokenTokens.length >= 2;
+  const isLikelyNoise = windowScore < 0.20 && spokenTokens.length <= 2;
+  const isWrongPosition = windowScore < 0.12 && spokenTokens.length >= 3;
   
   if (isLikelyNoise) {
     console.log(`⚠️ Short transcript, low score (${windowScore.toFixed(3)}) — likely noise, ignoring`);
@@ -3618,16 +3785,38 @@ function processBufferedTranscripts() {
       // For short words, ar-SA SR outputs أن vs إن as different tokens.
       // normalizeArabic() merges both to ان, losing the distinction.
       // normStrict() keeps أ/إ separate → if spoken أن vs ref إن → score drops.
+      //
+      // IMPORTANT: Only penalize TRUE أ↔إ swap (different meaning).
+      // Do NOT penalize أ→ا (SR dropping hamza from أنت→انت, أنا→انا, etc.)
+      // That's an ASR limitation, not a recitation error.
       if (wObj.normStrict && wObj.norm.length <= 5) {
         const spokenStrict = normalizeArabicStrict(spokenTokens[t]);
-        // If strict norms differ but loose norms match → harakat error detected
         if (spokenStrict !== wObj.normStrict) {
-          // Check: is the difference ONLY in أ vs إ (hamza fathah vs kasrah)?
           const spokenLoose = normalizeArabic(spokenTokens[t]);
           if (spokenLoose === wObj.norm) {
-            // Consonants match but hamza form differs → harakat error
-            console.log(`   🔤 Hamza harakat error: spoken="${spokenTokens[t]}"(${spokenStrict}) vs ref="${wObj.ref}"(${wObj.normStrict}) → penalized`);
-            ws *= 0.60; // Heavy penalty — pushes below MATCH_THRESHOLD 0.72
+            // Is this a real أ↔إ swap (different harakat = different word)?
+            const refHasKasraHamza = wObj.normStrict.includes('إ');
+            const refHasFathaHamza = wObj.normStrict.includes('أ');
+            const spokenHasKasraHamza = spokenStrict.includes('إ');
+            const spokenHasFathaHamza = spokenStrict.includes('أ');
+            const spokenHasPlainAlif = spokenStrict.includes('ا') && !spokenHasFathaHamza && !spokenHasKasraHamza;
+
+            const isTrueHamzaSwap = (refHasKasraHamza && spokenHasFathaHamza) ||
+                                    (refHasFathaHamza && spokenHasKasraHamza);
+            const isAlifDropOnly = (refHasFathaHamza || refHasKasraHamza) && spokenHasPlainAlif;
+
+            if (isTrueHamzaSwap) {
+              // Real error: أن read as إن or vice versa — penalize
+              console.log(`   🔤 Hamza swap (أ↔إ): spoken="${spokenTokens[t]}"(${spokenStrict}) vs ref="${wObj.ref}"(${wObj.normStrict}) → penalized`);
+              ws *= 0.60;
+            } else if (isAlifDropOnly) {
+              // SR dropped hamza (أنت→انت): ASR limitation, not user error — no penalty
+              console.log(`   🟡 SR alif-hamza drop (أ/إ→ا): spoken="${spokenTokens[t]}" vs ref="${wObj.ref}" — no penalty`);
+            } else {
+              // Other mismatch — light penalty
+              console.log(`   🔤 Strict mismatch: spoken="${spokenTokens[t]}"(${spokenStrict}) vs ref="${wObj.ref}"(${wObj.normStrict}) → light penalty`);
+              ws *= 0.85;
+            }
           }
         }
       }
@@ -3697,7 +3886,14 @@ function processBufferedTranscripts() {
       matchedAny = true;
       refSkipped = 0;
     } else {
-      // No match for this ref word
+      // No match for this ref word.
+      // ── IMPORTANT: if SR tokens are exhausted (si >= length), this ref word
+      // simply wasn't spoken in this utterance yet — do NOT mark it wrong.
+      // Just stop here; cursor will advance to this word and wait for next utterance.
+      if (si >= spokenTokens.length) {
+        console.log(`   ⏸️ SR tokens exhausted before "${wObj.norm}" — leaving for next utterance`);
+        break;
+      }
       // Only flag as wrong if in the SAME ayah as cursor start
       if (remainingWords[wi].ayahIndex === currentAyahIdx && wObj.el.className !== 'w correct') {
         wObj.el.className = 'w wrong';
@@ -3994,44 +4190,53 @@ async function startSession() {
     return;
   }
 
-  // Ensure mic permission once — keeps stream alive so browser won't ask again
-  const micOk = await ensureMicPermission();
-  if (!micOk) {
-    log('❌ Izinkan akses mikrofon di browser', true);
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    log('❌ Browser tidak support Speech Recognition. Gunakan Chrome/Edge', true);
     return;
   }
-  
-  if (!rec && !setupRec()) {
-    log('❌ Browser tidak support Speech Recognition', true);
-    return;
-  }
+
+  // Setup rec jika belum ada
+  if (!rec) setupRec();
 
   sessionActive = true;
   transcriptBuffer = [];
   lastTranscriptTime = Date.now();
-  sessionRunStart = cursor; // catat posisi awal sesi
+  sessionRunStart = cursor;
   
-  // Warm-up flag: ignore first 500ms of results (mic stabilization)
   window.srWarmingUp = true;
   setTimeout(() => {
     window.srWarmingUp = false;
-    console.log('✅ Warm-up complete — tracking active');
     log('✅ Siap — mulai membaca sekarang');
   }, 500);
 
   if (!recRunning) {
     try {
       rec.start();
-      log('🎤 Memulai mikrofon... tunggu "LIVE" sebelum baca');
+      log('🎤 Memulai mikrofon...');
     } catch(e) {
-      log('⚠️ Error: ' + e.message, true);
-      sessionActive = false;
+      // If InvalidStateError, create fresh rec and retry
+      if (e.name === 'InvalidStateError') {
+        rec = null;
+        setupRec();
+        try { rec.start(); log('🎤 Memulai mikrofon...'); } catch(e2) { log('⚠️ Error: ' + e2.message, true); sessionActive = false; }
+      } else {
+        log('⚠️ Error: ' + e.message, true);
+        sessionActive = false;
+      }
     }
   } else {
     setDot('rec', 'Smart tracking aktif');
     document.getElementById('wave').classList.add('show');
     document.getElementById('btnMic').classList.add('live');
     log('Melanjutkan sesi — baca dengan natural');
+  }
+
+  // Request getUserMedia in background (non-blocking) to keep permission alive
+  if (!globalMicStream) {
+    navigator.mediaDevices?.getUserMedia({ audio: true })
+      .then(s => { globalMicStream = s; })
+      .catch(() => {}); // ignore — SR already handles permission
   }
 }
 
@@ -4044,11 +4249,12 @@ function stopSession() {
 
 function setMicOff() {
   document.getElementById('wave').classList.remove('show');
-  document.getElementById('btnMic').classList.remove('live');
-  document.getElementById('btnMic').innerHTML = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>';
+  const mic = document.getElementById('btnMic');
+  mic.classList.remove('live');
+  mic.innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>';
   document.getElementById('micLabel').textContent = 'Mulai Sesi';
-  document.getElementById('micSub').textContent = 'Smart tracking: otomatis mengikuti';
-  setDot('', 'Sesi dijeda');
+  document.getElementById('micSub').textContent = 'Tekan untuk aktifkan mikrofon';
+  setDot('', 'Belum aktif');
 }
 
 function setDot(state, text) {
@@ -4147,7 +4353,9 @@ function resetSession() {
 }
 
 async function loadSurah() {
-  currentSurah = parseInt(document.getElementById("surahSel").value);
+  const sel = document.getElementById("surahSel");
+  const selR = document.getElementById("surahSelRight");
+  currentSurah = parseInt((sel || selR).value);
   correctCount = 0; wrongCount = 0; cursor = 0; currentAyahIndex = 0;
   processingResult = false; sessionRunStart = -1;
   transcriptBuffer = [];
@@ -4167,9 +4375,15 @@ async function loadSurah() {
   
   const surahData = SURAHS[currentSurah];
   if (surahData) {
-    document.getElementById('startAyahNum').max = surahData.ayahs.length;
-    document.getElementById('startAyahNum').value = 1;
+    const inp = document.getElementById('startAyahNum');
+    if (inp) { inp.value = 1; }
     updateStartPosition();
+    // Update right panel selectors
+    const sr = document.getElementById('surahSelRight');
+    if (sr) sr.value = currentSurah;
+    const ar = document.getElementById('audioSurahSel');
+    if (ar) ar.value = currentSurah;
+    populateAyatSelector(surahData.ayahs.length, 1);
     log("📖 " + surahData.name + " dimuat — siap untuk tracking");
   }
 }
@@ -4178,20 +4392,21 @@ async function loadSurah() {
 //  START POSITION FUNCTIONS
 // ════════════════════════════════════════════════════════════
 function updateStartPosition() {
-  const startAyah = parseInt(document.getElementById('startAyahNum').value);
+  const inp = document.getElementById('startAyahNum');
+  const startAyah = inp ? parseInt(inp.value) : 1;
   const surahData = SURAHS[currentSurah];
   
   if (!surahData) return;
   
   const maxAyah = surahData.ayahs.length;
   if (startAyah < 1 || startAyah > maxAyah) {
-    document.getElementById('startInfo').textContent = `❌ Ayat tidak valid (1-${maxAyah})`;
-    document.getElementById('startInfo').style.color = '#ef6b5a';
+    const si = document.getElementById('startInfo');
+    if (si) { si.textContent = `❌ Ayat tidak valid (1-${maxAyah})`; si.style.color = '#ef6b5a'; }
     return;
   }
   
-  document.getElementById('startInfo').textContent = `Akan mulai dari ayat ${startAyah}`;
-  document.getElementById('startInfo').style.color = '';
+  const si = document.getElementById('startInfo');
+  if (si) { si.textContent = `Akan mulai dari ayat ${startAyah}`; si.style.color = ''; }
 }
 
 function goToStartPosition() {
@@ -4252,6 +4467,7 @@ function goToStartPosition() {
 // ════════════════════════════════════════════════════════════
 function init() {
   const sel = document.getElementById('surahSel');
+  const selRight = document.getElementById('surahSelRight');
   // Combine static SURAHS + JUZ_SURAHS for the dropdown
   const allSurahEntries = new Map();
   Object.entries(SURAHS).forEach(([n,s]) => allSurahEntries.set(parseInt(n), s.name));
@@ -4262,7 +4478,16 @@ function init() {
     const o = document.createElement('option');
     o.value = n; o.textContent = n + '. ' + name;
     if (n === currentSurah) o.selected = true;
-    sel.appendChild(o);
+    if (sel) sel.appendChild(o);
+    const o2 = document.createElement('option');
+    o2.value = n; o2.textContent = n + '. ' + name;
+    if (n === currentSurah) o2.selected = true;
+    if (selRight) selRight.appendChild(o2);
+    const o3 = document.createElement('option');
+    o3.value = n; o3.textContent = n + '. ' + name;
+    if (n === currentSurah) o3.selected = true;
+    const audioSel = document.getElementById('audioSurahSel');
+    if (audioSel) audioSel.appendChild(o3);
   });
 
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -4277,9 +4502,59 @@ function init() {
   // Set max value for start ayah input
   const surahData = SURAHS[currentSurah];
   if (surahData) {
-    document.getElementById('startAyahNum').max = surahData.ayahs.length;
+    populateAyatSelector(surahData.ayahs.length, 1);
     updateStartPosition();
   }
+}
+
+function populateAyatSelector(maxAyah, selectedAyah) {
+  const sel = document.getElementById('ayatSelRight');
+  if (!sel) return;
+  sel.innerHTML = '';
+  for (let i = 1; i <= maxAyah; i++) {
+    const o = document.createElement('option');
+    o.value = i; o.textContent = i;
+    if (i === selectedAyah) o.selected = true;
+    sel.appendChild(o);
+  }
+}
+
+function syncAudioSurah() {
+  const sel = document.getElementById('audioSurahSel');
+  if (!sel) return;
+  const num = parseInt(sel.value);
+  const data = SURAHS[num] || JUZ_SURAHS[num];
+  if (!data) return;
+  const maxAyah = data.ayahs ? data.ayahs.length : data.ayahCount;
+  const startEl = document.getElementById('audioStartAyah');
+  const endEl = document.getElementById('audioEndAyah');
+  if (startEl) { startEl.value = 1; startEl.max = maxAyah; }
+  if (endEl) { endEl.value = Math.min(5, maxAyah); endEl.max = maxAyah; }
+  // Also sync main surah selector so audio plays correct surah
+  const mainSel = document.getElementById('surahSel');
+  const rightSel = document.getElementById('surahSelRight');
+  if (mainSel) mainSel.value = num;
+  if (rightSel) rightSel.value = num;
+  currentSurah = num;
+  renderPage(currentSurah);
+}
+
+function syncSurahFromRight() {
+  const selRight = document.getElementById('surahSelRight');
+  const sel = document.getElementById('surahSel');
+  if (!selRight) return;
+  const val = selRight.value;
+  if (sel) sel.value = val;
+  loadSurah();
+}
+
+function syncAyatFromRight() {
+  const sel = document.getElementById('ayatSelRight');
+  if (!sel) return;
+  const ayah = parseInt(sel.value);
+  const inp = document.getElementById('startAyahNum');
+  if (inp) { inp.value = ayah; }
+  goToStartPosition();
 }
 
 
@@ -4637,6 +4912,7 @@ async function loadDynamicSurahSilent(surahNum) {
 
 function sambungLewati() {
   if (!sambungActive) return;
+  cancelSambungCountdown();
   stopSambungRec();
   sambungWaitingForUser = false;
   document.getElementById('sambungHintBox').style.display = 'none';
@@ -4676,10 +4952,13 @@ function sambungHint() {
 
 
 async function nextSambung() {
+  cancelSambungCountdown();
   stopSambungRec();
   sambungWaitingForUser = false;
-  document.getElementById('sambungResult').style.display = 'none';
-  document.getElementById('sambungTranscript').textContent = '—';
+  const resultDiv = document.getElementById('sambungResult');
+  if (resultDiv) { resultDiv.style.display = 'none'; resultDiv.style.cssText = 'display:none'; }
+  const transcript = document.getElementById('sambungTranscript');
+  if (transcript) { transcript.textContent = '—'; transcript.style.color = 'var(--muted)'; }
   document.getElementById('sambungHintBox').style.display = 'none';
   setSambungDot('idle', 'Memilih ayat...');
 
@@ -4718,17 +4997,18 @@ async function nextSambung() {
   document.getElementById('sambungAyahText').textContent = promptAyahObj.words.join(' ');
 
   setSambungDot('idle', '🔊 Sistem sedang membaca...');
-  document.getElementById('sambungMicBtn').disabled = true;
-  document.getElementById('sambungMicLabel').textContent = 'Tunggu...';
-  document.getElementById('sambungMicSub').textContent = 'Sistem sedang membaca';
+  const sambungBtn = document.getElementById('sambungMicBtn');
+  if (sambungBtn) { sambungBtn.disabled = true; sambungBtn.style.opacity = '0.4'; }
+  setSambungDot('idle', '🔊 Sistem sedang membaca...');
 
   playSambungAudio(sambungPromptSurah, sambungPromptAyahN, () => {
     if (!sambungActive) return;
     sambungWaitingForUser = true;
-    setSambungDot('idle', 'Sambung ayat ' + sambungTargetAyahN + ' — tekan mikrofon');
-    document.getElementById('sambungMicBtn').disabled = false;
-    document.getElementById('sambungMicLabel').textContent = 'Sambung Ayat ' + sambungTargetAyahN;
-    document.getElementById('sambungMicSub').textContent = 'Tekan untuk bicara';
+    const btn = document.getElementById('sambungMicBtn');
+    if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+    setSambungDot('live', 'Mendengarkan...');
+    // AUTO-START mic after audio finishes — no tap needed
+    startSambungRec();
   });
 }
 
@@ -4759,6 +5039,7 @@ function playSambungAudio(surahNum, ayahNum, onDone) {
 
 function sambungReplayAudio() {
   if (!sambungActive) return;
+  cancelSambungCountdown();
   setSambungDot('idle', '🔊 Memutar ulang...');
   document.getElementById('sambungMicBtn').disabled = true;
   sambungWaitingForUser = false;
@@ -4766,23 +5047,23 @@ function sambungReplayAudio() {
   playSambungAudio(sambungPromptSurah, sambungPromptAyahN, () => {
     if (!sambungActive) return;
     sambungWaitingForUser = true;
-    setSambungDot('idle', 'Sambung ayat ' + sambungTargetAyahN);
     document.getElementById('sambungMicBtn').disabled = false;
+    setSambungDot('live', 'Mendengarkan...');
+    startSambungRec();
   });
 }
 
-async function toggleSambungSession() {
+function toggleSambungSession() {
+  sambungManualMicToggle();
+}
+function sambungManualMicToggle() {
   if (!sambungWaitingForUser) return;
   if (sambungRecRunning) {
+    // User manually stops → process immediately
     stopSambungRec();
     processSambungBuffer();
   } else {
-    // Ensure mic permission first (once only)
-    const ok = await ensureMicPermission();
-    if (!ok) {
-      setSambungDot('warn', '❌ Izinkan akses mikrofon');
-      return;
-    }
+    // User manually restarts (e.g. after wrong answer)
     startSambungRec();
   }
 }
@@ -4792,53 +5073,74 @@ function startSambungRec() {
   if (!SR) { setSambungDot('warn', '❌ Gunakan Chrome'); return; }
 
   sambungBuffer = [];
-  if (!sambungRec) {
-    sambungRec = new SR();
-    sambungRec.lang = 'ar-SA';
-    sambungRec.continuous = true;
-    sambungRec.interimResults = true;
-    sambungRec.maxAlternatives = 3;
+  // Always fresh instance to avoid InvalidStateError
+  if (sambungRec) { try { sambungRec.abort(); } catch(e) {} sambungRec = null; }
+  sambungRec = new SR();
+  sambungRec.lang = 'ar-SA';
+  sambungRec.continuous = true;
+  sambungRec.interimResults = true;
+  sambungRec.maxAlternatives = 3;
 
     sambungRec.onresult = (e) => {
-      let finalText = '';
+      let finalText = '', interimText = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
         if (e.results[i].isFinal) finalText += e.results[i][0].transcript + ' ';
+        else interimText += e.results[i][0].transcript;
       }
       if (finalText.trim()) {
         sambungBuffer.push(finalText.trim());
-        document.getElementById('sambungTranscript').textContent = sambungBuffer.join(' ');
+        const transcript = document.getElementById('sambungTranscript');
+        transcript.textContent = sambungBuffer.join(' ');
+        transcript.style.color = 'var(--text)';
         clearTimeout(sambungSilenceTimeout);
-        sambungSilenceTimeout = setTimeout(processSambungBuffer, 1500);
+        // Auto-process after 1.2s silence — user doesn't need to tap to stop
+        sambungSilenceTimeout = setTimeout(processSambungBuffer, 1200);
+      } else if (interimText) {
+        const transcript = document.getElementById('sambungTranscript');
+        transcript.textContent = interimText + ' ⏳';
+        transcript.style.color = 'var(--muted)';
       }
     };
 
     sambungRec.onend = () => {
       sambungRecRunning = false;
-      document.getElementById('sambungMicBtn').innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>';
-      document.getElementById('sambungMicBtn').style.background = '';
-      document.getElementById('sambungMicSub').textContent = 'Tekan untuk bicara';
+      const btn = document.getElementById('sambungMicBtn');
+      if (btn) {
+        btn.innerHTML = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>';
+        btn.style.background = '';
+      }
+      // Auto-restart listening if we're still waiting for user (continuous mode)
+      if (sambungActive && sambungWaitingForUser && sambungRecRunning === false) {
+        setTimeout(() => {
+          if (sambungActive && sambungWaitingForUser) startSambungRec();
+        }, 200);
+      }
     };
 
     sambungRec.onerror = (e) => {
       sambungRecRunning = false;
       if (e.error === 'not-allowed') {
-        setSambungDot('warn', '❌ Izinkan akses mikrofon');
-        globalMicStream = null; // reset so next attempt asks again
-      } else if (e.error !== 'no-speech' && e.error !== 'aborted') {
-        setSambungDot('warn', '⚠️ Error SR: ' + e.error);
+        setSambungDot('warn', '❌ Izinkan mikrofon di Settings browser');
+      } else if (e.error === 'no-speech') {
+        sambungWaitingForUser = true;
+        setSambungDot('idle', 'Tidak terdengar — coba lagi');
+      } else if (e.error !== 'aborted') {
+        setSambungDot('warn', '⚠️ Error: ' + e.error);
       }
     };
-  }
 
   try {
     sambungRec.start();
     sambungRecRunning = true;
-    document.getElementById('sambungMicBtn').innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>';
-    document.getElementById('sambungMicBtn').style.background = 'rgba(239,107,90,0.3)';
-    setSambungDot('live', 'Sedang mendengarkan...');
-    document.getElementById('sambungMicSub').textContent = 'Tekan lagi untuk selesai';
+    const btn = document.getElementById('sambungMicBtn');
+    if (btn) {
+      btn.innerHTML = '<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>';
+      btn.style.background = 'rgba(239,107,90,0.35)';
+      btn.style.boxShadow = '0 0 0 8px rgba(239,107,90,0.12)';
+    }
+    setSambungDot('live', 'Mendengarkan...');
   } catch(e) {
-    setSambungDot('warn', '❌ Gagal mulai mic');
+    setSambungDot('warn', '❌ Gagal mulai mic: ' + e.message);
   }
 }
 
@@ -4879,63 +5181,145 @@ function validateSambung(spokenRaw, refWords) {
   const spokenTokens = spokenRaw.trim().split(/\s+/).filter(Boolean);
   if (!spokenTokens.length) return { ok: false, score: 0, detail: 'Tidak ada bacaan' };
 
-  // First word gate — must match
+  // First word gate — use flexible matching with candidates
   const firstRefNorm = normalizeArabic(refWords[0]);
   const firstWS = wordSim(spokenTokens[0], firstRefNorm);
-  if (firstWS < MATCH_THRESHOLD) {
+  // Also try bigram for first word (handles tajweed merging)
+  let firstBigramWS = 0;
+  if (refWords.length >= 2) {
+    const bg = firstRefNorm + normalizeArabic(refWords[1]);
+    firstBigramWS = Math.max(
+      ...spokenCandidates(spokenTokens[0]).map(c => simNorm(c, bg)),
+      simNorm(normalizeArabic(spokenTokens[0]), bg)
+    );
+  }
+  const SAMBUNG_FIRST_THRESHOLD = 0.62; // more lenient than tracking mode
+  if (firstWS < SAMBUNG_FIRST_THRESHOLD && firstBigramWS < 0.68) {
     return { ok: false, score: 0, detail: 'Kata pertama tidak cocok' };
   }
 
-  // Count sequential matches
+  // Count sequential matches using full candidate system
   let matched = 0;
   let si = 0;
+  const SAMBUNG_THRESHOLD = 0.65; // more lenient than main tracking
   for (let wi = 0; wi < refWords.length && si < spokenTokens.length; wi++) {
     const refNorm = normalizeArabic(refWords[wi]);
-    const ws = wordSim(spokenTokens[si], refNorm);
-    if (ws >= MATCH_THRESHOLD) {
-      matched++; si++;
-    } else if (wi + 1 < refWords.length) {
-      // try bigram
+
+    // Try bigram first (ref[wi]+ref[wi+1] vs spoken[si])
+    if (wi + 1 < refWords.length) {
       const bg = refNorm + normalizeArabic(refWords[wi + 1]);
-      const bgWS = simNorm(normalizeArabic(spokenTokens[si]), bg);
-      if (bgWS >= 0.72) { matched += 2; si++; wi++; }
-      else break;
-    } else break;
+      const bgWS = Math.max(
+        ...spokenCandidates(spokenTokens[si]).map(c => simNorm(c, bg)),
+        simNorm(normalizeArabic(spokenTokens[si]), bg)
+      );
+      if (bgWS >= 0.68) { matched += 2; si++; wi++; continue; }
+    }
+
+    // Single word match using full candidate system
+    const ws = wordSim(spokenTokens[si], refNorm);
+    if (ws >= SAMBUNG_THRESHOLD) {
+      matched++; si++;
+    } else {
+      // Allow lookahead: SR may skip a short word
+      if (wi + 1 < refWords.length) {
+        const wsNext = wordSim(spokenTokens[si], normalizeArabic(refWords[wi + 1]));
+        if (wsNext >= SAMBUNG_THRESHOLD) {
+          // ref[wi] was short/silent — skip ref word, count it as matched
+          matched++; // partial credit for ref[wi]
+          wi++;
+          matched++; si++; // count ref[wi+1] matched
+          continue;
+        }
+      }
+      break;
+    }
   }
 
-  const minRequired = Math.max(1, Math.ceil(refWords.length * 0.5));
+  // More lenient: require at least 40% match (was 50%)
+  // Short ayahs (1-3 words): require all words
+  const minPct = refWords.length <= 3 ? 0.75 : 0.40;
+  const minRequired = Math.max(1, Math.ceil(refWords.length * minPct));
   const ok = matched >= minRequired;
   return { ok, score: matched / refWords.length, matched, total: refWords.length, detail: `${matched}/${refWords.length} kata cocok` };
 }
 
+let sambungCountdownTimer = null;
+
 function showSambungResult(result, refWords) {
   const data = SURAHS[sambungTargetSurah];
-  const resultDiv  = document.getElementById('sambungResult');
-  const msgDiv     = document.getElementById('sambungResultMsg');
+  const resultDiv   = document.getElementById('sambungResult');
+  const msgDiv      = document.getElementById('sambungResultMsg');
   const expectedDiv = document.getElementById('sambungExpected');
-  const labelDiv   = document.getElementById('sambungResultLabel');
+  const labelDiv    = document.getElementById('sambungResultLabel');
 
   expectedDiv.textContent = refWords.join(' ');
 
   if (result.ok) {
     sambungScoreOk++;
-    labelDiv.textContent = `✅ Benar — Ayat ${sambungTargetAyahN} ${data.name}`;
-    msgDiv.textContent = `Masyaa Allah! ${result.detail}`;
-    msgDiv.style.cssText = 'font-size:13px;font-weight:600;text-align:center;padding:10px;border-radius:8px;background:rgba(93,186,125,0.15);color:#5dba7d;border:1px solid rgba(93,186,125,0.3)';
-    setSambungDot('ok', '✅ Sambungan benar!');
+    labelDiv.textContent = `Ayat ${sambungTargetAyahN} · ${data.name}`;
+    msgDiv.textContent = `✅ Masyaa Allah! ${result.detail}`;
+    msgDiv.style.cssText = 'font-size:13px;font-weight:600;text-align:center;padding:10px 14px;background:rgba(29,185,84,0.12);color:var(--accent)';
+    resultDiv.style.cssText = 'display:block;border-radius:12px;overflow:hidden;border:1px solid rgba(29,185,84,0.25)';
+    setSambungDot('ok', 'Benar! ✓');
     playCorrectSound();
+    updateSambungScore();
+    // AUTO-NEXT with countdown
+    startSambungCountdown(3);
   } else {
     sambungScoreErr++;
-    labelDiv.textContent = `❌ Salah — Ayat ${sambungTargetAyahN} ${data.name}`;
-    msgDiv.textContent = result.score === 0 ? `Bukan ayat yang tepat — ${result.detail}` : `Kurang tepat — ${result.detail}`;
-    msgDiv.style.cssText = 'font-size:13px;font-weight:600;text-align:center;padding:10px;border-radius:8px;background:rgba(239,107,90,0.15);color:#ef6b5a;border:1px solid rgba(239,107,90,0.3)';
-    setSambungDot('warn', '❌ Sambungan salah');
+    labelDiv.textContent = `Ayat ${sambungTargetAyahN} · ${data.name}`;
+    msgDiv.textContent = result.score === 0 ? `❌ Tidak cocok — ${result.detail}` : `❌ Kurang tepat — ${result.detail}`;
+    msgDiv.style.cssText = 'font-size:13px;font-weight:600;text-align:center;padding:10px 14px;background:rgba(239,107,90,0.12);color:#ef6b5a';
+    resultDiv.style.cssText = 'display:block;border-radius:12px;overflow:hidden;border:1px solid rgba(239,107,90,0.25)';
+    setSambungDot('warn', 'Salah — coba lagi atau lewati');
     playWrongSound();
+    updateSambungScore();
+    // Wrong: auto-restart mic after short delay so user can retry
+    setTimeout(() => {
+      if (!sambungActive) return;
+      sambungWaitingForUser = true;
+      setSambungDot('live', 'Coba lagi...');
+      startSambungRec();
+    }, 1800);
   }
+}
 
-  resultDiv.style.display = 'block';
-  updateSambungScore();
-  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+function startSambungCountdown(seconds) {
+  clearTimeout(sambungCountdownTimer);
+  const wrap = document.getElementById('sambungCountdownWrap');
+  const label = document.getElementById('sambungCountdownLabel');
+  const bar = document.getElementById('sambungCountdownBar');
+  if (!wrap) { nextSambung(); return; }
+
+  wrap.style.display = 'block';
+  let remaining = seconds;
+  label.textContent = `Soal berikutnya dalam ${remaining}...`;
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+
+  // Animate bar shrinking
+  requestAnimationFrame(() => {
+    bar.style.transition = `width ${seconds}s linear`;
+    bar.style.width = '0%';
+  });
+
+  function tick() {
+    remaining--;
+    if (remaining <= 0) {
+      wrap.style.display = 'none';
+      nextSambung();
+    } else {
+      label.textContent = `Soal berikutnya dalam ${remaining}...`;
+      sambungCountdownTimer = setTimeout(tick, 1000);
+    }
+  }
+  sambungCountdownTimer = setTimeout(tick, 1000);
+}
+
+function cancelSambungCountdown() {
+  clearTimeout(sambungCountdownTimer);
+  const wrap = document.getElementById('sambungCountdownWrap');
+  if (wrap) wrap.style.display = 'none';
 }
 
 function updateSambungScore() {
@@ -4960,6 +5344,11 @@ function setSambungDot(type, text) {
 window.addEventListener('DOMContentLoaded', () => {
   init();
   initSambungSelects();
+  // Init mobile selectors after desktop selectors are populated
+  setTimeout(() => {
+    mbInitVoiceSelectors();
+    mbInitAudioSelectors();
+  }, 300);
 });
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -4967,11 +5356,133 @@ window.addEventListener('DOMContentLoaded', () => {
 //  prefix: mb / mobile
 // ═══════════════════════════════════════════════════════════════════════
 
+// ── Mobile Surah/Ayat Selectors ──────────────────────────────────────────────
+function mbInitVoiceSelectors() {
+  const sel = document.getElementById('mb-surahSel');
+  if (!sel) return;
+  // Populate from desktop surahSelRight
+  const dSel = document.getElementById('surahSelRight');
+  if (!dSel) return;
+  if (sel.options.length === 0) {
+    // Copy options from desktop
+    Array.from(dSel.options).forEach(opt => {
+      sel.add(new Option(opt.text, opt.value));
+    });
+  }
+  sel.value = dSel.value;
+  mbPopulateAyatSel();
+}
+
+function mbPopulateAyatSel() {
+  const surahSel = document.getElementById('mb-surahSel');
+  const ayatSel = document.getElementById('mb-ayatSel');
+  const dSel = document.getElementById('surahSelRight');
+  const dAyat = document.getElementById('ayatSelRight');
+  if (!surahSel || !ayatSel) return;
+  const surahNum = parseInt(surahSel.value);
+  const data = SURAHS[surahNum];
+  if (!data) return;
+  const currentAyat = dAyat ? parseInt(dAyat.value) || 1 : 1;
+  ayatSel.innerHTML = '';
+  for (let i = 1; i <= data.ayahs.length; i++) {
+    ayatSel.add(new Option(i, i));
+  }
+  ayatSel.value = Math.min(currentAyat, data.ayahs.length);
+}
+
+function mbSyncSurah() {
+  const mbSel = document.getElementById('mb-surahSel');
+  const dSel = document.getElementById('surahSelRight');
+  if (mbSel && dSel) {
+    dSel.value = mbSel.value;
+    dSel.dispatchEvent(new Event('change'));
+  }
+  mbPopulateAyatSel();
+}
+
+function mbSyncAyat() {
+  const mbAyat = document.getElementById('mb-ayatSel');
+  const dAyat = document.getElementById('ayatSelRight');
+  if (mbAyat && dAyat) {
+    dAyat.value = mbAyat.value;
+    dAyat.dispatchEvent(new Event('change'));
+  }
+}
+
+function mbInitAudioSelectors() {
+  const sel = document.getElementById('mb-audioSurahSel');
+  if (!sel) return;
+  const dSel = document.getElementById('audioSurahSel');
+  if (!dSel) return;
+  if (sel.options.length === 0) {
+    Array.from(dSel.options).forEach(opt => {
+      sel.add(new Option(opt.text, opt.value));
+    });
+  }
+  sel.value = dSel.value;
+}
+
+function mbSyncAudioSurah() {
+  const mbSel = document.getElementById('mb-audioSurahSel');
+  const dSel = document.getElementById('audioSurahSel');
+  if (mbSel && dSel) {
+    dSel.value = mbSel.value;
+    dSel.dispatchEvent(new Event('change'));
+  }
+}
+
+// ── Mobile Panel Switcher ────────────────────────────────────────────────────
+function mbShowPanel(panelId, title, badge) {
+  // Hide all panels, show the requested one
+  document.querySelectorAll('.mobile-panel-content').forEach(el => el.classList.remove('active'));
+  const target = document.getElementById('mb-panel-' + panelId);
+  if (target) target.classList.add('active');
+  // Update header title
+  const titleEl = document.getElementById('mb-panelTitle');
+  if (titleEl) titleEl.textContent = title;
+  // Sync drawer nav active state
+  const navMap = { voice: 'murojaah', audio: 'audio', sambung: 'sambung' };
+  const navId = navMap[panelId];
+  ['murojaah','audio','sambung'].forEach(n => {
+    document.getElementById('drawer-nav-'+n)?.classList.toggle('nav-active', n === navId);
+  });
+}
+
 // ── Tab switching (legacy — now driven by mbDrawerNav) ──────────────────
 function mbSwitchTab(tab) {
   if (tab === 'voice') mbShowPanel('voice', 'Cek Hafalan', 'Voice');
   else if (tab === 'audio') mbShowPanel('audio', 'Audio Repeat', 'Audio');
-  else if (tab === 'sambung') { mbOpenSambungView(); }
+  else if (tab === 'sambung') { mbSambungOpen(); }
+}
+// ── Mobile Drawer Open/Close ─────────────────────────────────────────────────
+function mbOpenDrawer() {
+  document.getElementById('mobileDrawer').classList.add('drawer-open');
+  document.getElementById('drawerOverlay').classList.add('overlay-active');
+}
+function mbCloseDrawer() {
+  document.getElementById('mobileDrawer').classList.remove('drawer-open');
+  document.getElementById('drawerOverlay').classList.remove('overlay-active');
+}
+
+// ── Mobile Drawer Navigation ─────────────────────────────────────────────────
+function mbDrawerNav(item) {
+  mbCloseDrawer();
+  ['murojaah','audio','sambung'].forEach(n => {
+    document.getElementById('drawer-nav-'+n)?.classList.toggle('nav-active', n===item);
+  });
+  navToHash(item);
+
+  if (item === 'murojaah') {
+    sfpClose(); // close sambung if open
+    mbShowPanel('voice', 'Cek Hafalan', 'Voice');
+    setTimeout(mbInitVoiceSelectors, 50);
+  } else if (item === 'audio') {
+    sfpClose();
+    mbShowPanel('audio', 'Audio Repeat', 'Audio');
+    setTimeout(mbInitAudioSelectors, 50);
+  } else if (item === 'sambung') {
+    mbSambungOpen();
+  }
 }
 
 // ── Mirror desktop state → mobile ────────────────────────────────────────
@@ -4979,7 +5490,7 @@ function mbMirrorState() {
   // Dot + text
   mbMirrorEl('sdot',    'mb-sdot',    'className');
   mbMirrorEl('stext',   'mb-stext',   'textContent');
-  mbMirrorEl('tText',   null,         null); // handled separately
+  mbMirrorEl('tText',   'mb-tText',   'textContent');
   mbMirrorEl('stOk',    'mb-stOk',    'textContent');
   mbMirrorEl('stErr',   'mb-stErr',   'textContent');
   mbMirrorEl('stPos',   'mb-stPos',   'textContent');
@@ -5004,6 +5515,17 @@ function mbMirrorState() {
     mbMirrorEl('retryAyahNum','mb-retryAyahNum','textContent');
     mbMirrorEl('retryWord','mb-retryWord','textContent');
   }
+  // Sync surah and ayat selectors
+  const mbSS = document.getElementById('mb-surahSel');
+  const rSS = document.getElementById('surahSelRight');
+  if(mbSS && rSS && mbSS.options.length > 0 && mbSS.value !== rSS.value) {
+    mbSS.value = rSS.value;
+    mbPopulateAyatSel();
+  }
+  const mbAY = document.getElementById('mb-ayatSel');
+  const rAY = document.getElementById('ayatSelRight');
+  if(mbAY && rAY && mbAY.options.length > 0) mbAY.value = rAY.value;
+
 }
 
 function mbMirrorEl(srcId, dstId, prop) {
@@ -5019,6 +5541,8 @@ function mbSetupObserver() {
   const watchIds = ['sdot','stext','tText','stOk','stErr','stPos','progFill','logBar','btnMic','micLabel','micSub','wave','retryBanner','retryAyahNum','retryWord'];
   const obs = new MutationObserver(() => {
     if (document.getElementById('mb-panel-voice')?.classList.contains('active')) mbMirrorState();
+  setTimeout(mbInitVoiceSelectors, 200);
+  setTimeout(mbInitAudioSelectors, 200);
   });
   watchIds.forEach(id => {
     const el = document.getElementById(id);
@@ -5036,6 +5560,10 @@ function mbSetupObserver() {
 function mbToggleAudio() {
   // Sync inputs to desktop hidden fields
   const map = [['mb-audioStart','audioStartAyah'],['mb-audioEnd','audioEndAyah'],['mb-audioRepeat','audioRepeatCount'],['mb-audioPause','audioPause']];
+  // Sync surah selector
+  const mbAS = document.getElementById('mb-audioSurahSel');
+  const dAS = document.getElementById('audioSurahSel');
+  if(mbAS && dAS && mbAS.options.length > 0) mbAS.value = dAS.value;
   map.forEach(([m,d]) => { const me=document.getElementById(m),de=document.getElementById(d); if(me&&de) de.value=me.value; });
   toggleAudioPlayer();
   // Update button state
@@ -5069,746 +5597,41 @@ function mbWatchAudio() {
   obs.observe(statusEl, {childList:true, characterData:true, subtree:true, attributes:true});
 }
 
-// ── SAMBUNG AYAT (mobile standalone) ────────────────────────────────────
-let mbSA = {
-  active: false, rec: null, recRunning: false,
-  buffer: [], silTimer: null, ranges: [],
-  promptSurah:-1, promptAyah:-1, targetSurah:-1, targetAyah:-1,
-  ok:0, err:0, waiting:false, audio:null
-};
 
-function mbInitSambungList() {
-  const list = document.getElementById('mb-sambungSurahList');
-  if (!list || list.children.length > 0) return;
-
-  const allMeta = new Map();
-  Object.entries(SURAHS).forEach(([n,s]) => allMeta.set(parseInt(n), {name:s.name, ayahCount:s.ayahs.length, juz: JUZ_SURAHS[parseInt(n)]?.juz||null}));
-  Object.entries(JUZ_SURAHS).forEach(([n,s]) => {
-    if (!allMeta.has(parseInt(n))) allMeta.set(parseInt(n), {name:s.name, ayahCount:s.ayahCount, juz:s.juz});
-    else allMeta.get(parseInt(n)).juz = s.juz;
-  });
-
-  const groups = [
-    {id:'mbs',label:null,nums:[1,2,3,32]},
-    {id:'mbj28',label:'Juz 28',nums:[]},
-    {id:'mbj29',label:'Juz 29',nums:[]},
-    {id:'mbj30',label:'Juz 30',nums:[]},
-  ];
-  const sp = new Set([1,2,3,32]);
-  [...allMeta.keys()].sort((a,b)=>a-b).forEach(num => {
-    if (sp.has(num)) return;
-    const m = allMeta.get(num);
-    if (m.juz?.includes(28)) groups[1].nums.push(num);
-    else if (m.juz?.includes(29)) groups[2].nums.push(num);
-    else if (m.juz?.includes(30)) groups[3].nums.push(num);
-  });
-
-  groups.forEach(g => {
-    if (g.label) {
-      const h = document.createElement('div');
-      h.style.cssText='display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(201,168,76,0.07);border-bottom:1px solid rgba(201,168,76,0.1);cursor:pointer;user-select:none';
-      const hcb = document.createElement('input'); hcb.type='checkbox'; hcb.id=`mbjcb_${g.id}`;
-      hcb.style.cssText='width:15px;height:15px;accent-color:#C9A84C;cursor:pointer;pointer-events:none';
-      const ht = document.createElement('div'); ht.style.cssText='flex:1;font-size:12px;font-weight:700;color:#E8C97A';
-      ht.innerHTML=`${g.label} <span style="font-weight:400;color:rgba(240,234,216,0.4);font-size:10px">— centang semua</span>`;
-      const hc = document.createElement('div'); hc.id=`mbjcnt_${g.id}`; hc.style.cssText='font-size:10px;color:rgba(240,234,216,0.4)';
-      hc.textContent=`0/${g.nums.length}`;
-      h.appendChild(hcb); h.appendChild(ht); h.appendChild(hc);
-      h.onclick = () => mbToggleJuz(g.id, g.nums, allMeta);
-      list.appendChild(h);
-    }
-    g.nums.forEach((num, i) => {
-      const meta = allMeta.get(num);
-      const row = document.createElement('div');
-      row.id=`mbsrow_${num}`;
-      row.style.cssText=`display:flex;align-items:center;gap:8px;padding:8px 12px 8px ${g.label?'26px':'12px'};border-bottom:${i===g.nums.length-1?'none':'1px solid rgba(255,255,255,0.04)'};cursor:pointer;transition:background .12s;user-select:none`;
-      const cb = document.createElement('input'); cb.type='checkbox'; cb.id=`mbsc_${num}`; cb.value=num;
-      cb.style.cssText='width:15px;height:15px;accent-color:#C9A84C;cursor:pointer;pointer-events:none';
-      const lb = document.createElement('div'); lb.style.cssText='flex:1;font-size:12px;color:#F0EAD8'; lb.textContent=`${num}. ${meta.name}`;
-      const ac = document.createElement('div'); ac.style.cssText='font-size:10px;color:rgba(240,234,216,0.4)'; ac.textContent=`${meta.ayahCount} ayat`;
-      const tog = () => { cb.checked=!cb.checked; row.style.background=cb.checked?'rgba(201,168,76,0.07)':''; mbOnCheck(num,cb.checked,meta); if(g.label) mbUpdJuz(g.id,g.nums); };
-      row.onclick = e => { if(e.target===cb){row.style.background=cb.checked?'rgba(201,168,76,0.07)':''; mbOnCheck(num,cb.checked,meta); if(g.label) mbUpdJuz(g.id,g.nums); return;} tog(); };
-      row.appendChild(cb); row.appendChild(lb); row.appendChild(ac);
-      list.appendChild(row);
+// ── Mobile Sambung: unified open/close (uses desktop sfp engine) ─────────────
+function mbSambungOpen() {
+  const isMobile = window.innerWidth <= 768;
+  if (isMobile) {
+    // On mobile: sfpOpen handles sambungFullPage but it also hides ctrl/mushaf panels
+    // those are already hidden/non-existent on mobile, so we just:
+    document.getElementById('mobileFixedPanel').style.display = 'none';
+    const mp = document.querySelector('.mushaf-panel');
+    if (mp) mp.style.display = 'none';
+    const cp = document.querySelector('.ctrl-panel');
+    if (cp) cp.style.display = 'none';
+    // Mark sambung active in drawer
+    ['murojaah','audio','sambung'].forEach(n => {
+      document.getElementById('drawer-nav-'+n)?.classList.toggle('nav-active', n === 'sambung');
     });
-  });
-}
-
-function mbUpdJuz(gid, nums) {
-  const c = nums.filter(n=>document.getElementById(`mbsc_${n}`)?.checked).length;
-  const el = document.getElementById(`mbjcnt_${gid}`); if(el) el.textContent=`${c}/${nums.length}`;
-  const h = document.getElementById(`mbjcb_${gid}`); if(h){h.checked=c===nums.length;h.indeterminate=c>0&&c<nums.length;}
-}
-function mbToggleJuz(gid, nums, allMeta) {
-  const all = nums.every(n=>document.getElementById(`mbsc_${n}`)?.checked);
-  const ns=!all; const h=document.getElementById(`mbjcb_${gid}`); if(h){h.checked=ns;h.indeterminate=false;}
-  nums.forEach(num => { const cb=document.getElementById(`mbsc_${num}`),row=document.getElementById(`mbsrow_${num}`); if(!cb) return; cb.checked=ns; if(row) row.style.background=ns?'rgba(201,168,76,0.07)':''; mbOnCheck(num,ns,allMeta.get(num)); });
-  mbUpdJuz(gid, nums);
-}
-function mbOnCheck(num, checked, meta) {
-  const max = meta?.ayahCount||SURAHS[num]?.ayahs?.length||1;
-  const name = meta?.name||`Surah ${num}`;
-  const cfg = document.getElementById('mb-sambungRangeConfig');
-  if (checked) {
-    if (document.getElementById(`mbsrange_${num}`)) return;
-    const r = document.createElement('div'); r.id=`mbsrange_${num}`;
-    r.style.cssText='background:rgba(0,0,0,0.18);border:1px solid rgba(255,255,255,0.07);border-radius:7px;padding:8px 10px;display:flex;flex-direction:column;gap:5px';
-    r.innerHTML=`<div style="font-size:10px;font-weight:700;color:#E8C97A">${num}. ${name}</div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-size:10px;color:rgba(240,234,216,0.45);min-width:50px">Dari Ayat</span>
-        <input type="number" id="mbsfrom_${num}" value="1" min="1" max="${max}" style="flex:1;background:#27333D;border:1px solid rgba(255,255,255,0.07);color:#F0F2F4;border-radius:5px;padding:4px 7px;font-size:12px;text-align:center">
-        <span style="font-size:10px;color:rgba(240,234,216,0.45)">–</span>
-        <input type="number" id="mbsto_${num}" value="${max}" min="1" max="${max}" style="flex:1;background:#27333D;border:1px solid rgba(255,255,255,0.07);color:#F0F2F4;border-radius:5px;padding:4px 7px;font-size:12px;text-align:center">
-        <span style="font-size:10px;color:rgba(240,234,216,0.45);min-width:26px">/${max}</span>
-      </div>`;
-    cfg.appendChild(r);
-  } else { document.getElementById(`mbsrange_${num}`)?.remove(); }
-}
-
-async function mbStartSambung() {
-  const cbs = document.querySelectorAll('#mb-sambungSurahList input[type=checkbox]:checked');
-  if (!cbs.length) { alert('Pilih minimal 1 surah dulu'); return; }
-  const btn = document.querySelector('#mb-sambungSetup .mobile-play-btn');
-  if (btn) { btn.textContent='⏳ Memuat...'; btn.disabled=true; }
-  await Promise.all(Array.from(cbs).map(c => loadDynamicSurahSilent(parseInt(c.value))));
-  if (btn) { btn.innerHTML='🎲 Mulai Sambung Ayat'; btn.disabled=false; }
-  mbSA.ranges=[]; let err=false;
-  cbs.forEach(cb => {
-    const num=parseInt(cb.value), data=SURAHS[num]; if(!data){err=true;return;}
-    const fr=parseInt(document.getElementById(`mbsfrom_${num}`)?.value||1);
-    const to=parseInt(document.getElementById(`mbsto_${num}`)?.value||data.ayahs.length);
-    if(fr<1||to>data.ayahs.length||fr>=to){alert(`Range tidak valid untuk ${data.name}`);err=true;return;}
-    mbSA.ranges.push({surahNum:num,fromAyah:fr,toAyah:to});
-  });
-  if (err||!mbSA.ranges.length) return;
-  mbSA.ok=0; mbSA.err=0; mbSA.active=true;
-  document.getElementById('mb-sambungSetup').style.display='none';
-  document.getElementById('mb-sambungActive').style.display='flex';
-  document.getElementById('mb-sambungResult').style.display='none';
-  document.getElementById('mb-sambungHintBox').style.display='none';
-  mbUpdScore(); mbNextSambung();
-}
-
-function mbStopSambung() {
-  mbSA.active=false; mbSA.waiting=false;
-  mbStopRec();
-  if(mbSA.audio){mbSA.audio.pause();mbSA.audio=null;}
-  if(mbSA.silTimer){clearTimeout(mbSA.silTimer);mbSA.silTimer=null;}
-  document.getElementById('mb-sambungSetup').style.display='flex';
-  document.getElementById('mb-sambungActive').style.display='none';
-  document.getElementById('mb-sambungResult').style.display='none';
-  document.getElementById('mb-sambungHintBox').style.display='none';
-  mbSetDot('idle','Selesai');
-}
-
-async function mbNextSambung() {
-  mbStopRec(); mbSA.waiting=false;
-  document.getElementById('mb-sambungResult').style.display='none';
-  document.getElementById('mb-sambungTranscript').textContent='—';
-  document.getElementById('mb-sambungHintBox').style.display='none';
-  mbSetDot('idle','Memilih ayat...');
-  let pool=[];
-  mbSA.ranges.forEach(r=>{for(let n=r.fromAyah;n<=r.toAyah-1;n++) pool.push({surahNum:r.surahNum,ayahN:n});});
-  if(!pool.length){mbSetDot('warn','⚠️ Tidak ada ayat');return;}
-  const pick=pool[Math.floor(Math.random()*pool.length)];
-  mbSA.promptSurah=pick.surahNum; mbSA.promptAyah=pick.ayahN; mbSA.targetSurah=pick.surahNum;
-  let data=SURAHS[mbSA.promptSurah]; if(!data){data=await loadDynamicSurah(mbSA.promptSurah);if(!data) return;}
-  const pAyah=data.ayahs.find(a=>a.n===mbSA.promptAyah);
-  const pIdx=data.ayahs.findIndex(a=>a.n===mbSA.promptAyah);
-  const tAyah=data.ayahs[pIdx+1]; mbSA.targetAyah=tAyah.n;
-  document.getElementById('mb-sambungAyahInfo').textContent=`${data.name} • Ayat ${mbSA.promptAyah}`;
-  document.getElementById('mb-sambungAyahText').textContent=pAyah.words.join(' ');
-  mbSetDot('idle','🔊 Sistem sedang membaca...');
-  document.getElementById('mb-sambungMicBtn').disabled=true;
-  document.getElementById('mb-sambungMicLabel').textContent='Tunggu...';
-  mbPlayAudio(mbSA.promptSurah, mbSA.promptAyah, ()=>{
-    if(!mbSA.active) return;
-    mbSA.waiting=true;
-    mbSetDot('idle','Sambung ayat '+mbSA.targetAyah);
-    document.getElementById('mb-sambungMicBtn').disabled=false;
-    document.getElementById('mb-sambungMicLabel').textContent='Sambung Ayat '+mbSA.targetAyah;
-    document.getElementById('mb-sambungMicSub').textContent='Tekan untuk bicara';
-  });
-}
-
-function mbPlayAudio(s,a,cb) {
-  if(mbSA.audio){mbSA.audio.pause();mbSA.audio=null;}
-  const url=getAudioUrl(s,a); const audio=new Audio(url); mbSA.audio=audio;
-  const rb=document.getElementById('mb-sambungReplayBtn'); if(rb) rb.disabled=true;
-  audio.onended=()=>{mbSA.audio=null;if(rb) rb.disabled=false;if(cb) cb();};
-  audio.onerror=()=>{mbSA.audio=null;if(rb) rb.disabled=false;if(cb) cb();};
-  audio.play().catch(()=>{if(rb) rb.disabled=false;if(cb) cb();});
-}
-
-function mbSambungReplay() {
-  if(!mbSA.active) return;
-  mbSetDot('idle','🔊 Memutar ulang...');
-  document.getElementById('mb-sambungMicBtn').disabled=true;
-  mbSA.waiting=false; mbStopRec();
-  mbPlayAudio(mbSA.promptSurah, mbSA.promptAyah, ()=>{
-    if(!mbSA.active) return;
-    mbSA.waiting=true; mbSetDot('idle','Sambung ayat '+mbSA.targetAyah);
-    document.getElementById('mb-sambungMicBtn').disabled=false;
-  });
-}
-
-async function mbToggleSambungRec() {
-  if(!mbSA.waiting) return;
-  if(mbSA.recRunning){mbStopRec();mbProcessBuffer();return;}
-  const ok=await ensureMicPermission(); if(!ok){mbSetDot('warn','❌ Izinkan mikrofon');return;}
-  mbStartRec();
-}
-
-function mbStartRec() {
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){mbSetDot('warn','❌ Gunakan Chrome');return;}
-  mbSA.buffer=[];
-  if(!mbSA.rec){
-    mbSA.rec=new SR(); mbSA.rec.lang='ar-SA'; mbSA.rec.continuous=true;
-    mbSA.rec.interimResults=true; mbSA.rec.maxAlternatives=3;
-    mbSA.rec.onresult=e=>{
-      let ft=''; for(let i=e.resultIndex;i<e.results.length;i++) if(e.results[i].isFinal) ft+=e.results[i][0].transcript+' ';
-      if(ft.trim()){mbSA.buffer.push(ft.trim());document.getElementById('mb-sambungTranscript').textContent=mbSA.buffer.join(' ');clearTimeout(mbSA.silTimer);mbSA.silTimer=setTimeout(mbProcessBuffer,1500);}
-    };
-    mbSA.rec.onend=()=>{mbSA.recRunning=false;const b=document.getElementById('mb-sambungMicBtn');if(b){b.textContent='🎙️';b.style.background='';}document.getElementById('mb-sambungMicSub').textContent='Tekan untuk bicara';};
-    mbSA.rec.onerror=e=>{mbSA.recRunning=false;if(e.error==='not-allowed'){mbSetDot('warn','❌ Izinkan mikrofon');globalMicStream=null;}};
   }
-  try{
-    mbSA.rec.start(); mbSA.recRunning=true;
-    const b=document.getElementById('mb-sambungMicBtn');if(b){b.textContent='<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>';b.style.background='rgba(239,107,90,0.3)';}
-    mbSetDot('live','🎙️ Mendengarkan...');
-    document.getElementById('mb-sambungMicSub').textContent='Tekan lagi untuk selesai';
-  }catch(e){mbSetDot('warn','❌ Gagal mulai mic');}
+  // Use the proven desktop sfpOpen
+  sfpOpen();
 }
 
-function mbStopRec() {
-  if(mbSA.rec&&mbSA.recRunning){try{mbSA.rec.stop();}catch(e){} mbSA.recRunning=false;}
-  clearTimeout(mbSA.silTimer);
-  const b=document.getElementById('mb-sambungMicBtn');if(b){b.textContent='🎙️';b.style.background='';}
-}
-
-function mbProcessBuffer() {
-  clearTimeout(mbSA.silTimer); mbStopRec(); mbSA.waiting=false;
-  if(!mbSA.active) return;
-  const spoken=mbSA.buffer.join(' ').trim(); mbSA.buffer=[];
-  if(!spoken){mbSetDot('warn','⚠️ Tidak ada bacaan');mbSA.waiting=true;return;}
-  const data=SURAHS[mbSA.targetSurah]; const t=data.ayahs.find(a=>a.n===mbSA.targetAyah); if(!t) return;
-  const result=validateSambung(spoken,t.words); mbShowResult(result,t.words);
-}
-
-function mbShowResult(result, refWords) {
-  const data=SURAHS[mbSA.targetSurah];
-  document.getElementById('mb-sambungExpected').textContent=refWords.join(' ');
-  const msg=document.getElementById('mb-sambungResultMsg');
-  const lbl=document.getElementById('mb-sambungResultLabel');
-  if(result.ok){
-    mbSA.ok++;
-    lbl.textContent=`✅ Benar — Ayat ${mbSA.targetAyah} ${data.name}`;
-    msg.textContent=`Masyaa Allah! ${result.detail}`;
-    msg.style.cssText='font-size:12px;font-weight:600;text-align:center;padding:8px;border-radius:7px;background:rgba(93,186,125,0.15);color:#5dba7d;border:1px solid rgba(93,186,125,0.3)';
-    mbSetDot('ok','✅ Benar!'); playCorrectSound();
-  } else {
-    mbSA.err++;
-    lbl.textContent=`❌ Salah — Ayat ${mbSA.targetAyah} ${data.name}`;
-    msg.textContent=result.score===0?`Bukan ayat yang tepat — ${result.detail}`:`Kurang tepat — ${result.detail}`;
-    msg.style.cssText='font-size:12px;font-weight:600;text-align:center;padding:8px;border-radius:7px;background:rgba(239,107,90,0.15);color:#ef6b5a;border:1px solid rgba(239,107,90,0.3)';
-    mbSetDot('warn','❌ Salah'); playWrongSound();
-  }
-  document.getElementById('mb-sambungResult').style.display='block';
-  mbUpdScore();
-}
-
-function mbSkipSambung() {
-  if(!mbSA.active) return;
-  mbStopRec(); mbSA.waiting=false;
-  document.getElementById('mb-sambungHintBox').style.display='none';
-  const data=SURAHS[mbSA.targetSurah];
-  if(data){
-    const t=data.ayahs.find(a=>a.n===mbSA.targetAyah);
-    if(t){
-      document.getElementById('mb-sambungExpected').textContent=t.words.join(' ');
-      document.getElementById('mb-sambungResultLabel').textContent=`⏭ Dilewati — Ayat ${mbSA.targetAyah} ${data.name}`;
-      const msg=document.getElementById('mb-sambungResultMsg');
-      msg.textContent='Dilewati — lihat jawaban di atas';
-      msg.style.cssText='font-size:12px;font-weight:600;text-align:center;padding:8px;border-radius:7px;background:rgba(201,168,76,0.1);color:#C9A84C;border:1px solid rgba(201,168,76,0.3)';
-      document.getElementById('mb-sambungResult').style.display='block';
-      mbSetDot('warn','⏭ Dilewati'); return;
-    }
-  }
-  mbNextSambung();
-}
-
-function mbHintSambung() {
-  if(!mbSA.active) return;
-  const data=SURAHS[mbSA.targetSurah]; if(!data) return;
-  const t=data.ayahs.find(a=>a.n===mbSA.targetAyah); if(!t||!t.words.length) return;
-  document.getElementById('mb-sambungHintText').textContent=t.words.slice(0,2).join(' ');
-  const box=document.getElementById('mb-sambungHintBox');
-  box.style.display=box.style.display==='none'?'block':'none';
-}
-
-function mbUpdScore() {
-  document.getElementById('mb-sambungOk').textContent=mbSA.ok;
-  document.getElementById('mb-sambungErr').textContent=mbSA.err;
-  document.getElementById('mb-sambungTotal').textContent=mbSA.ok+mbSA.err;
-}
-
-function mbSetDot(type,text) {
-  const d=document.getElementById('mb-sambungDot'),t2=document.getElementById('mb-sambungText');
-  if(!d||!t2) return;
-  d.className='sdot';
-  if(type==='ok'){d.style.background='#5dba7d';d.style.animation='';}
-  else if(type==='warn'){d.style.background='#ef6b5a';d.style.animation='';}
-  else if(type==='live'){d.style.background='#f59e0b';d.style.animation='dp 1s infinite';}
-  else{d.style.background='rgba(255,255,255,0.2)';d.style.animation='';}
-  t2.textContent=text;
-}
-
-// ── Patch desktop functions to mirror to mobile ──────────────────────────
-// Patch setDot
-const _origSetDot = setDot;
-window.setDot = function(state, text) {
-  _origSetDot(state, text);
-  const md=document.getElementById('mb-sdot'),mt=document.getElementById('mb-stext');
-  if(md) md.className='sdot'+(state?' '+state:'');
-  if(mt) mt.textContent=text;
-};
-
-// Patch log
-const _origLog = log;
-window.log = function(msg, err) {
-  _origLog(msg, err);
-  const ml=document.getElementById('mb-logBar');
-  if(ml){ml.textContent=msg;ml.className='mobile-log'+(err?' err':'');}
-};
-
-// Patch updateStats
-const _origUpdateStats = updateStats;
-window.updateStats = function() {
-  _origUpdateStats();
-  const ids=[['stOk','mb-stOk'],['stErr','mb-stErr'],['stPos','mb-stPos']];
-  ids.forEach(([s,m])=>{const se=document.getElementById(s),me=document.getElementById(m);if(se&&me) me.textContent=se.textContent;});
-  const pf=document.getElementById('progFill'),mbpf=document.getElementById('mb-progFill');
-  if(pf&&mbpf) mbpf.style.width=pf.style.width;
-};
-
-// Patch setMicOff
-const _origSetMicOff = setMicOff;
-window.setMicOff = function() {
-  _origSetMicOff();
-  const mb=document.getElementById('mb-btnMic');if(mb){mb.classList.remove('live');mb.textContent='🎙️';}
-  const mw=document.getElementById('mb-wave');if(mw) mw.classList.remove('show');
-  const ml=document.getElementById('mb-micLabel');if(ml) ml.textContent='Mulai Sesi';
-  const ms=document.getElementById('mb-micSub');if(ms) ms.textContent='Tekan untuk aktifkan mikrofon';
-};
-
-// Patch enterRetryMode
-const _origEnterRetry = enterRetryMode;
-window.enterRetryMode = function(idx) {
-  _origEnterRetry(idx);
-  const mr=document.getElementById('mb-retryBanner');
-  if(mr){
-    mr.style.display='flex';
-    const dn=document.getElementById('retryAyahNum'),mn=document.getElementById('mb-retryAyahNum');if(dn&&mn) mn.textContent=dn.textContent;
-    const dw=document.getElementById('retryWord'),mw=document.getElementById('mb-retryWord');if(dw&&mw) mw.textContent=dw.textContent;
-  }
-};
-
-// Patch exitRetryMode
-const _origExitRetry = exitRetryMode;
-window.exitRetryMode = function() {
-  _origExitRetry();
-  const mr=document.getElementById('mb-retryBanner');if(mr) mr.style.display='none';
-};
-
-// Patch rec onstart (inside setupRec) — mirror wave + mic state
-// We do this by observing the desktop btnMic element
-function mbWatchMic() {
-  const dMic=document.getElementById('btnMic'),dWave=document.getElementById('wave');
-  if(!dMic||!dWave) return;
-  new MutationObserver(()=>{
-    const mb=document.getElementById('mb-btnMic');if(mb){mb.textContent=dMic.textContent;mb.className=dMic.className;}
-    const mw=document.getElementById('mb-wave');if(mw) mw.classList.toggle('show',dWave.classList.contains('show'));
-    const ml=document.getElementById('mb-micLabel'),dl=document.getElementById('micLabel');if(ml&&dl) ml.textContent=dl.textContent;
-    const ms=document.getElementById('mb-micSub'),ds=document.getElementById('micSub');if(ms&&ds) ms.textContent=ds.textContent;
-  }).observe(dMic,{attributes:true,childList:true,characterData:true,subtree:true});
-  new MutationObserver(()=>{
-    const mw=document.getElementById('mb-wave');if(mw) mw.classList.toggle('show',dWave.classList.contains('show'));
-  }).observe(dWave,{attributes:true});
-  // Also watch tText for transcript
-  const tText=document.getElementById('tText');
-  if(tText) new MutationObserver(()=>{
-    // transcript not shown separately in mobile voice panel but log covers it
-  }).observe(tText,{childList:true,characterData:true,subtree:true});
-}
-
-// ── Init ──────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  mbSetupObserver();
-  mbWatchAudio();
-  mbWatchMic();
-  // Sync audio end ayah when surah loads
-  const origLS = window.loadSurah;
-  window.loadSurah = async function() {
-    await origLS.apply(this, arguments);
-    const de=document.getElementById('audioEndAyah'),me=document.getElementById('mb-audioEnd');
-    if(de&&me) me.value=de.value;
-  };
-});
-
-
-// ═══════════════════════════════════════════════════════════════════════
-//  MOBILE DRAWER + SAMBUNG VIEW
-// ═══════════════════════════════════════════════════════════════════════
-
-function mbOpenDrawer() {
-  document.getElementById('mobileDrawer').classList.add('drawer-open');
-  document.getElementById('drawerOverlay').classList.add('overlay-active');
-}
-function mbCloseDrawer() {
-  document.getElementById('mobileDrawer').classList.remove('drawer-open');
-  document.getElementById('drawerOverlay').classList.remove('overlay-active');
-}
-
-function mbDrawerNav(item) {
-  mbCloseDrawer();
-  ['murojaah','audio','sambung','setoran'].forEach(n => {
-    document.getElementById('drawer-nav-'+n)?.classList.toggle('nav-active', n===item);
-  });
-
-  navToHash(item);
-
-  if (item === 'murojaah') {
-    mbCloseSambungView();
+function mbSambungClose() {
+  const isMobile = window.innerWidth <= 768;
+  sfpClose();
+  if (isMobile) {
+    document.getElementById('mobileFixedPanel').style.display = '';
+    const mp = document.querySelector('.mushaf-panel');
+    if (mp) mp.style.display = '';
+    // Go back to voice
     mbShowPanel('voice', 'Cek Hafalan', 'Voice');
-  } else if (item === 'audio') {
-    mbCloseSambungView();
-    mbShowPanel('audio', 'Audio Repeat', 'Audio');
-  } else if (item === 'sambung') {
-    mbOpenSambungView();
-  } else if (item === 'setoran') {
-    alert('Fitur Setoran segera hadir');
-    document.getElementById('drawer-nav-murojaah').classList.add('nav-active');
-    document.getElementById('drawer-nav-setoran').classList.remove('nav-active');
     navToHash('murojaah');
   }
 }
 
-function mbShowPanel(panelId, title, badge) {
-  // Hide all panels
-  ['voice','audio'].forEach(p => {
-    const el = document.getElementById('mb-panel-'+p);
-    if (el) el.classList.toggle('active', p === panelId);
-  });
-  // Update header
-  const titleEl = document.getElementById('mb-panelTitle');
-  const badgeEl = document.getElementById('mb-panelBadge');
-  if (titleEl) titleEl.textContent = title;
-  if (badgeEl) badgeEl.textContent = badge;
-}
-
-function mbOpenSambungView() {
-  document.getElementById('mobileSambungView').classList.add('sambung-view-open');
-  document.getElementById('mobileFixedPanel').style.display='none';
-  mbsvInitList();
-}
-function mbCloseSambungView() {
-  document.getElementById('mobileSambungView').classList.remove('sambung-view-open');
-  document.getElementById('mobileFixedPanel').style.display='';
-  document.getElementById('drawer-nav-murojaah')?.classList.add('nav-active');
-  document.getElementById('drawer-nav-sambung')?.classList.remove('nav-active');
-  document.getElementById('drawer-nav-audio')?.classList.remove('nav-active');
-  mbShowPanel('voice', 'Cek Hafalan', 'Voice');
-  navToHash('murojaah');
-}
-
 // ── Sambung View: Init surah list ────────────────────────────────────────
-function mbsvInitList() {
-  const list = document.getElementById('mbsv-surahList');
-  if (!list || list.children.length > 0) return;
-
-  const allMeta = new Map();
-  Object.entries(SURAHS).forEach(([n,s]) => allMeta.set(parseInt(n), {name:s.name, ayahCount:s.ayahs.length, juz: JUZ_SURAHS[parseInt(n)]?.juz||null}));
-  Object.entries(JUZ_SURAHS).forEach(([n,s]) => {
-    if (!allMeta.has(parseInt(n))) allMeta.set(parseInt(n), {name:s.name, ayahCount:s.ayahCount, juz:s.juz});
-    else allMeta.get(parseInt(n)).juz = s.juz;
-  });
-
-  const groups = [
-    {id:'svs',label:null,nums:[1,2,3,32]},
-    {id:'svj28',label:'Juz 28',nums:[]},
-    {id:'svj29',label:'Juz 29',nums:[]},
-    {id:'svj30',label:'Juz 30',nums:[]},
-  ];
-  const sp = new Set([1,2,3,32]);
-  [...allMeta.keys()].sort((a,b)=>a-b).forEach(num => {
-    if (sp.has(num)) return;
-    const m = allMeta.get(num);
-    if (m.juz?.includes(28)) groups[1].nums.push(num);
-    else if (m.juz?.includes(29)) groups[2].nums.push(num);
-    else if (m.juz?.includes(30)) groups[3].nums.push(num);
-  });
-
-  groups.forEach(g => {
-    if (g.label) {
-      const h = document.createElement('div');
-      h.style.cssText='display:flex;align-items:center;gap:10px;padding:11px 14px;background:rgba(201,168,76,0.08);border-bottom:1px solid rgba(201,168,76,0.1);cursor:pointer;user-select:none';
-      const hcb = document.createElement('input'); hcb.type='checkbox'; hcb.id=`svcb_${g.id}`;
-      hcb.style.cssText='width:16px;height:16px;accent-color:#C9A84C;cursor:pointer;pointer-events:none';
-      const ht = document.createElement('div'); ht.style.cssText='flex:1;font-size:13px;font-weight:700;color:#E8C97A';
-      ht.innerHTML=`${g.label} <span style="font-weight:400;color:rgba(240,234,216,0.4);font-size:11px">— centang semua</span>`;
-      const hc = document.createElement('div'); hc.id=`svcnt_${g.id}`; hc.style.cssText='font-size:11px;color:rgba(240,234,216,0.4)';
-      hc.textContent=`0/${g.nums.length}`;
-      h.appendChild(hcb); h.appendChild(ht); h.appendChild(hc);
-      h.onclick = () => svToggleJuz(g.id, g.nums, allMeta);
-      list.appendChild(h);
-    }
-    g.nums.forEach((num, i) => {
-      const meta = allMeta.get(num);
-      const row = document.createElement('div');
-      row.id=`svrow_${num}`;
-      row.style.cssText=`display:flex;align-items:center;gap:10px;padding:11px 14px 11px ${g.label?'28px':'14px'};border-bottom:${i===g.nums.length-1?'none':'1px solid rgba(255,255,255,0.04)'};cursor:pointer;transition:background .12s;user-select:none`;
-      const cb = document.createElement('input'); cb.type='checkbox'; cb.id=`svsc_${num}`; cb.value=num;
-      cb.style.cssText='width:16px;height:16px;accent-color:#C9A84C;cursor:pointer;pointer-events:none';
-      const lb = document.createElement('div'); lb.style.cssText='flex:1;font-size:13px;color:#F0EAD8'; lb.textContent=`${num}. ${meta.name}`;
-      const ac = document.createElement('div'); ac.style.cssText='font-size:11px;color:rgba(240,234,216,0.4)'; ac.textContent=`${meta.ayahCount} ayat`;
-      const tog = () => { cb.checked=!cb.checked; row.style.background=cb.checked?'rgba(201,168,76,0.07)':''; svOnCheck(num,cb.checked,meta); if(g.label) svUpdJuz(g.id,g.nums); };
-      row.onclick = e => { if(e.target===cb){row.style.background=cb.checked?'rgba(201,168,76,0.07)':''; svOnCheck(num,cb.checked,meta); if(g.label) svUpdJuz(g.id,g.nums); return;} tog(); };
-      row.appendChild(cb); row.appendChild(lb); row.appendChild(ac);
-      list.appendChild(row);
-    });
-  });
-}
-
-function svUpdJuz(gid, nums) {
-  const c=nums.filter(n=>document.getElementById(`svsc_${n}`)?.checked).length;
-  const el=document.getElementById(`svcnt_${gid}`); if(el) el.textContent=`${c}/${nums.length}`;
-  const h=document.getElementById(`svcb_${gid}`); if(h){h.checked=c===nums.length;h.indeterminate=c>0&&c<nums.length;}
-}
-function svToggleJuz(gid, nums, allMeta) {
-  const all=nums.every(n=>document.getElementById(`svsc_${n}`)?.checked); const ns=!all;
-  const h=document.getElementById(`svcb_${gid}`); if(h){h.checked=ns;h.indeterminate=false;}
-  nums.forEach(num=>{const cb=document.getElementById(`svsc_${num}`),row=document.getElementById(`svrow_${num}`);if(!cb) return;cb.checked=ns;if(row) row.style.background=ns?'rgba(201,168,76,0.07)':'';svOnCheck(num,ns,allMeta.get(num));});
-  svUpdJuz(gid, nums);
-}
-function svOnCheck(num, checked, meta) {
-  const max=meta?.ayahCount||SURAHS[num]?.ayahs?.length||1;
-  const name=meta?.name||`Surah ${num}`;
-  const cfg=document.getElementById('mbsv-rangeConfig');
-  if (checked) {
-    if (document.getElementById(`svrange_${num}`)) return;
-    const r=document.createElement('div'); r.id=`svrange_${num}`;
-    r.style.cssText='background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.07);border-radius:9px;padding:10px 12px;display:flex;flex-direction:column;gap:7px';
-    r.innerHTML=`<div style="font-size:11px;font-weight:700;color:#E8C97A">${num}. ${name}</div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:11px;color:rgba(240,234,216,0.45);min-width:55px">Dari Ayat</span>
-        <input type="number" id="svfrom_${num}" value="1" min="1" max="${max}" style="flex:1;background:#27333D;border:1px solid rgba(255,255,255,0.07);color:#F0F2F4;border-radius:6px;padding:6px 8px;font-size:13px;text-align:center">
-        <span style="font-size:11px;color:rgba(240,234,216,0.45)">–</span>
-        <input type="number" id="svto_${num}" value="${max}" min="1" max="${max}" style="flex:1;background:#27333D;border:1px solid rgba(255,255,255,0.07);color:#F0F2F4;border-radius:6px;padding:6px 8px;font-size:13px;text-align:center">
-        <span style="font-size:11px;color:rgba(240,234,216,0.45);min-width:28px">/${max}</span>
-      </div>`;
-    cfg.appendChild(r);
-  } else { document.getElementById(`svrange_${num}`)?.remove(); }
-}
-
-// ── Sambung View: Session state ──────────────────────────────────────────
-let mbsv = {
-  active:false, rec:null, recRunning:false, buffer:[], silTimer:null,
-  ranges:[], promptSurah:-1, promptAyah:-1, targetSurah:-1, targetAyah:-1,
-  ok:0, err:0, waiting:false, audio:null
-};
-
-async function mbsvStart() {
-  const cbs = document.querySelectorAll('#mbsv-surahList input[type=checkbox]:checked');
-  if (!cbs.length) { alert('Pilih minimal 1 surah dulu'); return; }
-  const btn = document.querySelector('#mbsv-setup button:last-child');
-  if (btn) { btn.textContent='⏳ Memuat...'; btn.disabled=true; }
-  await Promise.all(Array.from(cbs).map(c=>loadDynamicSurahSilent(parseInt(c.value))));
-  if (btn) { btn.innerHTML='🎲 Mulai Sambung Ayat'; btn.disabled=false; }
-  mbsv.ranges=[]; let err=false;
-  cbs.forEach(cb=>{
-    const num=parseInt(cb.value),data=SURAHS[num]; if(!data){err=true;return;}
-    const fr=parseInt(document.getElementById(`svfrom_${num}`)?.value||1);
-    const to=parseInt(document.getElementById(`svto_${num}`)?.value||data.ayahs.length);
-    if(fr<1||to>data.ayahs.length||fr>=to){alert(`Range tidak valid untuk ${data.name}`);err=true;return;}
-    mbsv.ranges.push({surahNum:num,fromAyah:fr,toAyah:to});
-  });
-  if(err||!mbsv.ranges.length) return;
-  mbsv.ok=0; mbsv.err=0; mbsv.active=true;
-  document.getElementById('mbsv-setup').style.display='none';
-  document.getElementById('mbsv-active').style.display='flex';
-  document.getElementById('mbsv-result').style.display='none';
-  document.getElementById('mbsv-hintBox').style.display='none';
-  mbsvUpdScore(); mbsvNext();
-}
-
-function mbsvStop() {
-  mbsv.active=false; mbsv.waiting=false;
-  mbsvStopRec();
-  if(mbsv.audio){mbsv.audio.pause();mbsv.audio=null;}
-  if(mbsv.silTimer){clearTimeout(mbsv.silTimer);mbsv.silTimer=null;}
-  document.getElementById('mbsv-setup').style.display='block';
-  document.getElementById('mbsv-active').style.display='none';
-  document.getElementById('mbsv-result').style.display='none';
-  document.getElementById('mbsv-hintBox').style.display='none';
-  mbsvSetDot('idle','Selesai');
-}
-
-async function mbsvNext() {
-  mbsvStopRec(); mbsv.waiting=false;
-  document.getElementById('mbsv-result').style.display='none';
-  document.getElementById('mbsv-transcript').textContent='—';
-  document.getElementById('mbsv-hintBox').style.display='none';
-  mbsvSetDot('idle','Memilih ayat...');
-  let pool=[];
-  mbsv.ranges.forEach(r=>{for(let n=r.fromAyah;n<=r.toAyah-1;n++) pool.push({surahNum:r.surahNum,ayahN:n});});
-  if(!pool.length){mbsvSetDot('warn','⚠️ Tidak ada ayat');return;}
-  const pick=pool[Math.floor(Math.random()*pool.length)];
-  mbsv.promptSurah=pick.surahNum; mbsv.promptAyah=pick.ayahN; mbsv.targetSurah=pick.surahNum;
-  let data=SURAHS[mbsv.promptSurah]; if(!data){data=await loadDynamicSurah(mbsv.promptSurah);if(!data) return;}
-  const pAyah=data.ayahs.find(a=>a.n===mbsv.promptAyah);
-  const pIdx=data.ayahs.findIndex(a=>a.n===mbsv.promptAyah);
-  const tAyah=data.ayahs[pIdx+1]; mbsv.targetAyah=tAyah.n;
-  document.getElementById('mbsv-ayahInfo').textContent=`${data.name} • Ayat ${mbsv.promptAyah}`;
-  document.getElementById('mbsv-ayahText').textContent=pAyah.words.join(' ');
-  mbsvSetDot('idle','🔊 Sistem sedang membaca...');
-  document.getElementById('mbsv-micBtn').disabled=true;
-  document.getElementById('mbsv-micLabel').textContent='Tunggu...';
-  mbsvPlayAudio(mbsv.promptSurah,mbsv.promptAyah,()=>{
-    if(!mbsv.active) return;
-    mbsv.waiting=true;
-    mbsvSetDot('idle','Sambung ayat '+mbsv.targetAyah);
-    document.getElementById('mbsv-micBtn').disabled=false;
-    document.getElementById('mbsv-micLabel').textContent='Sambung Ayat '+mbsv.targetAyah;
-    document.getElementById('mbsv-micSub').textContent='Tekan untuk bicara';
-  });
-}
-
-function mbsvPlayAudio(s,a,cb) {
-  if(mbsv.audio){mbsv.audio.pause();mbsv.audio=null;}
-  const url=getAudioUrl(s,a); const audio=new Audio(url); mbsv.audio=audio;
-  const rb=document.getElementById('mbsv-replayBtn'); if(rb) rb.disabled=true;
-  audio.onended=()=>{mbsv.audio=null;if(rb) rb.disabled=false;if(cb) cb();};
-  audio.onerror=()=>{mbsv.audio=null;if(rb) rb.disabled=false;if(cb) cb();};
-  audio.play().catch(()=>{if(rb) rb.disabled=false;if(cb) cb();});
-}
-
-function mbsvReplay() {
-  if(!mbsv.active) return;
-  mbsvSetDot('idle','🔊 Memutar ulang...'); document.getElementById('mbsv-micBtn').disabled=true;
-  mbsv.waiting=false; mbsvStopRec();
-  mbsvPlayAudio(mbsv.promptSurah,mbsv.promptAyah,()=>{
-    if(!mbsv.active) return; mbsv.waiting=true;
-    mbsvSetDot('idle','Sambung ayat '+mbsv.targetAyah);
-    document.getElementById('mbsv-micBtn').disabled=false;
-  });
-}
-
-async function mbsvToggleRec() {
-  if(!mbsv.waiting) return;
-  if(mbsv.recRunning){mbsvStopRec();mbsvProcessBuffer();return;}
-  const ok=await ensureMicPermission(); if(!ok){mbsvSetDot('warn','❌ Izinkan mikrofon');return;}
-  mbsvStartRec();
-}
-
-function mbsvStartRec() {
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){mbsvSetDot('warn','❌ Gunakan Chrome');return;}
-  mbsv.buffer=[];
-  if(!mbsv.rec){
-    mbsv.rec=new SR(); mbsv.rec.lang='ar-SA'; mbsv.rec.continuous=true;
-    mbsv.rec.interimResults=true; mbsv.rec.maxAlternatives=3;
-    mbsv.rec.onresult=e=>{
-      let ft=''; for(let i=e.resultIndex;i<e.results.length;i++) if(e.results[i].isFinal) ft+=e.results[i][0].transcript+' ';
-      if(ft.trim()){mbsv.buffer.push(ft.trim());document.getElementById('mbsv-transcript').textContent=mbsv.buffer.join(' ');clearTimeout(mbsv.silTimer);mbsv.silTimer=setTimeout(mbsvProcessBuffer,1500);}
-    };
-    mbsv.rec.onend=()=>{mbsv.recRunning=false;const b=document.getElementById('mbsv-micBtn');if(b){b.textContent='🎙️';b.style.background='';}document.getElementById('mbsv-micSub').textContent='Tekan untuk bicara';};
-    mbsv.rec.onerror=e=>{mbsv.recRunning=false;if(e.error==='not-allowed'){mbsvSetDot('warn','❌ Izinkan mikrofon');globalMicStream=null;}};
-  }
-  try{
-    mbsv.rec.start(); mbsv.recRunning=true;
-    const b=document.getElementById('mbsv-micBtn');if(b){b.textContent='<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>';b.style.background='rgba(239,107,90,0.3)';}
-    mbsvSetDot('live','🎙️ Mendengarkan...');
-    document.getElementById('mbsv-micSub').textContent='Tekan lagi untuk selesai';
-  }catch(e){mbsvSetDot('warn','❌ Gagal mulai mic');}
-}
-
-function mbsvStopRec() {
-  if(mbsv.rec&&mbsv.recRunning){try{mbsv.rec.stop();}catch(e){} mbsv.recRunning=false;}
-  clearTimeout(mbsv.silTimer);
-  const b=document.getElementById('mbsv-micBtn');if(b){b.textContent='🎙️';b.style.background='';}
-}
-
-function mbsvProcessBuffer() {
-  clearTimeout(mbsv.silTimer); mbsvStopRec(); mbsv.waiting=false;
-  if(!mbsv.active) return;
-  const spoken=mbsv.buffer.join(' ').trim(); mbsv.buffer=[];
-  if(!spoken){mbsvSetDot('warn','⚠️ Tidak ada bacaan');mbsv.waiting=true;return;}
-  const data=SURAHS[mbsv.targetSurah]; const t=data.ayahs.find(a=>a.n===mbsv.targetAyah); if(!t) return;
-  const result=validateSambung(spoken,t.words); mbsvShowResult(result,t.words);
-}
-
-function mbsvShowResult(result, refWords) {
-  const data=SURAHS[mbsv.targetSurah];
-  document.getElementById('mbsv-expected').textContent=refWords.join(' ');
-  const msg=document.getElementById('mbsv-resultMsg'), lbl=document.getElementById('mbsv-resultLabel');
-  if(result.ok){
-    mbsv.ok++;
-    lbl.textContent=`✅ Benar — Ayat ${mbsv.targetAyah} ${data.name}`;
-    msg.textContent=`Masyaa Allah! ${result.detail}`;
-    msg.style.cssText='font-size:13px;font-weight:600;text-align:center;padding:10px;border-radius:8px;background:rgba(93,186,125,0.15);color:#5dba7d;border:1px solid rgba(93,186,125,0.3)';
-    mbsvSetDot('ok','✅ Benar!'); playCorrectSound();
-  } else {
-    mbsv.err++;
-    lbl.textContent=`❌ Salah — Ayat ${mbsv.targetAyah} ${data.name}`;
-    msg.textContent=result.score===0?`Bukan ayat yang tepat — ${result.detail}`:`Kurang tepat — ${result.detail}`;
-    msg.style.cssText='font-size:13px;font-weight:600;text-align:center;padding:10px;border-radius:8px;background:rgba(239,107,90,0.15);color:#ef6b5a;border:1px solid rgba(239,107,90,0.3)';
-    mbsvSetDot('warn','❌ Salah'); playWrongSound();
-  }
-  document.getElementById('mbsv-result').style.display='block';
-  mbsvUpdScore();
-}
-
-function mbsvSkip() {
-  if(!mbsv.active) return;
-  mbsvStopRec(); mbsv.waiting=false;
-  document.getElementById('mbsv-hintBox').style.display='none';
-  const data=SURAHS[mbsv.targetSurah]; const t=data?.ayahs?.find(a=>a.n===mbsv.targetAyah);
-  if(t){
-    document.getElementById('mbsv-expected').textContent=t.words.join(' ');
-    document.getElementById('mbsv-resultLabel').textContent=`⏭ Dilewati — Ayat ${mbsv.targetAyah} ${data.name}`;
-    const msg=document.getElementById('mbsv-resultMsg');
-    msg.textContent='Dilewati — lihat jawaban di atas';
-    msg.style.cssText='font-size:13px;font-weight:600;text-align:center;padding:10px;border-radius:8px;background:rgba(201,168,76,0.1);color:#C9A84C;border:1px solid rgba(201,168,76,0.3)';
-    document.getElementById('mbsv-result').style.display='block';
-    mbsvSetDot('warn','⏭ Dilewati'); return;
-  }
-  mbsvNext();
-}
-
-function mbsvHint() {
-  if(!mbsv.active) return;
-  const data=SURAHS[mbsv.targetSurah]; if(!data) return;
-  const t=data.ayahs.find(a=>a.n===mbsv.targetAyah); if(!t||!t.words.length) return;
-  document.getElementById('mbsv-hintText').textContent=t.words.slice(0,2).join(' ');
-  const box=document.getElementById('mbsv-hintBox');
-  box.style.display=box.style.display==='none'?'block':'none';
-}
-
-function mbsvUpdScore() {
-  document.getElementById('mbsv-scoreOk').textContent=mbsv.ok;
-  document.getElementById('mbsv-scoreErr').textContent=mbsv.err;
-  document.getElementById('mbsv-scoreTotal').textContent=mbsv.ok+mbsv.err;
-}
-
-function mbsvSetDot(type,text) {
-  const d=document.getElementById('mbsv-dot'),t2=document.getElementById('mbsv-statusText');
-  if(!d||!t2) return;
-  d.className='sdot';
-  if(type==='ok'){d.style.background='#5dba7d';d.style.animation='';}
-  else if(type==='warn'){d.style.background='#ef6b5a';d.style.animation='';}
-  else if(type==='live'){d.style.background='#f59e0b';d.style.animation='dp 1s infinite';}
-  else{d.style.background='rgba(255,255,255,0.2)';d.style.animation='';}
-  t2.textContent=text;
-}
 
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -5816,8 +5639,8 @@ function mbsvSetDot(type,text) {
 // ═══════════════════════════════════════════════════════════════════════
 
 const SNAV_CONFIG = {
-  murojaah: { title: 'مراجعة', subtitle: 'Cek Hafalan', tab: 'voice' },
-  audio:    { title: "🔁 Audio Repeat", subtitle: "Muroja'ah Player", tab: "audio" },
+  murojaah: { title: 'Cek Hafalan', subtitle: 'Voice Tracking', tab: 'voice' },
+  audio:    { title: 'Audio Repeat', subtitle: "Muroja'ah Player", tab: "audio" },
   sambung:  { title: '🔗 Sambung Ayat', subtitle: 'Latihan Menyambung', tab: 'sambung' },
   setoran:  { title: '✅ Setoran', subtitle: 'Rekam Pencapaian', tab: null }
 };
@@ -5832,12 +5655,20 @@ const HASH_MAP = {
 const HASH_REVERSE = Object.fromEntries(Object.entries(HASH_MAP).map(([k,v])=>[v,k]));
 
 function navToHash(item) {
-  const h = HASH_MAP[item] || item;
-  if (location.hash !== '#' + h) history.pushState(null, '', '#' + h);
+  try {
+    const h = HASH_MAP[item] || item;
+    if (location.hash !== '#' + h) history.pushState(null, '', '#' + h);
+  } catch(e) { /* ignore SecurityError in iframe environments */ }
 }
 
+const RPANEL_ICONS = {
+  murojaah: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>',
+  audio:    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>',
+  sambung:  '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+};
+
 function snavSwitch(item) {
-  ['murojaah','audio','sambung','setoran'].forEach(n => {
+  ['murojaah','audio','sambung'].forEach(n => {
     document.getElementById('snav-'+n)?.classList.toggle('snav-active', n===item);
   });
 
@@ -5845,6 +5676,11 @@ function snavSwitch(item) {
   if (cfg) {
     document.getElementById('rpanelTitle').textContent = cfg.title;
     document.getElementById('rpanelSubtitle').textContent = cfg.subtitle;
+    const iconEl = document.getElementById('rpanelIcon');
+    if (iconEl && RPANEL_ICONS[item]) iconEl.innerHTML = RPANEL_ICONS[item];
+    // Hide built-in header for audio tab (it has its own inline header)
+    const header = document.getElementById('rpanelHeader');
+    if (header) header.style.display = item === 'audio' ? 'none' : '';
   }
 
   navToHash(item);
@@ -5860,11 +5696,6 @@ function snavSwitch(item) {
 
 // On desktop init + hash routing
 document.addEventListener('DOMContentLoaded', () => {
-  // Set user avatar initial
-  const name = document.getElementById('sidebarName').textContent.trim();
-  const av = document.getElementById('sidebarAvatar');
-  if (av && name) av.textContent = name[0].toLowerCase();
-
   // Navigate to correct section based on URL hash
   applyHash();
 });
@@ -5880,20 +5711,20 @@ function applyHash() {
 
   if (isMobile) {
     // sync drawer nav active state
-    ['murojaah','audio','sambung','setoran'].forEach(n => {
+    ['murojaah','audio','sambung'].forEach(n => {
       document.getElementById('drawer-nav-'+n)?.classList.toggle('nav-active', n===item);
     });
     if (item === 'sambung') {
-      mbOpenSambungView();
+      mbSambungOpen();
     } else {
-      mbCloseSambungView();
+      sfpClose();
       if (item === 'audio') mbShowPanel('audio', 'Audio Repeat', 'Audio');
       else mbShowPanel('voice', 'Cek Hafalan', 'Voice');
     }
   } else {
     // desktop
     if (item === 'sambung') {
-      ['murojaah','audio','sambung','setoran'].forEach(n => {
+      ['murojaah','audio','sambung'].forEach(n => {
         document.getElementById('snav-'+n)?.classList.toggle('snav-active', n===item);
       });
       sfpOpen();
@@ -5914,7 +5745,10 @@ let sfp = {
   active: false, rec: null, recRunning: false,
   buffer: [], silTimer: null, ranges: [],
   promptSurah: -1, promptAyah: -1, targetSurah: -1, targetAyah: -1,
-  ok: 0, err: 0, waiting: false, audio: null, listInit: false
+  ok: 0, err: 0, waiting: false, audio: null, listInit: false,
+  resultState: null,       // null | 'ok' | 'err' | 'skip'
+  countdownActive: false,  // true when auto-next countdown is running
+  countdownTimer: null
 };
 
 // Open / close
@@ -5929,13 +5763,19 @@ function sfpClose() {
   document.querySelector('.mushaf-panel').style.display = '';
   document.querySelector('.ctrl-panel').style.display = '';
   document.getElementById('sambungFullPage').classList.remove('sfp-open');
+  // On mobile: restore the mobile panel
+  if (window.innerWidth <= 768) {
+    document.getElementById('mobileFixedPanel').style.display = '';
+    mbShowPanel('voice', 'Cek Hafalan', 'Voice');
+    navToHash('murojaah');
+  }
 }
 
 // Override snavSwitch to handle sambung specially
 const _origSnavSwitch = snavSwitch;
 window.snavSwitch = function(item) {
   if (item === 'sambung') {
-    ['murojaah','audio','sambung','setoran'].forEach(n => {
+    ['murojaah','audio','sambung'].forEach(n => {
       document.getElementById('snav-'+n)?.classList.toggle('snav-active', n===item);
     });
     navToHash('sambung');
@@ -6051,34 +5891,50 @@ async function sfpStart() {
     sfp.ranges.push({surahNum:num,fromAyah:fr,toAyah:to});
   });
   if(err||!sfp.ranges.length) return;
-  sfp.ok=0; sfp.err=0; sfp.active=true;
+  sfp.ok=0; sfp.err=0; sfp.active=true; sfp.resultState=null; sfp.countdownActive=false;
   document.getElementById('sfp-setup').style.display='none';
   document.getElementById('sfp-active').style.display='flex';
   document.getElementById('sfp-idle').style.display='none';
-  document.getElementById('sfp-scoreGrid').style.display='grid';
+  // Mobile: hide setup panel (sfp-left) so sfp-right takes full screen
+  if (window.innerWidth <= 768) {
+    const left = document.querySelector('.sfp-left');
+    if (left) left.classList.add('sfp-left-hidden');
+  }
   sfpUpdScore(); sfpNext();
 }
 
 function sfpStop() {
+  sfpCancelCountdown();
   sfp.active=false; sfp.waiting=false; sfpStopRec();
   if(sfp.audio){sfp.audio.pause();sfp.audio=null;}
   if(sfp.silTimer){clearTimeout(sfp.silTimer);sfp.silTimer=null;}
   document.getElementById('sfp-setup').style.display='block';
   document.getElementById('sfp-active').style.display='none';
   document.getElementById('sfp-idle').style.display='flex';
-  document.getElementById('sfp-scoreGrid').style.display='none';
-  document.getElementById('sfp-promptBox').classList.remove('sfp-show');
-  document.getElementById('sfp-resultBox').classList.remove('sfp-show');
+  document.getElementById('sfp-promptArabic').style.display='none';
   document.getElementById('sfp-hintBox').classList.remove('sfp-show');
+  const exp=document.getElementById('sfp-expected'); if(exp) exp.style.display='none';
+  const rm=document.getElementById('sfp-resultMsg'); if(rm) rm.style.display='none';
+  sfpSetActionBtn('idle','Menunggu...', true);
   sfpSetDot('idle','Selesai');
+  // Mobile: show setup panel again
+  if (window.innerWidth <= 768) {
+    const left = document.querySelector('.sfp-left');
+    if (left) left.classList.remove('sfp-left-hidden');
+  }
 }
 
 async function sfpNext() {
-  sfpStopRec(); sfp.waiting=false;
-  document.getElementById('sfp-resultBox').classList.remove('sfp-show');
-  document.getElementById('sfp-transcript').textContent='—';
+  sfpCancelCountdown();
+  sfpStopRec(); sfp.waiting=false; sfp.resultState=null;
+  // Reset UI
+  const t=document.getElementById('sfp-transcript'); if(t){t.textContent='—';t.className='sfp-transcript-box';}
   document.getElementById('sfp-hintBox').classList.remove('sfp-show');
+  const expected=document.getElementById('sfp-expected'); if(expected){expected.className='sfp-result-arabic';expected.style.display='none';}
+  const rmsg=document.getElementById('sfp-resultMsg'); if(rmsg) rmsg.style.display='none';
+  sfpSetActionBtn('idle','Menunggu...', true);
   sfpSetDot('idle','Memilih ayat...');
+
   let pool=[];
   sfp.ranges.forEach(r=>{for(let n=r.fromAyah;n<=r.toAyah-1;n++) pool.push({surahNum:r.surahNum,ayahN:n});});
   if(!pool.length){sfpSetDot('warn','⚠️ Tidak ada ayat');return;}
@@ -6088,19 +5944,27 @@ async function sfpNext() {
   const pAyah=data.ayahs.find(a=>a.n===sfp.promptAyah);
   const pIdx=data.ayahs.findIndex(a=>a.n===sfp.promptAyah);
   const tAyah=data.ayahs[pIdx+1]; sfp.targetAyah=tAyah.n;
-  document.getElementById('sfp-promptInfo').textContent=`${data.name} • Ayat ${sfp.promptAyah}`;
-  document.getElementById('sfp-promptArabic').textContent=pAyah.words.join(' ');
-  document.getElementById('sfp-promptBox').classList.add('sfp-show');
+
+  const piText = `${data.name} • Ayat ${sfp.promptAyah}`;
+  document.getElementById('sfp-promptInfo').textContent = piText;
+  const pid2 = document.getElementById('sfp-promptInfo-desktop'); if(pid2) pid2.textContent = piText;
+  const arabic=document.getElementById('sfp-promptArabic');
+  arabic.textContent=pAyah.words.join(' ');
+  arabic.style.display='block';
+  arabic.className='sfp-prompt-arabic';
+  document.getElementById('sfp-idle').style.display='none';
   sfpSetDot('idle','🔊 Sistem sedang membaca...');
-  document.getElementById('sfp-micBtn').disabled=true;
-  document.getElementById('sfp-micLabel').textContent='Tunggu...';
+  document.getElementById('sfp-replayBtn').disabled=true;
+  const rbd=document.getElementById('sfp-replayBtn-desktop');if(rbd)rbd.disabled=true;
+
   sfpPlayAudio(sfp.promptSurah,sfp.promptAyah,()=>{
     if(!sfp.active) return;
     sfp.waiting=true;
-    sfpSetDot('idle','Sambung ayat '+sfp.targetAyah);
-    document.getElementById('sfp-micBtn').disabled=false;
-    document.getElementById('sfp-micLabel').textContent='Sambung Ayat '+sfp.targetAyah;
-    document.getElementById('sfp-micSub').textContent='Tekan untuk bicara';
+    document.getElementById('sfp-replayBtn').disabled=false;
+  const rbe=document.getElementById('sfp-replayBtn-desktop');if(rbe)rbe.disabled=false;
+    sfpSetDot('live','Mendengarkan...');
+    sfpSetActionBtn('listening','Sedang Mendengarkan', false);
+    sfpStartRec(true); // AUTO-START — fresh question
   });
 }
 
@@ -6115,50 +5979,95 @@ function sfpPlayAudio(s,a,cb) {
 
 function sfpReplay() {
   if(!sfp.active) return;
+  sfpCancelCountdown();
   sfpSetDot('idle','🔊 Memutar ulang...');
-  document.getElementById('sfp-micBtn').disabled=true;
+  sfpSetActionBtn('idle','Menunggu...', true);
   sfp.waiting=false; sfpStopRec();
+  document.getElementById('sfp-replayBtn').disabled=true;
+  // Reset result display
+  const exp=document.getElementById('sfp-expected'); if(exp) exp.style.display='none';
+  const rm=document.getElementById('sfp-resultMsg'); if(rm) rm.style.display='none';
+  const arabic=document.getElementById('sfp-promptArabic');
+  arabic.className='sfp-prompt-arabic'; // remove dimmed
   sfpPlayAudio(sfp.promptSurah,sfp.promptAyah,()=>{
-    if(!sfp.active) return; sfp.waiting=true;
-    sfpSetDot('idle','Sambung ayat '+sfp.targetAyah);
-    document.getElementById('sfp-micBtn').disabled=false;
+    if(!sfp.active) return;
+    sfp.waiting=true;
+    document.getElementById('sfp-replayBtn').disabled=false;
+  const rbe=document.getElementById('sfp-replayBtn-desktop');if(rbe)rbe.disabled=false;
+    sfpSetDot('live','Mendengarkan...');
+    sfpSetActionBtn('listening','Sedang Mendengarkan', false);
+    sfpStartRec(true); // replay = fresh attempt
   });
 }
 
-async function sfpToggleRec() {
+async function sfpToggleRec() { sfpActionClick(); }
+async function sfpActionClick() {
+  // If countdown active → cancel + skip to next
+  if(sfp.countdownActive) { sfpCancelCountdown(); sfpNext(); return; }
+  // If correct result shown → go next
+  if(sfp.resultState==='ok' || sfp.resultState==='skip') { sfpNext(); return; }
+  // If wrong result shown → retry (restart recording)
+  if(sfp.resultState==='err') {
+    sfp.resultState=null;
+    const exp=document.getElementById('sfp-expected'); if(exp) exp.style.display='none';
+    const rm=document.getElementById('sfp-resultMsg'); if(rm) rm.style.display='none';
+    const arabic=document.getElementById('sfp-promptArabic');
+    arabic.className='sfp-prompt-arabic';
+    document.getElementById('sfp-transcript').textContent='—';
+    document.getElementById('sfp-hintBox').classList.remove('sfp-show');
+    if(!sfp.waiting){sfp.waiting=true;}
+    sfpSetActionBtn('listening','Sedang Mendengarkan', false);
+    sfpSetDot('live','Mendengarkan...');
+    sfpStartRec(true); // Coba Lagi = fresh attempt
+    return;
+  }
+  // Normal: toggle recording
   if(!sfp.waiting) return;
   if(sfp.recRunning){sfpStopRec();sfpProcessBuffer();return;}
   const ok=await ensureMicPermission(); if(!ok){sfpSetDot('warn','❌ Izinkan mikrofon');return;}
   sfpStartRec();
 }
 
-function sfpStartRec() {
+function sfpStartRec(clearBuf=false) {
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){sfpSetDot('warn','❌ Gunakan Chrome');return;}
-  sfp.buffer=[];
-  if(!sfp.rec){
-    sfp.rec=new SR(); sfp.rec.lang='ar-SA'; sfp.rec.continuous=true;
-    sfp.rec.interimResults=true; sfp.rec.maxAlternatives=3;
-    sfp.rec.onresult=e=>{
-      let ft=''; for(let i=e.resultIndex;i<e.results.length;i++) if(e.results[i].isFinal) ft+=e.results[i][0].transcript+' ';
-      if(ft.trim()){sfp.buffer.push(ft.trim());document.getElementById('sfp-transcript').textContent=sfp.buffer.join(' ');clearTimeout(sfp.silTimer);sfp.silTimer=setTimeout(sfpProcessBuffer,1500);}
-    };
-    sfp.rec.onend=()=>{sfp.recRunning=false;const b=document.getElementById('sfp-micBtn');if(b){b.textContent='🎙️';b.style.background='';}const mw=document.getElementById('sfp-wave');if(mw) mw.classList.remove('show');document.getElementById('sfp-micSub').textContent='Tekan untuk bicara';};
-    sfp.rec.onerror=e=>{sfp.recRunning=false;if(e.error==='not-allowed'){sfpSetDot('warn','❌ Izinkan mikrofon');globalMicStream=null;}};
-  }
+  if(clearBuf) sfp.buffer=[];  // only clear when explicitly starting fresh
+  if(sfp.rec){try{sfp.rec.abort();}catch(e){} sfp.rec=null;}
+  sfp.rec=new SR(); sfp.rec.lang='ar-SA'; sfp.rec.continuous=true;
+  sfp.rec.interimResults=true; sfp.rec.maxAlternatives=3;
+  sfp.rec.onresult=e=>{
+    let ft='',interim='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal) ft+=e.results[i][0].transcript+' ';
+      else interim+=e.results[i][0].transcript;
+    }
+    if(ft.trim()){
+      sfp.buffer.push(ft.trim());
+      const t=document.getElementById('sfp-transcript');
+      t.textContent=sfp.buffer.join(' '); t.className='sfp-transcript-box live';
+      clearTimeout(sfp.silTimer); sfp.silTimer=setTimeout(sfpProcessBuffer,2000); // 2s silence = done
+    } else if(interim){
+      document.getElementById('sfp-transcript').textContent=interim+' ⏳';
+    }
+  };
+  sfp.rec.onend=()=>{
+    sfp.recRunning=false;
+    // Auto-restart if still waiting and no result yet
+    if(sfp.active && sfp.waiting && !sfp.resultState){
+      setTimeout(()=>{if(sfp.active&&sfp.waiting&&!sfp.resultState) sfpStartRec();},150);
+    }
+  };
+  sfp.rec.onerror=e=>{sfp.recRunning=false;if(e.error==='not-allowed'){sfpSetDot('warn','❌ Izinkan mikrofon');globalMicStream=null;}};
   try{
     sfp.rec.start(); sfp.recRunning=true;
-    const b=document.getElementById('sfp-micBtn');if(b){b.textContent='<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>';b.style.background='rgba(239,107,90,0.3)';}
-    const mw=document.getElementById('sfp-wave');if(mw) mw.classList.add('show');
-    sfpSetDot('live','🎙️ Mendengarkan...');
-    document.getElementById('sfp-micSub').textContent='Tekan lagi untuk selesai';
-  }catch(e){sfpSetDot('warn','❌ Gagal mulai mic');}
+    sfpSetActionBtn('listening','Sedang Mendengarkan', false);
+    sfpSetDot('live','Mendengarkan...');
+  }catch(e){sfpSetDot('warn','❌ Gagal mulai mic: '+e.message);}
 }
 
 function sfpStopRec() {
   if(sfp.rec&&sfp.recRunning){try{sfp.rec.stop();}catch(e){} sfp.recRunning=false;}
   clearTimeout(sfp.silTimer);
-  const b=document.getElementById('sfp-micBtn');if(b){b.textContent='🎙️';b.style.background='';}
-  const mw=document.getElementById('sfp-wave');if(mw) mw.classList.remove('show');
+  sfp.rec=null;
 }
 
 function sfpProcessBuffer() {
@@ -6172,40 +6081,106 @@ function sfpProcessBuffer() {
 
 function sfpShowResult(result,refWords) {
   const data=SURAHS[sfp.targetSurah];
-  document.getElementById('sfp-expected').textContent=refWords.join(' ');
-  const msg=document.getElementById('sfp-resultMsg'), lbl=document.getElementById('sfp-resultLabel');
+  sfpStopRec();
+
+  // Show the correct answer text
+  const expected=document.getElementById('sfp-expected');
+  expected.textContent=refWords.join(' ');
+  expected.style.display='block';
+
+  // Dim the prompt arabic
+  const arabic=document.getElementById('sfp-promptArabic');
+  arabic.className='sfp-prompt-arabic sfp-dimmed';
+
+  const rmsg=document.getElementById('sfp-resultMsg');
+
   if(result.ok){
-    sfp.ok++;
-    lbl.textContent=`✅ Benar — Ayat ${sfp.targetAyah} ${data.name}`;
-    msg.textContent=`Masyaa Allah! ${result.detail}`;
-    msg.style.cssText='font-size:15px;font-weight:600;text-align:center;padding:12px;border-radius:10px;background:rgba(93,186,125,0.15);color:#5dba7d;border:1px solid rgba(93,186,125,0.3)';
-    sfpSetDot('ok','✅ Benar!'); playCorrectSound();
+    sfp.ok++; sfp.resultState='ok';
+    expected.className='sfp-result-arabic sfp-ok sfp-show';
+    rmsg.textContent=`✅ Masyaa Allah! ${result.detail}`;
+    rmsg.style.cssText='display:block;font-size:13px;font-weight:600;padding:7px 18px;border-radius:50px;background:rgba(29,185,84,0.12);color:var(--accent);border:1px solid rgba(29,185,84,0.2)';
+    sfpSetDot('ok','Benar ✓');
+    sfpSetActionBtn('next','Lanjutkan  →', false);
+    playCorrectSound();
+    sfpStartCountdown(3);
   } else {
-    sfp.err++;
-    lbl.textContent=`❌ Salah — Ayat ${sfp.targetAyah} ${data.name}`;
-    msg.textContent=result.score===0?`Bukan ayat yang tepat — ${result.detail}`:`Kurang tepat — ${result.detail}`;
-    msg.style.cssText='font-size:15px;font-weight:600;text-align:center;padding:12px;border-radius:10px;background:rgba(239,107,90,0.15);color:#ef6b5a;border:1px solid rgba(239,107,90,0.3)';
-    sfpSetDot('warn','❌ Salah'); playWrongSound();
+    sfp.err++; sfp.resultState='err';
+    expected.className='sfp-result-arabic sfp-err sfp-show';
+    rmsg.textContent=result.score===0?`❌ Tidak cocok — ${result.detail}`:`❌ Kurang tepat — ${result.detail}`;
+    rmsg.style.cssText='display:block;font-size:13px;font-weight:600;padding:7px 18px;border-radius:50px;background:rgba(239,107,90,0.1);color:#ef6b5a;border:1px solid rgba(239,107,90,0.2)';
+    sfpSetDot('warn','Salah');
+    sfpSetActionBtn('retry','Coba Lagi', false);
+    playWrongSound();
   }
-  document.getElementById('sfp-promptBox').classList.remove('sfp-show');
-  document.getElementById('sfp-resultBox').classList.add('sfp-show');
   sfpUpdScore();
+}
+
+// ── Button state helper ──────────────────────────────────────────────────────
+function sfpSetActionBtn(state, label, disabled) {
+  const btn=document.getElementById('sfp-actionBtn');
+  const lbl=document.getElementById('sfp-actionLabel');
+  if(!btn||!lbl) return;
+  btn.disabled=disabled;
+  btn.className='sfp-action-btn state-'+state;
+  lbl.textContent=label;
+  // Update icon
+  const icons={
+    idle:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>',
+    listening:'<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>',
+    next:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>',
+    retry:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
+  };
+  const icon=btn.querySelector('svg')||btn.firstChild;
+  if(icon) icon.outerHTML=icons[state]||icons.idle;
+  btn.insertAdjacentHTML('afterbegin',icons[state]||icons.idle);
+  btn.querySelectorAll('svg').forEach((s,i)=>{if(i>0) s.remove();});
+}
+
+// ── Countdown helper ─────────────────────────────────────────────────────────
+function sfpStartCountdown(secs) {
+  sfp.countdownActive=true;
+  const wrap=document.getElementById('sfp-countdownWrap');
+  const lbl=document.getElementById('sfp-countdownLabel');
+  const bar=document.getElementById('sfp-countdownBar');
+  if(!wrap) return;
+  wrap.className='sfp-countdown-wrap show';
+  bar.style.transition='none'; bar.style.width='100%';
+  requestAnimationFrame(()=>{bar.style.transition=`width ${secs}s linear`;bar.style.width='0%';});
+  let rem=secs;
+  lbl.textContent=`Lanjut dalam ${rem}...`;
+  const tick=()=>{
+    rem--;
+    if(rem<=0){sfp.countdownActive=false;wrap.className='sfp-countdown-wrap';sfpNext();}
+    else{lbl.textContent=`Lanjut dalam ${rem}...`;sfp.countdownTimer=setTimeout(tick,1000);}
+  };
+  sfp.countdownTimer=setTimeout(tick,1000);
+}
+function sfpCancelCountdown() {
+  sfp.countdownActive=false;
+  clearTimeout(sfp.countdownTimer);
+  const wrap=document.getElementById('sfp-countdownWrap');
+  if(wrap) wrap.className='sfp-countdown-wrap';
 }
 
 function sfpLewati() {
   if(!sfp.active) return;
+  sfpCancelCountdown();
   sfpStopRec(); sfp.waiting=false;
   document.getElementById('sfp-hintBox').classList.remove('sfp-show');
   const data=SURAHS[sfp.targetSurah]; const t=data?.ayahs?.find(a=>a.n===sfp.targetAyah);
   if(t){
-    document.getElementById('sfp-expected').textContent=t.words.join(' ');
-    document.getElementById('sfp-resultLabel').textContent=`⏭ Dilewati — Ayat ${sfp.targetAyah} ${data.name}`;
-    const msg=document.getElementById('sfp-resultMsg');
-    msg.textContent='Dilewati — lihat jawaban di atas';
-    msg.style.cssText='font-size:15px;font-weight:600;text-align:center;padding:12px;border-radius:10px;background:rgba(201,168,76,0.1);color:#C9A84C;border:1px solid rgba(201,168,76,0.3)';
-    document.getElementById('sfp-promptBox').classList.remove('sfp-show');
-    document.getElementById('sfp-resultBox').classList.add('sfp-show');
-    sfpSetDot('warn','⏭ Dilewati'); return;
+    const exp=document.getElementById('sfp-expected');
+    exp.textContent=t.words.join(' ');
+    exp.className='sfp-result-arabic sfp-show'; exp.style.display='block';
+    document.getElementById('sfp-promptArabic').className='sfp-prompt-arabic sfp-dimmed';
+    const rm=document.getElementById('sfp-resultMsg');
+    rm.textContent=`⏭ Dilewati — Ayat ${sfp.targetAyah} ${data.name}`;
+    rm.style.cssText='display:block;font-size:13px;font-weight:600;padding:7px 18px;border-radius:50px;background:rgba(201,168,76,0.1);color:var(--gold);border:1px solid rgba(201,168,76,0.2)';
+    sfp.resultState='skip';
+    sfpSetActionBtn('next','Lanjutkan  →', false);
+    sfpSetDot('idle','Dilewati');
+    sfpStartCountdown(3);
+    return;
   }
   sfpNext();
 }
@@ -6219,13 +6194,11 @@ function sfpHint() {
 }
 
 function sfpUpdScore() {
-  ['ok','err'].forEach(k=>{ document.getElementById('sfp-sc-'+k).textContent=sfp[k]; });
   const tot=sfp.ok+sfp.err;
-  document.getElementById('sfp-sc-total').textContent=tot;
-  // also update left panel mini stats
-  document.getElementById('sfp-scoreOk').textContent=sfp.ok;
-  document.getElementById('sfp-scoreErr').textContent=sfp.err;
-  document.getElementById('sfp-scoreTotal').textContent=tot;
+  const setEl=(id,v)=>{const e=document.getElementById(id);if(e) e.textContent=v;};
+  setEl('sfp-scoreOk',sfp.ok);
+  setEl('sfp-scoreErr',sfp.err);
+  setEl('sfp-scoreTotal',tot);
 }
 
 function sfpSetDot(type,text) {
@@ -6270,14 +6243,39 @@ function toggleWaqfLegend() {
      ═══════════════════════════════════════════════════════════ -->
 <div class="mobile-fixed-panel" id="mobileFixedPanel">
 
-  <!-- Panel header bar — title changes per active nav -->
-  <div class="mobile-panel-header">
+  <!-- Panel header bar — hamburger + title -->
+  <div class="mobile-panel-header" style="display:flex;align-items:center;gap:10px">
+    <button id="mobileHamburger2" onclick="mbOpenDrawer()" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;background:none;border:none;cursor:pointer;color:var(--text);padding:0;flex-shrink:0">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
     <div class="mobile-panel-header-title" id="mb-panelTitle">Cek Hafalan</div>
-    <span class="mobile-panel-header-badge" id="mb-panelBadge">Voice</span>
   </div>
 
   <!-- ── VOICE PANEL (Cek Hafalan) ── shown by default -->
   <div class="mobile-panel-content active" id="mb-panel-voice">
+
+    <!-- Surah + Mulai dari Ayat row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:2px">
+      <div>
+        <div class="mobile-audio-label">Pilih Surah</div>
+        <div style="position:relative">
+          <select id="mb-surahSel" onchange="mbSyncSurah()" style="width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 30px 9px 12px;font-family:var(--font-ui);font-size:13px;font-weight:500;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none">
+          </select>
+          <span style="position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </div>
+      </div>
+      <div>
+        <div class="mobile-audio-label">Mulai dari Ayat</div>
+        <div style="position:relative">
+          <select id="mb-ayatSel" onchange="mbSyncAyat()" style="width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 30px 9px 12px;font-family:var(--font-ui);font-size:13px;font-weight:500;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none">
+          </select>
+          <span style="position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </div>
+      </div>
+    </div>
+
     <!-- Retry Banner -->
     <div class="mobile-retry-banner" id="mb-retryBanner">
       <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--sem-err);font-weight:700" id="mb-retryAyahNum">AYAT —</div>
@@ -6303,38 +6301,46 @@ function toggleWaqfLegend() {
       </div>
     </div>
 
-    <!-- Stats row -->
-    <div class="mobile-stat-row">
-      <div class="mobile-stat-item">
-        <div class="mobile-sv" style="color:var(--sem-ok)" id="mb-stOk">0</div>
-        <div class="mobile-sl">Benar</div>
+    <!-- Status section (mirrors desktop) -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;align-items:center;gap:7px">
+        <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--accent-mid);font-weight:600;font-family:var(--font-mono)">STATUS</span>
+        <div class="sdot" id="mb-sdot"></div>
+        <span style="font-size:11px;color:var(--muted)" id="mb-stext">Belum aktif</span>
       </div>
-      <div class="mobile-stat-item">
-        <div class="mobile-sv" style="color:var(--sem-err)" id="mb-stErr">0</div>
-        <div class="mobile-sl">Salah</div>
+      <div class="t-box" style="margin:0">
+        <div class="t-arabic" id="mb-tText" style="font-size:18px;min-height:28px">—</div>
       </div>
-      <div class="mobile-stat-item">
-        <div class="mobile-sv" style="color:var(--gold)" id="mb-stPos">0</div>
-        <div class="mobile-sl">Kata ke</div>
-      </div>
+      <div class="mobile-log" id="mb-logBar" style="margin:0">Smart Recognition siap</div>
     </div>
     <div class="mobile-prog-bg"><div class="mobile-prog-fill" id="mb-progFill" style="width:0%"></div></div>
+    <!-- Hidden stat counters (still mirrored by JS) -->
+    <span id="mb-stOk" style="display:none">0</span>
+    <span id="mb-stErr" style="display:none">0</span>
+    <span id="mb-stPos" style="display:none">0</span>
 
-    <!-- Log -->
-    <div class="mobile-log" id="mb-logBar">Smart Recognition siap</div>
-
-    <!-- Action buttons -->
+    <!-- Action buttons: Ulangi + Skip Ayat only -->
     <div class="mobile-btn-row">
-      <button class="mobile-btn red" onclick="resetSession()">Reset</button>
-      <button class="mobile-btn green" onclick="markCorrect()">Benar</button>
-      <button class="mobile-btn" onclick="jumpBack()">-5 Kata</button>
-      <button class="mobile-btn" onclick="skipForward()">Skip</button>
+      <button class="mobile-btn red" onclick="resetSession()">Ulangi</button>
+      <button class="mobile-btn" onclick="skipForward()">Skip Ayat</button>
     </div>
   </div><!-- /mb-panel-voice -->
 
   <!-- ── AUDIO REPEAT PANEL ── hidden by default, shown when nav = audio -->
   <div class="mobile-panel-content" id="mb-panel-audio">
-    <div class="mobile-audio-grid">
+
+    <!-- Pilih Surah — full width -->
+    <div style="margin-bottom:8px">
+      <div class="mobile-audio-label">Pilih Surah</div>
+      <div style="position:relative">
+        <select id="mb-audioSurahSel" onchange="mbSyncAudioSurah()" style="width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 30px 9px 12px;font-family:var(--font-ui);font-size:13px;font-weight:500;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none">
+        </select>
+        <span style="position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+    </div>
+
+    <!-- Dari + Sampai berjejeran -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
       <div>
         <div class="mobile-audio-label">Dari Ayat</div>
         <input type="number" class="mobile-audio-input" id="mb-audioStart" value="1" min="1">
@@ -6343,6 +6349,10 @@ function toggleWaqfLegend() {
         <div class="mobile-audio-label">Sampai Ayat</div>
         <input type="number" class="mobile-audio-input" id="mb-audioEnd" value="5" min="1">
       </div>
+    </div>
+
+    <!-- Pengulangan + Jeda berjejeran -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <div>
         <div class="mobile-audio-label">Pengulangan (kali)</div>
         <input type="number" class="mobile-audio-input" id="mb-audioRepeat" value="3" min="1" max="100">
@@ -6391,117 +6401,11 @@ function toggleWaqfLegend() {
       </span>
       Sambung Ayat
     </button>
-    <button class="drawer-nav-item" id="drawer-nav-setoran" onclick="mbDrawerNav('setoran')">
-      <span class="drawer-nav-icon icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-      </span>
-      Setoran
-    </button>
+
   </nav>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════
-     SAMBUNG AYAT FULL-SCREEN VIEW
-     ═══════════════════════════════════════════════════════════ -->
-<div class="mobile-sambung-view" id="mobileSambungView">
-  <!-- Header -->
-  <div class="sambung-view-header">
-    <button class="sambung-back-btn" onclick="mbCloseSambungView()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
-    <div class="sambung-view-title">Sambung Ayat</div>
-  </div>
 
-  <!-- Body -->
-  <div class="sambung-view-body">
-    <!-- SETUP STATE -->
-    <div id="mbsv-setup">
-      <div style="background:rgba(201,168,76,0.06);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:12px 14px;font-size:12px;color:rgba(240,234,216,0.6);margin-bottom:4px">
-        Sistem membaca 1 ayat acak, kamu sambung ayat berikutnya
-      </div>
-      <div style="font-size:10px;color:rgba(240,234,216,0.4);text-transform:uppercase;letter-spacing:0.8px;margin:10px 0 6px">Pilih Surah</div>
-      <div id="mbsv-surahList" style="display:flex;flex-direction:column;background:rgba(0,0,0,0.15);border:1px solid rgba(255,255,255,0.07);border-radius:12px;overflow:hidden;max-height:320px;overflow-y:auto"></div>
-      <div id="mbsv-rangeConfig" style="display:flex;flex-direction:column;gap:7px;margin-top:10px"></div>
-      <button onclick="mbsvStart()" style="margin-top:14px;width:100%;padding:13px;background:#1DB954;border:none;border-radius:100px;color:#000;font-family:var(--font-ui);font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.3px">
-        Mulai Sambung Ayat
-      </button>
-    </div>
-
-    <!-- ACTIVE STATE -->
-    <div id="mbsv-active" style="display:none;flex-direction:column;gap:14px">
-      <!-- Sistem Membaca -->
-      <div style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px">
-        <div style="font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:#C9A84C;margin-bottom:5px;font-weight:600">Sistem Membaca</div>
-        <div id="mbsv-ayahInfo" style="font-size:11px;color:rgba(240,234,216,0.45);margin-bottom:8px">—</div>
-        <div id="mbsv-ayahText" style="font-family:'UthmanicHafs','Scheherazade New',serif;font-size:28px;line-height:1.9;direction:rtl;text-align:right;color:#F0EAD8;padding:4px 0">—</div>
-        <button id="mbsv-replayBtn" onclick="mbsvReplay()" style="margin-top:10px;width:100%;padding:8px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);border-radius:8px;color:#E8C97A;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif">
-          Putar Ulang
-        </button>
-      </div>
-
-      <!-- Hint Box -->
-      <div id="mbsv-hintBox" style="display:none;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.3);border-radius:10px;padding:10px 14px;text-align:right">
-        <div style="font-size:9px;color:#C9A84C;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;text-align:left">Hint — 2 kata pertama:</div>
-        <div id="mbsv-hintText" style="font-family:'UthmanicHafs','Scheherazade New',serif;font-size:30px;line-height:1.8;color:#E8C97A;direction:rtl">—</div>
-      </div>
-
-      <!-- Status -->
-      <div style="display:flex;align-items:center;gap:8px;padding:0 2px">
-        <div class="sdot" id="mbsv-dot"></div>
-        <span style="font-size:12px;color:rgba(240,234,216,0.5)" id="mbsv-statusText">Siap — tekan mikrofon</span>
-      </div>
-
-      <!-- Transcript -->
-      <div style="background:rgba(0,0,0,0.15);border:1px solid rgba(255,255,255,0.06);border-radius:9px;padding:9px 12px;min-height:40px">
-        <div style="font-family:'Amiri',serif;font-size:20px;direction:rtl;text-align:right;color:#F0EAD8;line-height:1.5" id="mbsv-transcript">—</div>
-      </div>
-
-      <!-- Mic Button -->
-      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 0">
-        <button class="btn-mic" id="mbsv-micBtn" onclick="mbsvToggleRec()" style="width:76px;height:76px"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
-        <div style="text-align:center">
-          <strong style="display:block;font-size:14px;color:#F0EAD8" id="mbsv-micLabel">Sambung Ayat</strong>
-          <span style="font-size:12px;color:rgba(240,234,216,0.5)" id="mbsv-micSub">Tekan untuk bicara</span>
-        </div>
-      </div>
-
-      <!-- Action buttons -->
-      <div style="display:flex;gap:8px">
-        <button onclick="mbsvSkip()" style="flex:1;padding:11px;background:rgba(0,0,0,0.22);border:1px solid rgba(255,255,255,0.07);border-radius:9px;color:rgba(240,242,244,0.55);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-ui)">Lewati</button>
-        <button onclick="mbsvHint()" style="flex:1;padding:11px;background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.22);border-radius:9px;color:#C9A84C;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Hint</button>
-      </div>
-
-      <!-- Result -->
-      <div id="mbsv-result" style="display:none;background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#C9A84C;margin-bottom:7px" id="mbsv-resultLabel">Hasil</div>
-        <div id="mbsv-expected" style="font-family:'UthmanicHafs','Scheherazade New',serif;font-size:24px;direction:rtl;text-align:right;line-height:1.8;margin-bottom:8px;color:#F0EAD8">—</div>
-        <div id="mbsv-resultMsg" style="font-size:13px;font-weight:600;text-align:center;padding:10px;border-radius:8px;margin-bottom:10px">—</div>
-        <div style="display:flex;gap:8px">
-          <button onclick="mbsvNext()" style="flex:1;padding:11px;background:#1DB954;border:none;border-radius:100px;color:#000;font-weight:700;cursor:pointer;font-size:13px">Soal Baru</button>
-          <button onclick="mbsvStop()" style="flex:1;padding:11px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.07);border-radius:9px;color:rgba(240,234,216,0.5);cursor:pointer;font-size:13px">Selesai</button>
-        </div>
-      </div>
-
-      <!-- Score -->
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
-        <div style="background:rgba(93,186,125,0.1);border:1px solid rgba(93,186,125,0.2);border-radius:9px;padding:10px;text-align:center">
-          <div style="font-size:22px;font-weight:700;color:#5dba7d" id="mbsv-scoreOk">0</div>
-          <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.6px;color:rgba(240,234,216,0.45);margin-top:2px">✓ Benar</div>
-        </div>
-        <div style="background:rgba(239,107,90,0.1);border:1px solid rgba(239,107,90,0.2);border-radius:9px;padding:10px;text-align:center">
-          <div style="font-size:22px;font-weight:700;color:#ef6b5a" id="mbsv-scoreErr">0</div>
-          <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.6px;color:rgba(240,234,216,0.45);margin-top:2px">✗ Salah</div>
-        </div>
-        <div style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:9px;padding:10px;text-align:center">
-          <div style="font-size:22px;font-weight:700;color:#C9A84C" id="mbsv-scoreTotal">0</div>
-          <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.6px;color:rgba(240,234,216,0.45);margin-top:2px">Total</div>
-        </div>
-      </div>
-
-      <button onclick="mbsvStop()" style="padding:10px;background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.06);border-radius:8px;color:rgba(240,234,216,0.4);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;width:100%">
-        ← Pengaturan
-      </button>
-    </div><!-- /mbsv-active -->
-  </div><!-- /sambung-view-body -->
-</div><!-- /mobileSambungView -->
 
 
 <!-- Waqf Legend Panel -->
