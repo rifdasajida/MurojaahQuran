@@ -2669,6 +2669,7 @@ let processingResult = false;
 let lastTranscriptTime = 0;
 let silenceTimeout = null;
 let transcriptBuffer = [];
+let recInstanceId = 0; // increments each time a new SR instance is created
 let currentAyahIndex = 0;
 let autoAdvanceEnabled = true;
 let sessionRunStart = -1;   // titik awal sesi baca aktif (untuk retry return)
@@ -3526,7 +3527,13 @@ function setupRec() {
     log('🧠 Smart Recognition aktif — baca dengan natural, sistem akan mengikuti');
   };
 
+  // Stamp this instance so stale callbacks can be ignored
+  const thisInstanceId = ++recInstanceId;
+  rec._instanceId = thisInstanceId;
+
   rec.onresult = (e) => {
+    // Ignore results from a stale (already-replaced) SR instance
+    if (rec._instanceId !== recInstanceId) return;
     if (!sessionActive || processingResult) return;
     if (window.srWarmingUp) return;
 
@@ -3625,10 +3632,14 @@ function setupRec() {
   rec.onend = () => {
     recRunning = false;
     if (sessionActive) {
+      // Flush any pending buffer before creating new instance to avoid duplication
+      clearTimeout(silenceTimeout);
+      transcriptBuffer = []; // CRITICAL: clear buffer so old words don't bleed into new instance
+
       // Must create fresh SR instance — mobile cannot restart stopped rec
       rec = null;
       setupRec();
-      if (rec) rec._lastFinalIdx = -1; // fresh instance = fresh index
+      // _lastFinalIdx starts fresh naturally (new instance, new index counter)
       setTimeout(() => {
         if (sessionActive && rec) {
           try { rec.start(); recRunning = true; }
