@@ -12,6 +12,317 @@
   font-display: swap;
 }
 </style>
+<!-- Supabase JS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ══════════════════════════════════════════
+   AUTH OVERLAY SYSTEM
+══════════════════════════════════════════ */
+#auth-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0D1014;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  transition: opacity 0.4s ease;
+}
+#auth-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Subtle BG effects matching main app */
+#auth-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 700px 500px at 20% 20%, rgba(29,185,84,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 500px 400px at 80% 80%, rgba(37,211,102,0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.auth-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  background: #161B20;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 40px 36px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(29,185,84,0.05);
+  animation: auth-appear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes auth-appear {
+  from { opacity: 0; transform: translateY(24px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.auth-logo {
+  text-align: center;
+  margin-bottom: 28px;
+}
+.auth-logo-arabic {
+  font-family: 'Amiri', serif;
+  font-size: 44px;
+  color: #E8C97A;
+  line-height: 1;
+  display: block;
+}
+.auth-logo-label {
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #637882;
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 6px;
+  display: block;
+}
+.auth-divider {
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #1DB954, transparent);
+  margin: 10px auto 0;
+}
+
+.auth-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #F0F2F4;
+  margin-bottom: 4px;
+}
+.auth-subtitle {
+  font-size: 13px;
+  color: #8696A0;
+  margin-bottom: 24px;
+}
+
+.auth-tab-row {
+  display: flex;
+  background: #1E2730;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 3px;
+  margin-bottom: 24px;
+  gap: 3px;
+}
+.auth-tab {
+  flex: 1;
+  padding: 8px;
+  background: transparent;
+  border: none;
+  border-radius: 9px;
+  color: #8696A0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.auth-tab.active {
+  background: #1DB954;
+  color: #000;
+}
+.auth-tab:not(.active):hover {
+  color: #F0F2F4;
+  background: rgba(255,255,255,0.05);
+}
+
+.auth-field {
+  margin-bottom: 14px;
+}
+.auth-field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #8696A0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.auth-field input {
+  width: 100%;
+  background: #1E2730;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 11px 14px;
+  color: #F0F2F4;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.auth-field input::placeholder { color: #3D5060; }
+.auth-field input:focus {
+  border-color: #1DB954;
+  box-shadow: 0 0 0 3px rgba(29,185,84,0.12);
+}
+
+.auth-btn {
+  width: 100%;
+  padding: 13px;
+  background: #1DB954;
+  border: none;
+  border-radius: 10px;
+  color: #000;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+  letter-spacing: 0.2px;
+  position: relative;
+  overflow: hidden;
+}
+.auth-btn:hover { background: #1ED760; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(29,185,84,0.3); }
+.auth-btn:active { transform: translateY(0); }
+.auth-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.auth-btn-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(0,0,0,0.3);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.auth-msg {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  display: none;
+}
+.auth-msg.error {
+  background: rgba(224,92,92,0.1);
+  border: 1px solid rgba(224,92,92,0.25);
+  color: #E05C5C;
+  display: block;
+}
+.auth-msg.success {
+  background: rgba(29,185,84,0.1);
+  border: 1px solid rgba(29,185,84,0.2);
+  color: #1DB954;
+  display: block;
+}
+
+.auth-footer-note {
+  text-align: center;
+  font-size: 11px;
+  color: #3D5060;
+  margin-top: 20px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.auth-footer-note a {
+  color: #637882;
+  text-decoration: none;
+}
+.auth-footer-note a:hover { color: #1DB954; }
+
+/* ── USER BADGE (top bar) ── */
+#user-badge {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px 5px 5px;
+  background: rgba(30,39,48,0.9);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 100px;
+  cursor: pointer;
+  transition: background 0.2s;
+  position: relative;
+}
+#user-badge:hover { background: rgba(39,51,61,0.95); }
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1DB954, #128C7E);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #000;
+  flex-shrink: 0;
+}
+.user-email-short {
+  font-size: 12px;
+  font-weight: 600;
+  color: #F0F2F4;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Logout dropdown */
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #1E2730;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 6px;
+  min-width: 160px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  display: none;
+  z-index: 100;
+}
+.user-dropdown.open { display: block; }
+.dropdown-item {
+  width: 100%;
+  background: none;
+  border: none;
+  color: #F0F2F4;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  padding: 9px 12px;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 7px;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dropdown-item:hover { background: rgba(255,255,255,0.06); }
+.dropdown-item.logout { color: #E05C5C; }
+.dropdown-item.logout:hover { background: rgba(224,92,92,0.08); }
+
+/* Supabase config banner */
+#supabase-config-banner {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1E2730;
+  border: 1px solid rgba(245,166,35,0.3);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 12px;
+  color: #F5A623;
+  font-family: 'JetBrains Mono', monospace;
+  z-index: 10000;
+  display: none;
+  white-space: nowrap;
+}
+</style>
 <style>
 :root {
   /* === SPOTIFY × WHATSAPP FUSION DESIGN SYSTEM === */
@@ -6471,6 +6782,85 @@ function toggleWaqfLegend() {
 
 
 
+<!-- ══════════════════════════════════════════
+     AUTH OVERLAY
+══════════════════════════════════════════ -->
+<div id="auth-overlay">
+  <div class="auth-card">
+    <!-- Logo -->
+    <div class="auth-logo">
+      <span class="auth-logo-arabic">مراجعة</span>
+      <span class="auth-logo-label">Hafalan Al-Quran</span>
+      <div class="auth-divider"></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="auth-tab-row">
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Masuk</button>
+      <button class="auth-tab" id="tab-signup" onclick="switchTab('signup')">Daftar</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="form-login">
+      <div class="auth-field">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="email@kamu.com" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()">
+      </div>
+      <div class="auth-msg" id="login-msg"></div>
+      <button class="auth-btn" id="login-btn" onclick="doLogin()">Masuk</button>
+      <div style="text-align:center;margin-top:12px">
+        <button onclick="doForgotPassword()" style="background:none;border:none;color:#637882;font-size:12px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:underline">Lupa password?</button>
+      </div>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div id="form-signup" style="display:none">
+      <div class="auth-field">
+        <label>Nama</label>
+        <input type="text" id="signup-name" placeholder="Nama kamu" autocomplete="name">
+      </div>
+      <div class="auth-field">
+        <label>Email</label>
+        <input type="email" id="signup-email" placeholder="email@kamu.com" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input type="password" id="signup-password" placeholder="Min. 6 karakter" autocomplete="new-password" onkeydown="if(event.key==='Enter') doSignup()">
+      </div>
+      <div class="auth-msg" id="signup-msg"></div>
+      <button class="auth-btn" id="signup-btn" onclick="doSignup()">Buat Akun</button>
+    </div>
+
+    <div class="auth-footer-note">
+      Dengan masuk, kamu setuju dengan <a href="#">Kebijakan Privasi</a> kami.
+    </div>
+  </div>
+</div>
+
+<!-- User badge (inserted dynamically into ctrl-header) -->
+<div id="user-badge" onclick="toggleDropdown()">
+  <div class="user-avatar" id="user-avatar-initials">?</div>
+  <span class="user-email-short" id="user-email-display">—</span>
+  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:#637882"><polyline points="6 9 12 15 18 9"/></svg>
+  <div class="user-dropdown" id="user-dropdown">
+    <button class="dropdown-item" onclick="event.stopPropagation(); showProfile()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profil
+    </button>
+    <button class="dropdown-item logout" onclick="event.stopPropagation(); doLogout()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Keluar
+    </button>
+  </div>
+</div>
+
+<!-- Supabase config warning -->
+<div id="supabase-config-banner">⚠ Supabase belum dikonfigurasi — edit SUPABASE_URL & SUPABASE_ANON_KEY di script</div>
+
 <!-- Waqf Legend Panel -->
 <div class="waqf-legend" id="waqfLegend">
   <div class="waqf-legend-title">Tanda Waqaf</div>
@@ -6483,5 +6873,238 @@ function toggleWaqfLegend() {
   <div class="waqf-legend-row"><span class="waqf-legend-sym">ۜ</span><span>س — Saktah (jeda sejenak)</span></div>
 </div>
 
+<script>
+/* ══════════════════════════════════════════
+   SUPABASE CONFIG
+   Ganti dengan URL dan anon key project kamu dari:
+   https://supabase.com/dashboard → Settings → API
+══════════════════════════════════════════ */
+const SUPABASE_URL      = 'https://jhbzstmcewffldjgsgtz.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoYnpzdG1jZXdmZmxkamdzZ3R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxOTM3NzAsImV4cCI6MjA4ODc2OTc3MH0.lTrwLGVrAKhsMp23u-yGX230KZHfCkU8ZjB0-duMq5o';
+
+/* ── Init ── */
+let supabase = null;
+let currentUser = null;
+
+function initSupabase() {
+  const isConfigured = SUPABASE_URL !== 'https://YOUR_PROJECT.supabase.co' && SUPABASE_ANON_KEY !== 'YOUR_ANON_KEY';
+  if (!isConfigured) {
+    document.getElementById('supabase-config-banner').style.display = 'block';
+    // Dev mode: skip auth entirely
+    hideAuthOverlay();
+    return;
+  }
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  checkSession();
+}
+
+async function checkSession() {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      currentUser = session.user;
+      onLoggedIn(currentUser);
+    } else {
+      showAuthOverlay();
+    }
+
+    // Listen for auth state changes
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        currentUser = session.user;
+        onLoggedIn(currentUser);
+      } else if (event === 'SIGNED_OUT') {
+        currentUser = null;
+        showAuthOverlay();
+      }
+    });
+  } catch(e) {
+    console.error('Supabase session check failed:', e);
+    hideAuthOverlay();
+  }
+}
+
+/* ── Auth Tab Switch ── */
+function switchTab(tab) {
+  document.getElementById('form-login').style.display  = tab === 'login'  ? 'block' : 'none';
+  document.getElementById('form-signup').style.display = tab === 'signup' ? 'block' : 'none';
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+  clearMessages();
+}
+
+function clearMessages() {
+  ['login-msg','signup-msg'].forEach(id => {
+    const el = document.getElementById(id);
+    el.className = 'auth-msg';
+    el.textContent = '';
+  });
+}
+
+function showMsg(id, text, type) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'auth-msg ' + type;
+}
+
+function setLoading(btnId, loading, label) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = loading;
+  btn.innerHTML = loading
+    ? `<span class="auth-btn-spinner"></span> ${label}...`
+    : label;
+}
+
+/* ── Login ── */
+async function doLogin() {
+  if (!supabase) return;
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-password').value;
+  if (!email || !pass) { showMsg('login-msg', 'Isi email dan password dulu.', 'error'); return; }
+
+  setLoading('login-btn', true, 'Masuk');
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+  setLoading('login-btn', false, 'Masuk');
+
+  if (error) {
+    const msg = error.message.includes('Invalid login') ? 'Email atau password salah.' : error.message;
+    showMsg('login-msg', msg, 'error');
+  } else {
+    currentUser = data.user;
+    onLoggedIn(currentUser);
+  }
+}
+
+/* ── Signup ── */
+async function doSignup() {
+  if (!supabase) return;
+  const name  = document.getElementById('signup-name').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const pass  = document.getElementById('signup-password').value;
+
+  if (!name)            { showMsg('signup-msg', 'Nama tidak boleh kosong.', 'error'); return; }
+  if (!email)           { showMsg('signup-msg', 'Email tidak boleh kosong.', 'error'); return; }
+  if (pass.length < 6)  { showMsg('signup-msg', 'Password minimal 6 karakter.', 'error'); return; }
+
+  setLoading('signup-btn', true, 'Buat Akun');
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password: pass,
+    options: { data: { full_name: name } }
+  });
+  setLoading('signup-btn', false, 'Buat Akun');
+
+  if (error) {
+    showMsg('signup-msg', error.message, 'error');
+  } else if (data.user && !data.session) {
+    // Email confirmation required
+    showMsg('signup-msg', '✓ Akun berhasil dibuat! Cek email kamu untuk verifikasi.', 'success');
+  } else {
+    currentUser = data.user;
+    onLoggedIn(currentUser);
+  }
+}
+
+/* ── Forgot Password ── */
+async function doForgotPassword() {
+  if (!supabase) return;
+  const email = document.getElementById('login-email').value.trim();
+  if (!email) { showMsg('login-msg', 'Masukkan email kamu dulu.', 'error'); return; }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.href
+  });
+  if (error) showMsg('login-msg', error.message, 'error');
+  else showMsg('login-msg', '✓ Link reset password dikirim ke email kamu.', 'success');
+}
+
+/* ── Logout ── */
+async function doLogout() {
+  if (supabase) await supabase.auth.signOut();
+  currentUser = null;
+  toggleDropdown(false);
+  showAuthOverlay();
+}
+
+/* ── UI state: logged in ── */
+function onLoggedIn(user) {
+  hideAuthOverlay();
+  renderUserBadge(user);
+}
+
+function renderUserBadge(user) {
+  const email = user.email || '';
+  const name  = user.user_metadata?.full_name || email.split('@')[0] || '?';
+  const initials = name.substring(0,2).toUpperCase();
+
+  document.getElementById('user-avatar-initials').textContent = initials;
+  document.getElementById('user-email-display').textContent = name.length > 14 ? name.substring(0,13)+'…' : name;
+
+  const badge = document.getElementById('user-badge');
+  badge.style.display = 'flex';
+
+  // Mount badge into ctrl-header (desktop) or mobile header
+  const ctrlHeader = document.querySelector('.ctrl-header');
+  if (ctrlHeader) {
+    // wrap title content, add badge to top-right
+    ctrlHeader.style.position = 'relative';
+    const existing = ctrlHeader.querySelector('#user-badge');
+    if (!existing) {
+      badge.style.position = 'absolute';
+      badge.style.top = '12px';
+      badge.style.right = '12px';
+      ctrlHeader.appendChild(badge);
+    }
+  }
+
+  // Also inject into mobile header if visible
+  const mobileTopBar = document.querySelector('.mobile-header-top');
+  if (mobileTopBar) {
+    const mobileBadge = badge.cloneNode(true);
+    mobileBadge.id = 'user-badge-mobile';
+    mobileBadge.style.position = 'static';
+    mobileBadge.onclick = () => toggleDropdown();
+    mobileTopBar.appendChild(mobileBadge);
+  }
+}
+
+function showProfile() {
+  toggleDropdown(false);
+  if (!currentUser) return;
+  const name  = currentUser.user_metadata?.full_name || '—';
+  const email = currentUser.email || '—';
+  alert(`👤 Profil\n\nNama: ${name}\nEmail: ${email}\nID: ${currentUser.id}`);
+}
+
+/* ── Overlay helpers ── */
+function showAuthOverlay() {
+  const el = document.getElementById('auth-overlay');
+  el.style.display = 'flex';
+  setTimeout(() => el.classList.remove('hidden'), 10);
+}
+
+function hideAuthOverlay() {
+  const el = document.getElementById('auth-overlay');
+  el.classList.add('hidden');
+  setTimeout(() => el.style.display = 'none', 400);
+}
+
+/* ── Dropdown toggle ── */
+function toggleDropdown(force) {
+  const dd = document.getElementById('user-dropdown');
+  if (force === false) dd.classList.remove('open');
+  else dd.classList.toggle('open');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#user-badge') && !e.target.closest('#user-badge-mobile')) {
+    document.querySelectorAll('.user-dropdown').forEach(d => d.classList.remove('open'));
+  }
+});
+
+/* ── Boot ── */
+window.addEventListener('DOMContentLoaded', initSupabase);
+</script>
 </body>
 </html>
