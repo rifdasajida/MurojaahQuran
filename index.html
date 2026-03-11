@@ -6796,8 +6796,8 @@ function toggleWaqfLegend() {
 
     <!-- Tabs -->
     <div class="auth-tab-row">
-      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Masuk</button>
-      <button class="auth-tab" id="tab-signup" onclick="switchTab('signup')">Daftar</button>
+      <button class="auth-tab active" id="auth-tab-login" onclick="authSwitchTab('login')">Masuk</button>
+      <button class="auth-tab" id="auth-tab-signup" onclick="authSwitchTab('signup')">Daftar</button>
     </div>
 
     <!-- LOGIN FORM -->
@@ -6813,7 +6813,7 @@ function toggleWaqfLegend() {
       <div class="auth-msg" id="login-msg"></div>
       <button class="auth-btn" id="login-btn" onclick="doLogin()">Masuk</button>
       <div style="text-align:center;margin-top:12px">
-        <button onclick="doForgotPassword()" style="background:none;border:none;color:#637882;font-size:12px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:underline">Lupa password?</button>
+        <button onclick="authForgotPassword()" style="background:none;border:none;color:#637882;font-size:12px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:underline">Lupa password?</button>
       </div>
     </div>
 
@@ -6883,7 +6883,7 @@ const SUPABASE_URL      = 'https://jhbzstmcewffldjgsgtz.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoYnpzdG1jZXdmZmxkamdzZ3R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxOTM3NzAsImV4cCI6MjA4ODc2OTc3MH0.lTrwLGVrAKhsMp23u-yGX230KZHfCkU8ZjB0-duMq5o';
 
 /* ── Init ── */
-let supabase = null;
+let sbClient = null;
 let currentUser = null;
 
 function initSupabase() {
@@ -6894,13 +6894,13 @@ function initSupabase() {
     hideAuthOverlay();
     return;
   }
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   checkSession();
 }
 
 async function checkSession() {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await sbClient.auth.getSession();
     if (session) {
       currentUser = session.user;
       onLoggedIn(currentUser);
@@ -6909,7 +6909,7 @@ async function checkSession() {
     }
 
     // Listen for auth state changes
-    supabase.auth.onAuthStateChange((event, session) => {
+    sbClient.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
         currentUser = session.user;
         onLoggedIn(currentUser);
@@ -6925,15 +6925,15 @@ async function checkSession() {
 }
 
 /* ── Auth Tab Switch ── */
-function switchTab(tab) {
+function authSwitchTab(tab) {
   document.getElementById('form-login').style.display  = tab === 'login'  ? 'block' : 'none';
   document.getElementById('form-signup').style.display = tab === 'signup' ? 'block' : 'none';
-  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
-  document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
-  clearMessages();
+  document.getElementById('auth-tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('auth-tab-signup').classList.toggle('active', tab === 'signup');
+  authClearMessages();
 }
 
-function clearMessages() {
+function authClearMessages() {
   ['login-msg','signup-msg'].forEach(id => {
     const el = document.getElementById(id);
     el.className = 'auth-msg';
@@ -6957,13 +6957,13 @@ function setLoading(btnId, loading, label) {
 
 /* ── Login ── */
 async function doLogin() {
-  if (!supabase) return;
+  if (!sbClient) return;
   const email = document.getElementById('login-email').value.trim();
   const pass  = document.getElementById('login-password').value;
   if (!email || !pass) { showMsg('login-msg', 'Isi email dan password dulu.', 'error'); return; }
 
   setLoading('login-btn', true, 'Masuk');
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+  const { data, error } = await sbClient.auth.signInWithPassword({ email, password: pass });
   setLoading('login-btn', false, 'Masuk');
 
   if (error) {
@@ -6977,7 +6977,7 @@ async function doLogin() {
 
 /* ── Signup ── */
 async function doSignup() {
-  if (!supabase) return;
+  if (!sbClient) return;
   const name  = document.getElementById('signup-name').value.trim();
   const email = document.getElementById('signup-email').value.trim();
   const pass  = document.getElementById('signup-password').value;
@@ -6987,7 +6987,7 @@ async function doSignup() {
   if (pass.length < 6)  { showMsg('signup-msg', 'Password minimal 6 karakter.', 'error'); return; }
 
   setLoading('signup-btn', true, 'Buat Akun');
-  const { data, error } = await supabase.auth.signUp({
+  const { data, error } = await sbClient.auth.signUp({
     email,
     password: pass,
     options: { data: { full_name: name } }
@@ -7006,12 +7006,12 @@ async function doSignup() {
 }
 
 /* ── Forgot Password ── */
-async function doForgotPassword() {
-  if (!supabase) return;
+async function authForgotPassword() {
+  if (!sbClient) return;
   const email = document.getElementById('login-email').value.trim();
   if (!email) { showMsg('login-msg', 'Masukkan email kamu dulu.', 'error'); return; }
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+  const { error } = await sbClient.auth.resetPasswordForEmail(email, {
     redirectTo: window.location.href
   });
   if (error) showMsg('login-msg', error.message, 'error');
@@ -7020,7 +7020,7 @@ async function doForgotPassword() {
 
 /* ── Logout ── */
 async function doLogout() {
-  if (supabase) await supabase.auth.signOut();
+  if (sbClient) await sbClient.auth.signOut();
   currentUser = null;
   toggleDropdown(false);
   showAuthOverlay();
