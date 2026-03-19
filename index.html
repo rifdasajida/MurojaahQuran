@@ -834,6 +834,196 @@ body {
 .loading-dot:nth-child(3) { animation-delay: 0.4s; }
 .loading-dots { display: flex; gap: 6px; }
 @keyframes loading-bounce { 0%,80%,100%{transform:scale(0.7);opacity:0.4} 40%{transform:scale(1);opacity:1} }
+
+/* ══════════════════════════════════════════
+   LEADERBOARD PAGE
+══════════════════════════════════════════ */
+.lb-page { padding: 0 0 16px; }
+
+/* Tab switcher */
+.lb-tabs {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 56px; z-index: 10;
+}
+.lb-tab {
+  flex: 1; padding: 12px 8px;
+  font-size: 13px; font-weight: 600;
+  color: var(--muted); border: none;
+  background: none; cursor: pointer;
+  font-family: var(--font);
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.lb-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* Month filter */
+.lb-header {
+  padding: 12px 16px 8px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.lb-title { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-family: var(--font-mono); }
+.lb-period { font-size: 12px; color: var(--accent); font-weight: 600; }
+
+/* Top 3 podium */
+.lb-podium {
+  display: flex; align-items: flex-end;
+  justify-content: center; gap: 12px;
+  padding: 20px 16px 16px;
+  background: linear-gradient(180deg, rgba(45,155,111,0.06) 0%, transparent 100%);
+}
+.podium-item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.podium-item:nth-child(1) { order: 2; }
+.podium-item:nth-child(2) { order: 1; }
+.podium-item:nth-child(3) { order: 3; }
+.podium-avatar {
+  position: relative;
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 800; color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  box-shadow: 0 4px 12px rgba(45,155,111,0.3);
+  flex-shrink: 0;
+}
+.podium-item:nth-child(1) .podium-avatar { width: 64px; height: 64px; font-size: 22px; }
+.podium-rank-badge {
+  position: absolute; bottom: -4px; right: -4px;
+  width: 20px; height: 20px; border-radius: 50%;
+  font-size: 10px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid #fff;
+}
+.rank-1 { background: #F5C518; color: #000; }
+.rank-2 { background: #B0BEC5; color: #fff; }
+.rank-3 { background: #CD7F32; color: #fff; }
+.podium-name { font-size: 11px; font-weight: 700; color: var(--text); text-align: center; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.podium-score { font-size: 10px; color: var(--muted); font-family: var(--font-mono); }
+.podium-bar {
+  width: 52px; border-radius: 6px 6px 0 0;
+  background: rgba(45,155,111,0.15);
+  border: 1px solid rgba(45,155,111,0.2);
+}
+.podium-item:nth-child(1) .podium-bar { height: 40px; background: rgba(45,155,111,0.2); width: 64px; }
+.podium-item:nth-child(2) .podium-bar { height: 28px; }
+.podium-item:nth-child(3) .podium-bar { height: 18px; }
+
+/* Down indicator */
+.down-badge {
+  font-size: 9px; padding: 2px 6px;
+  background: rgba(217,79,79,0.1);
+  color: var(--err); border-radius: 100px;
+  font-weight: 700;
+}
+
+/* List rows */
+.lb-list { padding: 0 16px; display: flex; flex-direction: column; gap: 8px; }
+.lb-row {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 12px 14px;
+  transition: all 0.15s; cursor: pointer;
+}
+.lb-row:hover { border-color: rgba(45,155,111,0.25); }
+.lb-row.is-me { border-color: rgba(45,155,111,0.35); background: rgba(45,155,111,0.04); }
+.lb-rank { font-size: 13px; font-weight: 800; color: var(--muted2); width: 24px; text-align: center; flex-shrink: 0; font-family: var(--font-mono); }
+.lb-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0;
+  position: relative;
+}
+.lb-avatar .streak-fire {
+  position: absolute; bottom: -2px; right: -2px;
+  font-size: 12px; line-height: 1;
+}
+.lb-info { flex: 1; min-width: 0; }
+.lb-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.lb-meta { font-size: 11px; color: var(--muted); margin-top: 1px; display: flex; align-items: center; gap: 6px; }
+.lb-score { text-align: right; flex-shrink: 0; }
+.lb-score-val { font-size: 16px; font-weight: 800; color: var(--accent); }
+.lb-score-lbl { font-size: 9px; color: var(--muted2); font-family: var(--font-mono); text-transform: uppercase; }
+
+/* Semangat button */
+.semangat-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--accent-soft); border: 1.5px solid rgba(45,155,111,0.2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; font-size: 16px;
+  transition: all 0.2s;
+}
+.semangat-btn:hover { background: rgba(45,155,111,0.15); transform: scale(1.1); }
+.semangat-btn.down { background: rgba(217,79,79,0.08); border-color: rgba(217,79,79,0.2); }
+
+/* Semangat modal */
+.semangat-sheet {
+  background: var(--surface);
+  border-radius: 24px 24px 0 0;
+  width: 100%; max-width: 480px;
+  padding: 20px 20px 36px;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+#semangat-backdrop.visible .semangat-sheet { transform: translateY(0); }
+.semangat-to-name { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+.semangat-to-sub { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+
+.reaction-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+.reaction-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 12px 6px; background: var(--surface2);
+  border: 1.5px solid var(--border); border-radius: 12px;
+  cursor: pointer; transition: all 0.2s;
+  font-size: 24px;
+}
+.reaction-item:hover, .reaction-item.selected {
+  border-color: var(--accent); background: var(--accent-soft);
+  transform: scale(1.05);
+}
+.reaction-lbl { font-size: 9px; color: var(--muted); font-weight: 600; text-align: center; font-family: var(--font-mono); }
+
+.msg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.msg-item {
+  padding: 10px 12px; background: var(--surface2);
+  border: 1.5px solid var(--border); border-radius: 10px;
+  font-size: 12px; font-weight: 600; color: var(--muted);
+  cursor: pointer; transition: all 0.15s; text-align: center;
+}
+.msg-item:hover, .msg-item.selected { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+/* Grup lingkaran */
+.lb-empty { text-align: center; padding: 40px 20px; color: var(--muted); }
+.lb-empty-icon { font-size: 40px; margin-bottom: 10px; }
+.lb-empty-text { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.lb-empty-sub { font-size: 13px; color: var(--muted); }
+.grup-card {
+  margin: 12px 16px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 16px; padding: 16px;
+}
+.grup-name { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 2px; }
+.grup-meta { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+.grup-code {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 12px;
+  font-family: var(--font-mono); font-size: 14px; font-weight: 700;
+  color: var(--accent); letter-spacing: 2px; cursor: pointer;
+}
+
+/* Notif semangat masuk */
+.semangat-notif {
+  margin: 0 16px 12px;
+  background: linear-gradient(135deg, rgba(45,155,111,0.08), rgba(58,184,127,0.04));
+  border: 1px solid rgba(45,155,111,0.2);
+  border-radius: 14px; padding: 12px 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.semangat-notif-icon { font-size: 24px; flex-shrink: 0; }
+.semangat-notif-text { flex: 1; font-size: 12px; color: var(--text); line-height: 1.4; }
+.semangat-notif-name { font-weight: 700; }
+
 </style>
 </head>
 <body>
@@ -1184,6 +1374,76 @@ body {
     </div>
   </div>
 
+
+  <!-- ══ PAGE: LEADERBOARD ══ -->
+  <div class="page" id="page-leaderboard">
+    <div class="lb-page">
+
+      <!-- Notif semangat masuk -->
+      <div class="semangat-notif" id="semangat-notif" style="display:none">
+        <div class="semangat-notif-icon" id="semangat-notif-icon">🤲</div>
+        <div class="semangat-notif-text" id="semangat-notif-text">Ada yang kirim semangat untukmu!</div>
+      </div>
+
+      <!-- Tabs: Publik / Lingkaran -->
+      <div class="lb-tabs">
+        <button class="lb-tab active" id="lb-tab-publik" onclick="lbSwitchTab('publik')">🌍 Publik</button>
+        <button class="lb-tab" id="lb-tab-lingkaran" onclick="lbSwitchTab('lingkaran')">👥 Lingkaran</button>
+      </div>
+
+      <!-- TAB: PUBLIK -->
+      <div id="lb-panel-publik">
+        <div class="lb-header">
+          <span class="lb-title">Ranking Bulan Ini</span>
+          <span class="lb-period" id="lb-period">—</span>
+        </div>
+
+        <!-- Podium top 3 -->
+        <div class="lb-podium" id="lb-podium">
+          <div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">Memuat...</div>
+        </div>
+
+        <!-- List rank 4+ -->
+        <div class="lb-list" id="lb-list"></div>
+
+        <div style="padding:16px;text-align:center">
+          <div id="lb-my-rank" style="font-size:12px;color:var(--muted);font-weight:600"></div>
+        </div>
+      </div>
+
+      <!-- TAB: LINGKARAN -->
+      <div id="lb-panel-lingkaran" style="display:none">
+        <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+          <!-- Buat grup -->
+          <div class="card" style="padding:16px">
+            <div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:4px">Buat Lingkaran</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Ajak teman, keluarga, atau halaqahmu</div>
+            <input type="text" id="grup-name-input" placeholder="Nama lingkaran..." class="select-input" style="margin-bottom:8px">
+            <button class="btn-primary" onclick="buatGrup()" style="font-size:13px;padding:10px">Buat Lingkaran</button>
+          </div>
+
+          <!-- Join grup -->
+          <div class="card" style="padding:16px">
+            <div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:4px">Gabung dengan Kode</div>
+            <div style="display:flex;gap:8px">
+              <input type="text" id="join-code-input" placeholder="Masukkan kode..." class="select-input" style="text-transform:uppercase;letter-spacing:2px">
+              <button class="btn-primary" onclick="joinGrup()" style="width:auto;padding:10px 16px;font-size:13px">Gabung</button>
+            </div>
+          </div>
+
+          <!-- List grup user -->
+          <div id="lb-grup-list">
+            <div class="lb-empty">
+              <div class="lb-empty-icon">👥</div>
+              <div class="lb-empty-text">Belum ada lingkaran</div>
+              <div class="lb-empty-sub">Buat atau gabung lingkaran untuk murajaah bersama</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div><!-- /app -->
 
 <!-- Bottom Nav -->
@@ -1200,15 +1460,47 @@ body {
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="12" y2="12"/><polyline points="9 9 12 12 15 9"/></svg>
     Setoran
   </button>
-  <button class="nav-item" id="nav-audio" onclick="navTo('audio')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-    Dengarkan
+  <button class="nav-item" id="nav-leaderboard" onclick="navTo('leaderboard')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+    Lingkaran
   </button>
   <button class="nav-item" id="nav-sambung" onclick="navTo('sambung')">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-    Sambung Ayat
+    Sambung
   </button>
 </nav>
+
+
+<!-- Semangat Modal -->
+<div id="semangat-backdrop" style="position:fixed;inset:0;z-index:9998;background:rgba(26,40,32,0.5);backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center;opacity:0;transition:opacity 0.25s ease" onclick="closeSemangat(event)">
+  <div class="semangat-sheet">
+    <div style="width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px"></div>
+    <div class="semangat-to-name" id="semangat-to-name">—</div>
+    <div class="semangat-to-sub" id="semangat-to-sub">Kirim semangat & doa</div>
+
+    <!-- Reactions -->
+    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:var(--font-mono);margin-bottom:8px">Pilih Reaksi</div>
+    <div class="reaction-grid">
+      <div class="reaction-item" onclick="selectReaction(this,'🤲')" data-r="🤲"><span>🤲</span><span class="reaction-lbl">Doa</span></div>
+      <div class="reaction-item" onclick="selectReaction(this,'🔥')" data-r="🔥"><span>🔥</span><span class="reaction-lbl">Semangat!</span></div>
+      <div class="reaction-item" onclick="selectReaction(this,'⭐')" data-r="⭐"><span>⭐</span><span class="reaction-lbl">Keren!</span></div>
+      <div class="reaction-item" onclick="selectReaction(this,'💪')" data-r="💪"><span>💪</span><span class="reaction-lbl">Istiqomah</span></div>
+    </div>
+
+    <!-- Preset messages -->
+    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:var(--font-mono);margin-bottom:8px">Pesan</div>
+    <div class="msg-grid">
+      <div class="msg-item" onclick="selectMsg(this,'Yuk semangat! Istiqomah ya 💚')">Yuk semangat!</div>
+      <div class="msg-item" onclick="selectMsg(this,'Barakallah, terus istiqomah!')">Barakallah!</div>
+      <div class="msg-item" onclick="selectMsg(this,'Kamu pasti bisa, jangan menyerah!')">Jangan menyerah!</div>
+      <div class="msg-item" onclick="selectMsg(this,'Semoga Allah mudahkan hafalanmu 🤲')">Doa terbaik 🤲</div>
+    </div>
+
+    <button class="btn-primary" id="btn-kirim-semangat" onclick="kirimSemangat()" style="margin-top:4px">
+      Kirim Semangat
+    </button>
+  </div>
+</div>
 
 <!-- Auth modal -->
 <div id="auth-backdrop" onclick="handleAuthBackdropClick(event)">
@@ -1427,6 +1719,7 @@ function navTo(page) {
   currentPage = page;
   if (page === 'beranda') refreshBeranda();
   if (page === 'setoran') refreshRiwayat();
+  if (page === 'leaderboard') loadLeaderboard();
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1827,7 +2120,7 @@ async function simpanSetoran() {
         audioUrl = urlData?.publicUrl;
       }
 
-      await sbClient.from('setoran').insert({
+      const { error: insertErr } = await sbClient.from('setoran').insert({
         user_id: currentUser.id,
         surah_num: surahNum,
         surah_name: surahName,
@@ -1838,6 +2131,18 @@ async function simpanSetoran() {
         date: today
       });
 
+      if (insertErr) {
+        console.error('Insert error:', insertErr);
+        // Jika error RLS/permission, coba tanpa audio_url
+        if (insertErr.code === '42501' || insertErr.message?.includes('policy')) {
+          showToast('❌ Izin database ditolak — cek RLS policy di Supabase');
+        } else {
+          showToast('❌ Gagal simpan: ' + insertErr.message);
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/></svg> Simpan Setoran';
+        return;
+      }
       showToast('✅ Setoran berhasil disimpan!');
       resetRecording();
       refreshRiwayat();
@@ -2587,7 +2892,7 @@ function stopAudioPlayer(){
 // ════════════════════════════════════════════════════════════
 //  SAMBUNG AYAT — FULL LOGIC WITH AUDIO PLAYBACK
 // ════════════════════════════════════════════════════════════
-let sambungActive=false,sambungWaitingForUser=false;
+let sambungActive=false,sambungWaitingForUser=false,sambungIsProcessing=false;
 let sambungRec=null,sambungRecRunning=false;
 let sambungBuffer=[],sambungSilenceTimeout=null;
 let sambungCurrentAudio=null;
@@ -2647,6 +2952,7 @@ async function nextSambungNew(){
   cancelSambungCountdown();
   stopSambungRec();
   sambungWaitingForUser=false;
+  sambungIsProcessing=false;
   document.getElementById('sambung-result-ar').textContent='\u2014';
   document.getElementById('sambung-result-ar').className='sambung-result-ar';
   const _cd=document.getElementById('sambung-countdown');if(_cd)_cd.style.display='none';
@@ -2733,7 +3039,10 @@ function startSambungRecNew(){
   sambungRec.onend=()=>{
     sambungRecRunning=false;
     document.getElementById('sambungMicBtn').classList.remove('live');
-    if(sambungActive&&sambungWaitingForUser){setTimeout(()=>{if(sambungActive&&sambungWaitingForUser)startSambungRecNew();},200);}
+    // Only auto-restart if still waiting AND not currently processing a result
+    if(sambungActive&&sambungWaitingForUser&&!sambungIsProcessing){
+      setTimeout(()=>{if(sambungActive&&sambungWaitingForUser&&!sambungIsProcessing)startSambungRecNew();},400);
+    }
   };
   sambungRec.onerror=(e)=>{
     sambungRecRunning=false;
@@ -2774,10 +3083,17 @@ function stopSambung(){stopSambungNew();}
 
 function processSambungNew(){
   clearTimeout(sambungSilenceTimeout);
+  if(sambungIsProcessing)return; // prevent double process
+  sambungIsProcessing=true;
   stopSambungRecNew();sambungWaitingForUser=false;
-  if(!sambungActive)return;
+  if(!sambungActive){sambungIsProcessing=false;return;}
   const spokenRaw=sambungBuffer.join(' ').trim();sambungBuffer=[];
-  if(!spokenRaw){setDotSambung('warn','⚠️ Tidak terdengar — coba lagi');sambungWaitingForUser=true;startSambungRecNew();return;}
+  if(!spokenRaw){
+    sambungIsProcessing=false;
+    setDotSambung('warn','⚠️ Tidak terdengar — coba lagi');
+    setTimeout(()=>{if(sambungActive){sambungWaitingForUser=true;startSambungRecNew();}},1000);
+    return;
+  }
 
   const data=SURAHS[sambungTargetSurah];
   const targetAyah=data?.ayahs.find(a=>a.n===sambungTargetAyahN);
@@ -2803,8 +3119,10 @@ function processSambungNew(){
     resultEl.textContent=spokenRaw+'\n\nJawaban: '+targetAyah.words.join(' ');
     setDotSambung('warn','\u274C Kurang tepat — '+result.detail);
     playWrongSound();
+    sambungIsProcessing=false;
     setTimeout(()=>{if(!sambungActive)return;sambungWaitingForUser=true;setDotSambung('rec','Coba lagi...');startSambungRecNew();},2500);
-  }
+  } 
+  if(result.ok) sambungIsProcessing=false;
 }
 
 function validateSambung(spokenRaw,refWords){
@@ -2865,6 +3183,402 @@ function showSambungHint(){
 // Aliases to fix naming inconsistency
 function stopSambungRec() { stopSambungRecNew(); }
 function startSambungRec() { startSambungRecNew(); }
+
+
+// ════════════════════════════════════════════════════════════
+//  LEADERBOARD
+// ════════════════════════════════════════════════════════════
+let lbCurrentTab = 'publik';
+let lbCurrentTarget = null; // user yang akan dikirim semangat
+let selectedReaction = '🤲';
+let selectedMsg = 'Yuk semangat! Istiqomah ya 💚';
+
+function lbSwitchTab(tab) {
+  lbCurrentTab = tab;
+  document.getElementById('lb-tab-publik').classList.toggle('active', tab === 'publik');
+  document.getElementById('lb-tab-lingkaran').classList.toggle('active', tab === 'lingkaran');
+  document.getElementById('lb-panel-publik').style.display = tab === 'publik' ? 'block' : 'none';
+  document.getElementById('lb-panel-lingkaran').style.display = tab === 'lingkaran' ? 'block' : 'none';
+  if (tab === 'lingkaran') loadGrupList();
+}
+
+async function loadLeaderboard() {
+  if (!sbClient) { renderLbGuest(); return; }
+
+  // Set period label
+  const now = new Date();
+  const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  document.getElementById('lb-period').textContent = months[now.getMonth()] + ' ' + now.getFullYear();
+
+  // Fetch leaderboard data from profiles + setoran
+  try {
+    // Get all public profiles with their stats this month
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+
+    const { data: setoranData } = await sbClient
+      .from('setoran')
+      .select('user_id, date')
+      .gte('date', monthStart)
+      .lte('date', monthEnd);
+
+    if (!setoranData) { renderLbEmpty(); return; }
+
+    // Group by user, count unique days
+    const userDays = {};
+    setoranData.forEach(s => {
+      if (!userDays[s.user_id]) userDays[s.user_id] = new Set();
+      userDays[s.user_id].add(s.date);
+    });
+
+    // Fetch profiles
+    const userIds = Object.keys(userDays);
+    if (!userIds.length) { renderLbEmpty(); return; }
+
+    const { data: profiles } = await sbClient
+      .from('profiles')
+      .select('id, name, is_public')
+      .in('id', userIds)
+      .eq('is_public', true);
+
+    if (!profiles?.length) { renderLbEmpty(); return; }
+
+    // Build ranked list
+    const ranked = profiles.map(p => ({
+      id: p.id,
+      name: p.name || 'Hafidz',
+      days: userDays[p.id]?.size || 0,
+      isMe: currentUser && p.id === currentUser.id
+    })).sort((a, b) => b.days - a.days);
+
+    // Also fetch streaks from setoran (all time)
+    const { data: allSetoran } = await sbClient
+      .from('setoran')
+      .select('user_id, date')
+      .in('user_id', userIds);
+
+    const streaks = {};
+    userIds.forEach(uid => {
+      const dates = [...new Set((allSetoran || []).filter(s => s.user_id === uid).map(s => s.date))].sort().reverse();
+      let streak = 0;
+      let d = new Date(); d.setHours(0,0,0,0);
+      for (const ds of dates) {
+        const diff = Math.round((d - new Date(ds)) / 86400000);
+        if (diff <= 1) { streak++; d = new Date(ds); }
+        else break;
+      }
+      streaks[uid] = streak;
+    });
+
+    ranked.forEach(r => r.streak = streaks[r.id] || 0);
+    renderLeaderboard(ranked);
+
+    // Check for incoming semangat
+    loadIncomingSemangat();
+
+  } catch(e) {
+    console.error('loadLeaderboard:', e);
+    renderLbEmpty();
+  }
+}
+
+function renderLbGuest() {
+  document.getElementById('lb-podium').innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">Login untuk lihat leaderboard 🔐</div>';
+  document.getElementById('lb-list').innerHTML = '';
+}
+
+function renderLbEmpty() {
+  document.getElementById('lb-podium').innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Belum ada data bulan ini</div>';
+  document.getElementById('lb-list').innerHTML = '';
+}
+
+function renderLeaderboard(ranked) {
+  const top3 = ranked.slice(0, 3);
+  const rest = ranked.slice(3);
+  const totalDays = new Date().getDate(); // days elapsed this month
+
+  // Podium
+  const podiumEl = document.getElementById('lb-podium');
+  if (top3.length === 0) { renderLbEmpty(); return; }
+
+  // Order: 2nd, 1st, 3rd
+  const podiumOrder = [top3[1], top3[0], top3[2]].filter(Boolean);
+  const ranks = top3[1] ? [2, 1, 3] : [1];
+
+  podiumEl.innerHTML = podiumOrder.map((u, i) => {
+    const rank = podiumOrder.indexOf(u) === 1 ? 1 : (podiumOrder.indexOf(u) === 0 ? 2 : 3);
+    const initials = (u.name || '?').substring(0, 2).toUpperCase();
+    const pct = Math.round(u.days / totalDays * 100);
+    const isDown = u.streak === 0;
+    return `<div class="podium-item" onclick="openSemangat('${u.id}','${u.name}',${u.streak})">
+      <div class="podium-avatar" style="${u.isMe ? 'box-shadow:0 0 0 3px var(--accent)' : ''}">
+        ${initials}
+        <span class="podium-rank-badge rank-${rank}">${rank}</span>
+        ${isDown ? '<span style="position:absolute;top:-4px;right:-4px;font-size:14px">😴</span>' : ''}
+      </div>
+      <div class="podium-name">${u.isMe ? '(Kamu)' : u.name}</div>
+      <div class="podium-score">${u.days}h · ${u.streak}🔥</div>
+      <div class="podium-bar"></div>
+    </div>`;
+  }).join('');
+
+  // List rank 4+
+  const listEl = document.getElementById('lb-list');
+  if (!rest.length) { listEl.innerHTML = ''; return; }
+
+  listEl.innerHTML = rest.map((u, i) => {
+    const rank = i + 4;
+    const initials = (u.name || '?').substring(0, 2).toUpperCase();
+    const isDown = u.streak === 0;
+    const pct = Math.round(u.days / totalDays * 100);
+    return `<div class="lb-row ${u.isMe ? 'is-me' : ''}" onclick="openSemangat('${u.id}','${u.name}',${u.streak})">
+      <div class="lb-rank">${rank}</div>
+      <div class="lb-avatar">
+        ${initials}
+        ${u.streak >= 7 ? '<span class="streak-fire">🔥</span>' : ''}
+      </div>
+      <div class="lb-info">
+        <div class="lb-name">${u.isMe ? u.name + ' (Kamu)' : u.name}</div>
+        <div class="lb-meta">
+          <span>${u.days} hari bulan ini</span>
+          ${isDown ? '<span class="down-badge">Streak putus</span>' : `<span>🔥 ${u.streak} hari</span>`}
+        </div>
+      </div>
+      <div class="lb-score">
+        <div class="lb-score-val">${pct}%</div>
+        <div class="lb-score-lbl">konsisten</div>
+      </div>
+      <div class="semangat-btn ${isDown ? 'down' : ''}" onclick="event.stopPropagation();openSemangat('${u.id}','${u.name}',${u.streak})">
+        ${isDown ? '💙' : '🤲'}
+      </div>
+    </div>`;
+  }).join('');
+
+  // My rank
+  const myRank = ranked.findIndex(u => u.isMe);
+  if (myRank >= 0) {
+    document.getElementById('lb-my-rank').textContent =
+      myRank < 3 ? '' : `Posisimu: #${myRank + 1} dari ${ranked.length} hafidz`;
+  }
+}
+
+// ── Semangat ──────────────────────────────────────────────────────────────────
+function openSemangat(userId, name, streak) {
+  if (!currentUser) { openAuthModal(); return; }
+  if (userId === currentUser.id) return; // tidak bisa kirim ke diri sendiri
+  lbCurrentTarget = { id: userId, name, streak };
+  selectedReaction = '🤲';
+  selectedMsg = 'Yuk semangat! Istiqomah ya 💚';
+
+  document.getElementById('semangat-to-name').textContent = name;
+  document.getElementById('semangat-to-sub').textContent =
+    streak === 0 ? '😴 Streaknya putus — kirim semangat!' : `🔥 Streak ${streak} hari — apresiasi yuk!`;
+
+  // Reset selections
+  document.querySelectorAll('.reaction-item').forEach(el => el.classList.remove('selected'));
+  document.querySelectorAll('.msg-item').forEach(el => el.classList.remove('selected'));
+  document.querySelector('[data-r="🤲"]')?.classList.add('selected');
+
+  const bd = document.getElementById('semangat-backdrop');
+  bd.style.display = 'flex';
+  setTimeout(() => bd.classList.add('visible'), 10);
+}
+
+function closeSemangat(e) {
+  if (e && e.target !== document.getElementById('semangat-backdrop')) return;
+  const bd = document.getElementById('semangat-backdrop');
+  bd.classList.remove('visible');
+  setTimeout(() => bd.style.display = 'none', 300);
+}
+
+function selectReaction(el, emoji) {
+  document.querySelectorAll('.reaction-item').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedReaction = emoji;
+}
+
+function selectMsg(el, msg) {
+  document.querySelectorAll('.msg-item').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMsg = msg;
+}
+
+async function kirimSemangat() {
+  if (!sbClient || !currentUser || !lbCurrentTarget) return;
+  const btn = document.getElementById('btn-kirim-semangat');
+  btn.disabled = true;
+  btn.textContent = 'Mengirim...';
+
+  try {
+    await sbClient.from('semangat').insert({
+      from_user: currentUser.id,
+      to_user: lbCurrentTarget.id,
+      type: selectedReaction,
+      message: selectedMsg
+    });
+    btn.textContent = '✅ Terkirim!';
+    setTimeout(() => {
+      closeSemangat({target: document.getElementById('semangat-backdrop')});
+      showToast(selectedReaction + ' Semangat terkirim ke ' + lbCurrentTarget.name + '!');
+      btn.disabled = false;
+      btn.textContent = 'Kirim Semangat';
+    }, 1000);
+  } catch(e) {
+    console.error('kirimSemangat:', e);
+    showToast('❌ Gagal kirim, coba lagi');
+    btn.disabled = false;
+    btn.textContent = 'Kirim Semangat';
+  }
+}
+
+async function loadIncomingSemangat() {
+  if (!sbClient || !currentUser) return;
+  try {
+    const { data } = await sbClient
+      .from('semangat')
+      .select('*, profiles!from_user(name)')
+      .eq('to_user', currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (data?.length) {
+      const s = data[0];
+      const fromName = s.profiles?.name || 'Seseorang';
+      const notif = document.getElementById('semangat-notif');
+      document.getElementById('semangat-notif-icon').textContent = s.type || '🤲';
+      document.getElementById('semangat-notif-text').innerHTML =
+        `<span class="semangat-notif-name">${fromName}</span> mengirim semangat: "${s.message}"`;
+      notif.style.display = 'flex';
+    }
+  } catch(e) {}
+}
+
+// ── Grup / Lingkaran ──────────────────────────────────────────────────────────
+function generateCode() {
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+async function buatGrup() {
+  if (!sbClient || !currentUser) { openAuthModal(); return; }
+  const name = document.getElementById('grup-name-input').value.trim();
+  if (!name) { showToast('Masukkan nama lingkaran'); return; }
+
+  const code = generateCode();
+  try {
+    const { data, error } = await sbClient.from('grup').insert({
+      name, code, created_by: currentUser.id
+    }).select().single();
+
+    if (error) throw error;
+
+    // Auto-join sebagai member
+    await sbClient.from('grup_members').insert({ grup_id: data.id, user_id: currentUser.id });
+
+    document.getElementById('grup-name-input').value = '';
+    showToast('✅ Lingkaran "' + name + '" dibuat! Kode: ' + code);
+    loadGrupList();
+  } catch(e) {
+    console.error('buatGrup:', e);
+    showToast('❌ Gagal buat lingkaran');
+  }
+}
+
+async function joinGrup() {
+  if (!sbClient || !currentUser) { openAuthModal(); return; }
+  const code = document.getElementById('join-code-input').value.trim().toUpperCase();
+  if (!code) { showToast('Masukkan kode lingkaran'); return; }
+
+  try {
+    const { data: grup } = await sbClient.from('grup').select('*').eq('code', code).single();
+    if (!grup) { showToast('❌ Kode tidak ditemukan'); return; }
+
+    const { error } = await sbClient.from('grup_members').insert({ grup_id: grup.id, user_id: currentUser.id });
+    if (error && error.code !== '23505') throw error; // 23505 = already member
+
+    document.getElementById('join-code-input').value = '';
+    showToast('✅ Bergabung ke "' + grup.name + '"!');
+    loadGrupList();
+  } catch(e) {
+    console.error('joinGrup:', e);
+    showToast('❌ Gagal bergabung');
+  }
+}
+
+async function loadGrupList() {
+  if (!sbClient || !currentUser) return;
+  try {
+    const { data: memberOf } = await sbClient
+      .from('grup_members')
+      .select('grup_id, grup(id, name, code)')
+      .eq('user_id', currentUser.id);
+
+    const listEl = document.getElementById('lb-grup-list');
+    if (!memberOf?.length) {
+      listEl.innerHTML = '<div class="lb-empty"><div class="lb-empty-icon">👥</div><div class="lb-empty-text">Belum ada lingkaran</div><div class="lb-empty-sub">Buat atau gabung lingkaran untuk murajaah bersama</div></div>';
+      return;
+    }
+
+    listEl.innerHTML = memberOf.map(m => {
+      const g = m.grup;
+      return `<div class="grup-card">
+        <div class="grup-name">${g.name}</div>
+        <div class="grup-meta">Kode invite:</div>
+        <div class="grup-code" onclick="navigator.clipboard.writeText('${g.code}');showToast('Kode disalin!')">
+          📋 ${g.code}
+        </div>
+        <button onclick="loadGrupLeaderboard('${g.id}','${g.name}')" class="btn-secondary" style="margin-top:10px;padding:8px;font-size:12px">
+          Lihat Ranking Lingkaran →
+        </button>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    console.error('loadGrupList:', e);
+  }
+}
+
+async function loadGrupLeaderboard(grupId, grupName) {
+  if (!sbClient) return;
+  try {
+    const { data: members } = await sbClient
+      .from('grup_members')
+      .select('user_id, profiles(name)')
+      .eq('grup_id', grupId);
+
+    if (!members?.length) return;
+
+    const userIds = members.map(m => m.user_id);
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+
+    const { data: setoranData } = await sbClient
+      .from('setoran').select('user_id, date')
+      .in('user_id', userIds).gte('date', monthStart);
+
+    const userDays = {};
+    (setoranData || []).forEach(s => {
+      if (!userDays[s.user_id]) userDays[s.user_id] = new Set();
+      userDays[s.user_id].add(s.date);
+    });
+
+    const ranked = members.map(m => ({
+      id: m.user_id,
+      name: m.profiles?.name || 'Hafidz',
+      days: userDays[m.user_id]?.size || 0,
+      streak: 0,
+      isMe: m.user_id === currentUser?.id
+    })).sort((a, b) => b.days - a.days);
+
+    // Show in panel
+    lbSwitchTab('publik');
+    document.getElementById('lb-period').textContent = grupName;
+    renderLeaderboard(ranked);
+  } catch(e) {
+    console.error('loadGrupLeaderboard:', e);
+  }
+}
+
+// ── navTo override to load lb data ──────────────────────────────────────────
+const _origNavTo = navTo;
 
 window.addEventListener('DOMContentLoaded', async () => {
   // Populate all selectors
