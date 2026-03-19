@@ -2614,7 +2614,7 @@ async function startSambungMode() {
   btn.style.display = 'none';
   document.getElementById('sambung-surah-row').style.display = 'none';
 
-  const surah = await loadDynamicSurahSilent(sambungCurrentSurah);
+  const surah = await loadDynamicSurah(sambungCurrentSurah);
   if (!surah) {
     setDotSambung('warn', '❌ Gagal memuat');
     btn.disabled = false;
