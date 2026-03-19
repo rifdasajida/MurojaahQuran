@@ -2587,301 +2587,361 @@ function stopAudioPlayer(){
 // ════════════════════════════════════════════════════════════
 //  SAMBUNG AYAT — FULL LOGIC WITH AUDIO PLAYBACK
 // ════════════════════════════════════════════════════════════
-let sambungActive=false,sambungWaitingForUser=false;
-let sambungRec=null,sambungRecRunning=false;
-let sambungBuffer=[],sambungSilenceTimeout=null;
-let sambungCurrentAudio=null;
-let sambungPromptSurah=68,sambungPromptAyahN=1,sambungTargetSurah=68,sambungTargetAyahN=2;
-let sambungScoreOk=0,sambungScoreErr=0;
-let sambungSurahRanges=[];
-let sambungCountdownTimer=null;
+let sambungActive = false;
+let sambungWaitingForUser = false;
+let sambungRec = null;
+let sambungRecRunning = false;
+let sambungBuffer = [];
+let sambungSilenceTimeout = null;
+let sambungCurrentAudio = null;
+let sambungPromptSurah = 68, sambungPromptAyahN = 1;
+let sambungTargetSurah = 68, sambungTargetAyahN = 2;
+let sambungScoreOk = 0, sambungScoreErr = 0;
+let sambungSurahRanges = [];
+let sambungCountdownTimer = null;
+let sambungCurrentSurah = 68;
 
-function initSambungPage(){populateSurahSel('sambungSurahSel',68);}
+function initSambungPage() { populateSurahSel('sambungSurahSel', 68); }
 
-async function startSambungMode(){
-  sambungCurrentSurah=parseInt(document.getElementById('sambungSurahSel').value);
-  const btn=document.getElementById('sambung-start-btn');
-  btn.disabled=true;
-  btn.textContent='⏳ Memuat...';
+async function startSambungMode() {
+  sambungCurrentSurah = parseInt(document.getElementById('sambungSurahSel').value);
+  const btn = document.getElementById('sambung-start-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Memuat...';
 
-  // Show UI dulu baru load
-  document.getElementById('sambung-prompt-card').style.display='block';
-  document.getElementById('sambung-controls').style.display='block';
-  btn.style.display='none';
-  document.getElementById('sambung-surah-row').style.display='none';
-  setDotSambung('','📖 Memuat surah dari server...');
+  document.getElementById('sambung-prompt-card').style.display = 'block';
+  document.getElementById('sambung-controls').style.display = 'block';
+  btn.style.display = 'none';
+  document.getElementById('sambung-surah-row').style.display = 'none';
 
-  const surah=await loadDynamicSurahSilent(sambungCurrentSurah);
-  btn.disabled=false;
-  btn.textContent='Mulai Sambung Ayat';
-
-  if(!surah||!surah.ayahs||surah.ayahs.length<2){
-    showToast('❌ Gagal memuat surah — cek koneksi internet');
-    setDotSambung('warn','❌ Gagal memuat');
-    // Kembalikan ke state awal
-    document.getElementById('sambung-prompt-card').style.display='none';
-    document.getElementById('sambung-controls').style.display='none';
-    btn.style.display='flex';
-    document.getElementById('sambung-surah-row').style.display='block';
+  const surah = await loadDynamicSurahSilent(sambungCurrentSurah);
+  if (!surah) {
+    setDotSambung('warn', '❌ Gagal memuat');
+    btn.disabled = false;
+    btn.textContent = 'Mulai Sambung Ayat';
+    btn.style.display = 'flex';
     return;
   }
 
-  const ayahNums=surah.ayahs.map(a=>a.n);
-  sambungSurahRanges=[{surahNum:sambungCurrentSurah,ayahNums:ayahNums.slice(0,-1)}];
-  sambungScoreOk=0;sambungScoreErr=0;sambungActive=true;
-  document.getElementById('sambung-score-ok').textContent='0';
-  document.getElementById('sambung-score-err').textContent='0';
-  nextSambungNew();
+  const ayahNums = surah.ayahs.map(a => a.n);
+  sambungSurahRanges = [{
+    surahNum: sambungCurrentSurah,
+    fromAyah: ayahNums[0],
+    toAyah: ayahNums[ayahNums.length - 1]
+  }];
+
+  sambungActive = true;
+  sambungScoreOk = 0;
+  sambungScoreErr = 0;
+  document.getElementById('sambung-score-ok').textContent = '0';
+  document.getElementById('sambung-score-err').textContent = '0';
+
+  nextSambung();
 }
 
-async function loadDynamicSurahSilent(surahNum) {
-  const STATIC = [1, 112, 113, 114];
-  if (STATIC.includes(surahNum) && SURAHS[surahNum]) return SURAHS[surahNum];
-  if (dynamicSurahCache[surahNum]) { SURAHS[surahNum] = dynamicSurahCache[surahNum]; return dynamicSurahCache[surahNum]; }
-  const meta = JUZ_SURAHS[surahNum];
-  if (!meta) return null;
-  return await fetchSurahFromCDN(surahNum, meta);
-}
-
-async function nextSambungNew(){
+async function nextSambung() {
   cancelSambungCountdown();
   stopSambungRec();
-  sambungWaitingForUser=false;
-  document.getElementById('sambung-result-ar').textContent='\u2014';
-  document.getElementById('sambung-result-ar').className='sambung-result-ar';
-  const _cd=document.getElementById('sambung-countdown');if(_cd)_cd.style.display='none';
-  document.getElementById('sambung-next-btn').style.display='none';
-  document.getElementById('sambung-hint-box').style.display='none';
+  sambungWaitingForUser = false;
 
-  // Gunakan ayahNums yg sudah valid dari startSambungMode
-  const data = SURAHS[sambungCurrentSurah];
-  if (!data || !data.ayahs || data.ayahs.length < 2) {
-    setDotSambung('warn', '⚠️ Data surah tidak tersedia');
+  const resultEl = document.getElementById('sambung-result-ar');
+  if (resultEl) { resultEl.textContent = '—'; resultEl.className = 'sambung-result-ar'; }
+  const nextBtn = document.getElementById('sambung-next-btn');
+  if (nextBtn) nextBtn.style.display = 'none';
+  const hintBox = document.getElementById('sambung-hint-box');
+  if (hintBox) hintBox.style.display = 'none';
+
+  // KUNCI: reset buffer setiap soal baru
+  sambungBuffer = [];
+  clearTimeout(sambungSilenceTimeout);
+  sambungSilenceTimeout = null;
+
+  setDotSambung('', 'Memilih ayat...');
+
+  let pool = [];
+  sambungSurahRanges.forEach(r => {
+    const data = SURAHS[r.surahNum];
+    if (!data) return;
+    data.ayahs.forEach((a, idx) => {
+      if (a.n >= r.fromAyah && a.n < r.toAyah && idx + 1 < data.ayahs.length) {
+        pool.push({ surahNum: r.surahNum, ayahN: a.n });
+      }
+    });
+  });
+
+  if (pool.length === 0) {
+    setDotSambung('warn', '⚠️ Tidak ada ayat tersedia');
     return;
   }
-  // Pick random ayah (bukan yang terakhir karena butuh next ayah)
-  const validAyahs = data.ayahs.slice(0, -1);
-  const promptAyah = validAyahs[Math.floor(Math.random() * validAyahs.length)];
-  const promptIdx = data.ayahs.indexOf(promptAyah);
+
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  sambungPromptSurah = pick.surahNum;
+  sambungPromptAyahN = pick.ayahN;
+  sambungTargetSurah = pick.surahNum;
+
+  const data = SURAHS[sambungPromptSurah];
+  const promptIdx = data.ayahs.findIndex(a => a.n === sambungPromptAyahN);
   const targetAyahObj = data.ayahs[promptIdx + 1];
-  if (!targetAyahObj) { setTimeout(nextSambungNew, 100); return; }
-  sambungPromptSurah = sambungCurrentSurah;
-  sambungPromptAyahN = promptAyah.n;
-  sambungTargetSurah = sambungCurrentSurah;
+  if (!targetAyahObj) { setTimeout(nextSambung, 100); return; }
   sambungTargetAyahN = targetAyahObj.n;
 
-  document.getElementById('sambung-prompt-ar').textContent=data.ayahs[promptIdx].words.join(' ');
-  document.getElementById('sambung-surah-info').textContent=`${data.name} \u2022 Ayat ${sambungPromptAyahN}`;
-  document.getElementById('sambung-result-ar').textContent='\u2014';
+  document.getElementById('sambung-prompt-ar').textContent = data.ayahs[promptIdx].words.join(' ');
+  document.getElementById('sambung-surah-info').textContent = `${data.name} • Ayat ${sambungPromptAyahN}`;
 
-  // FIX: Reset buffer dan timeout setiap soal baru
-  sambungBuffer=[];
-  clearTimeout(sambungSilenceTimeout);sambungSilenceTimeout=null;
+  setDotSambung('', '🔊 Sistem sedang membaca...');
+  document.getElementById('sambungMicBtn').disabled = true;
 
-  // Play audio first, then auto-start mic
-  setDotSambung('','🔊 Sistem sedang membaca...');
-  document.getElementById('sambungMicBtn').disabled=true;
-  playSambungAudioNew(sambungPromptSurah,sambungPromptAyahN,()=>{
-    if(!sambungActive)return;
-    document.getElementById('sambungMicBtn').disabled=false;
-    sambungWaitingForUser=true;
-    setDotSambung('rec','🎙 Mendengarkan — sambung ayatnya!');
-    startSambungRecNew();
+  playSambungAudio(sambungPromptSurah, sambungPromptAyahN, () => {
+    if (!sambungActive) return;
+    document.getElementById('sambungMicBtn').disabled = false;
+    sambungWaitingForUser = true;
+    setDotSambung('rec', '🎙 Mendengarkan — sambung ayatnya!');
+    startSambungRec();
   });
 }
 
-function playSambungAudioNew(surahNum,ayahNum,onDone){
-  if(sambungCurrentAudio){sambungCurrentAudio.pause();sambungCurrentAudio=null;}
-  const audio=new Audio(getAudioUrl(surahNum,ayahNum));
-  sambungCurrentAudio=audio;
-  audio.onended=()=>{sambungCurrentAudio=null;if(onDone)onDone();};
-  audio.onerror=()=>{sambungCurrentAudio=null;setDotSambung('warn','⚠️ Audio gagal — langsung jawab');if(onDone)onDone();};
-  audio.play().catch(()=>{if(onDone)onDone();});
+function playSambungAudio(surahNum, ayahNum, onDone) {
+  if (sambungCurrentAudio) { sambungCurrentAudio.pause(); sambungCurrentAudio = null; }
+  const audio = new Audio(getAudioUrl(surahNum, ayahNum));
+  sambungCurrentAudio = audio;
+  audio.onended = () => { sambungCurrentAudio = null; if (onDone) onDone(); };
+  audio.onerror = () => {
+    sambungCurrentAudio = null;
+    setDotSambung('warn', '⚠️ Audio gagal — langsung jawab');
+    if (onDone) onDone();
+  };
+  audio.play().catch(() => { if (onDone) onDone(); });
 }
 
-function replaySambungAudio(){
-  if(!sambungActive)return;
-  stopSambungRec();sambungWaitingForUser=false;
-  setDotSambung('','🔊 Memutar ulang...');
-  document.getElementById('sambungMicBtn').disabled=true;
-  playSambungAudioNew(sambungPromptSurah,sambungPromptAyahN,()=>{
-    if(!sambungActive)return;
-    document.getElementById('sambungMicBtn').disabled=false;
-    sambungWaitingForUser=true;
-    setDotSambung('rec','Mendengarkan...');
-    startSambungRecNew();
+function replaySambungAudio() {
+  if (!sambungActive) return;
+  cancelSambungCountdown();
+  stopSambungRec();
+  sambungWaitingForUser = false;
+  setDotSambung('', '🔊 Memutar ulang...');
+  document.getElementById('sambungMicBtn').disabled = true;
+  playSambungAudio(sambungPromptSurah, sambungPromptAyahN, () => {
+    if (!sambungActive) return;
+    sambungWaitingForUser = true;
+    document.getElementById('sambungMicBtn').disabled = false;
+    setDotSambung('rec', 'Mendengarkan...');
+    startSambungRec();
   });
 }
 
-function startSambungRecNew(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){showToast('❌ Gunakan Chrome');return;}
-  // FIX: Jangan reset buffer saat restart — tapi pastikan tidak ada duplikasi
-  // Buffer hanya di-reset di sini kalau ini adalah sesi baru (bukan restart)
-  if(sambungRecRunning){return;} // Sudah berjalan, jangan double-start
-  if(sambungRec){try{sambungRec.abort();}catch(e){}sambungRec=null;}
-  sambungRec=new SR();sambungRec.lang='ar-SA';sambungRec.continuous=true;sambungRec.interimResults=true;sambungRec.maxAlternatives=3;
-  // FIX: Track kata yang sudah masuk ke buffer agar tidak double
-  let lastFinalIndex=0;
-  sambungRec.onresult=(e)=>{
-    if(!sambungWaitingForUser)return; // Sudah diproses, abaikan hasil telat
-    let finalText='',interimText='';
-    for(let i=Math.max(e.resultIndex,lastFinalIndex);i<e.results.length;i++){
-      if(e.results[i].isFinal){finalText+=e.results[i][0].transcript+' ';lastFinalIndex=i+1;}
-      else interimText+=e.results[i][0].transcript;
+function toggleSambungRec() {
+  if (!sambungWaitingForUser) return;
+  if (sambungRecRunning) { stopSambungRec(); processSambungBuffer(); }
+  else { startSambungRec(); }
+}
+
+function startSambungRec() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { setDotSambung('warn', '❌ Gunakan Chrome'); return; }
+
+  // KUNCI: reset buffer tiap mulai sesi baru
+  sambungBuffer = [];
+
+  if (sambungRec) { try { sambungRec.abort(); } catch(e) {} sambungRec = null; }
+  sambungRec = new SR();
+  sambungRec.lang = 'ar-SA';
+  sambungRec.continuous = true;
+  sambungRec.interimResults = true;
+  sambungRec.maxAlternatives = 3;
+
+  sambungRec.onresult = (e) => {
+    if (!sambungWaitingForUser) return;
+    let finalText = '', interimText = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) finalText += e.results[i][0].transcript + ' ';
+      else interimText += e.results[i][0].transcript;
     }
-    if(finalText.trim()){
+    if (finalText.trim()) {
       sambungBuffer.push(finalText.trim());
-      document.getElementById('sambung-result-ar').textContent=sambungBuffer.join(' ');
+      const resultEl = document.getElementById('sambung-result-ar');
+      if (resultEl) resultEl.textContent = sambungBuffer.join(' ');
       clearTimeout(sambungSilenceTimeout);
-      sambungSilenceTimeout=setTimeout(processSambungNew,1200);
-    } else if(interimText){
-      document.getElementById('sambung-result-ar').textContent=(sambungBuffer.length?sambungBuffer.join(' ')+' ':'')+interimText+' \u23F3';
+      sambungSilenceTimeout = setTimeout(processSambungBuffer, 1200);
+    } else if (interimText) {
+      const resultEl = document.getElementById('sambung-result-ar');
+      if (resultEl) resultEl.textContent = (sambungBuffer.length ? sambungBuffer.join(' ') + ' ' : '') + interimText + ' ⏳';
     }
   };
-  sambungRec.onend=()=>{
-    sambungRecRunning=false;
+
+  sambungRec.onend = () => {
+    sambungRecRunning = false;
     document.getElementById('sambungMicBtn').classList.remove('live');
-    // FIX: Hanya restart jika masih menunggu user DAN belum ada yang diproses
-    if(sambungActive&&sambungWaitingForUser&&!sambungSilenceTimeout){
-      setTimeout(()=>{if(sambungActive&&sambungWaitingForUser)startSambungRecNew();},200);
+    // Restart HANYA jika masih menunggu DAN belum ada silence timer aktif
+    if (sambungActive && sambungWaitingForUser && !sambungSilenceTimeout) {
+      setTimeout(() => { if (sambungActive && sambungWaitingForUser) startSambungRec(); }, 200);
     }
   };
-  sambungRec.onerror=(e)=>{
-    sambungRecRunning=false;
-    if(e.error==='not-allowed'){showToast('❌ Izinkan mikrofon');stopSambungNew();}
-    else if(e.error==='no-speech'){
-      setDotSambung('rec','Tidak terdengar — coba lagi...');
-      if(sambungActive&&sambungWaitingForUser){setTimeout(()=>{if(sambungActive&&sambungWaitingForUser)startSambungRecNew();},300);}
+
+  sambungRec.onerror = (e) => {
+    sambungRecRunning = false;
+    if (e.error === 'not-allowed') { showToast('❌ Izinkan mikrofon'); stopSambungMode(); }
+    else if (e.error === 'no-speech') {
+      setDotSambung('rec', 'Tidak terdengar — coba lagi...');
+      if (sambungActive && sambungWaitingForUser) setTimeout(() => { if (sambungActive && sambungWaitingForUser) startSambungRec(); }, 300);
     }
   };
-  try{sambungRec.start();sambungRecRunning=true;document.getElementById('sambungMicBtn').classList.add('live');}catch(e){}
+
+  try {
+    sambungRec.start();
+    sambungRecRunning = true;
+    document.getElementById('sambungMicBtn').classList.add('live');
+  } catch(e) { setDotSambung('warn', '❌ Gagal mulai mic'); }
 }
 
-function stopSambungRecNew(){
-  if(sambungRec&&sambungRecRunning){try{sambungRec.stop();}catch(e){}}
-  sambungRecRunning=false;clearTimeout(sambungSilenceTimeout);
+function stopSambungRec() {
+  if (sambungRec && sambungRecRunning) { try { sambungRec.stop(); } catch(e) {} }
+  sambungRecRunning = false;
+  clearTimeout(sambungSilenceTimeout);
+  sambungSilenceTimeout = null;
   document.getElementById('sambungMicBtn').classList.remove('live');
 }
 
-function toggleSambungRec(){
-  if(!sambungWaitingForUser)return;
-  if(sambungRecRunning){stopSambungRecNew();processSambungNew();}
-  else{startSambungRecNew();}
-}
-
-function stopSambungNew(){
-  sambungActive=false;sambungWaitingForUser=false;
-  stopSambungRecNew();
-  if(sambungCurrentAudio){sambungCurrentAudio.pause();sambungCurrentAudio=null;}
-  const g=id=>document.getElementById(id);
-  if(g('sambung-prompt-card'))g('sambung-prompt-card').style.display='none';
-  if(g('sambung-controls'))g('sambung-controls').style.display='none';
-  if(g('sambung-start-btn')){g('sambung-start-btn').style.display='flex';g('sambung-start-btn').disabled=false;g('sambung-start-btn').textContent='Mulai Sambung Ayat';}
-  if(g('sambung-surah-row'))g('sambung-surah-row').style.display='block';
-  if(g('sambung-result-ar'))g('sambung-result-ar').textContent='—';
-  if(g('sambung-countdown'))g('sambung-countdown').style.display='none';
-  if(g('sambung-next-btn'))g('sambung-next-btn').style.display='none';
-  if(g('sambung-hint-box'))g('sambung-hint-box').style.display='none';
-  setDotSambung('','Selesai');
-}
-function stopSambung(){stopSambungNew();}
-
-function processSambungNew(){
+function processSambungBuffer() {
   clearTimeout(sambungSilenceTimeout);
-  sambungSilenceTimeout=null; // FIX: clear reference supaya onend tidak restart
-  if(!sambungWaitingForUser)return; // FIX: guard double-call
-  stopSambungRecNew();sambungWaitingForUser=false;
-  if(!sambungActive)return;
-  const spokenRaw=sambungBuffer.join(' ').trim();sambungBuffer=[];
-  if(!spokenRaw){setDotSambung('warn','⚠️ Tidak terdengar — coba lagi');sambungWaitingForUser=true;startSambungRecNew();return;}
+  sambungSilenceTimeout = null;
+  if (!sambungWaitingForUser) return; // guard double-call
+  stopSambungRec();
+  sambungWaitingForUser = false;
+  if (!sambungActive) return;
 
-  const data=SURAHS[sambungTargetSurah];
-  const targetAyah=data?.ayahs.find(a=>a.n===sambungTargetAyahN);
-  if(!targetAyah)return;
+  const spokenRaw = sambungBuffer.join(' ').trim();
+  sambungBuffer = [];
 
-  const result=validateSambung(spokenRaw,targetAyah.words);
-  const resultEl=document.getElementById('sambung-result-ar');
-  resultEl.textContent=spokenRaw;
-
-  if(result.ok){
-    sambungScoreOk++;
-    document.getElementById('sambung-score-ok').textContent=sambungScoreOk;
-    resultEl.className='sambung-result-ar correct';
-    setDotSambung('ok','\u2705 Masyaa Allah! '+result.detail);
-    playCorrectSound();
-    // Show "Lanjut" button — no auto-next
-    document.getElementById('sambung-next-btn').style.display='flex';
-  } else {
-    sambungScoreErr++;
-    document.getElementById('sambung-score-err').textContent=sambungScoreErr;
-    resultEl.className='sambung-result-ar wrong';
-    // Show correct answer below
-    resultEl.textContent=spokenRaw+'\n\nJawaban: '+targetAyah.words.join(' ');
-    setDotSambung('warn','\u274C Kurang tepat — '+result.detail);
-    playWrongSound();
-    setTimeout(()=>{if(!sambungActive)return;sambungWaitingForUser=true;setDotSambung('rec','Coba lagi...');startSambungRecNew();},2500);
+  if (!spokenRaw) {
+    setDotSambung('warn', '⚠️ Tidak ada bacaan terdeteksi');
+    sambungWaitingForUser = true;
+    startSambungRec();
+    return;
   }
+
+  const data = SURAHS[sambungTargetSurah];
+  const targetAyah = data?.ayahs.find(a => a.n === sambungTargetAyahN);
+  if (!targetAyah) return;
+
+  const result = validateSambung(spokenRaw, targetAyah.words);
+  showSambungResult(result, targetAyah.words);
 }
 
-function validateSambung(spokenRaw,refWords){
-  const spokenTokens=spokenRaw.trim().split(/\s+/).filter(Boolean);
-  if(!spokenTokens.length)return{ok:false,score:0,detail:'Tidak ada bacaan'};
-  const WORD_THRESHOLD=0.58,BIGRAM_THRESHOLD=0.62;
-  const refNorms=refWords.map(w=>normalizeArabic(w));
-  let bestScore=0,bestMatched=0;
-  const maxStartOffset=Math.min(3,spokenTokens.length-1);
-  for(let startOffset=0;startOffset<=maxStartOffset;startOffset++){
-    let matched=0,si=startOffset;
-    for(let wi=0;wi<refNorms.length&&si<spokenTokens.length;wi++){
-      if(wi+1<refNorms.length){
-        const bg=refNorms[wi]+refNorms[wi+1];
-        const bgScores=[simNorm(normalizeArabic(spokenTokens[si]),bg),...spokenCandidates(spokenTokens[si]).map(c=>simNorm(c,bg))];
-        if(Math.max(...bgScores)>=BIGRAM_THRESHOLD){matched+=2;si++;wi++;continue;}
+function validateSambung(spokenRaw, refWords) {
+  const spokenTokens = spokenRaw.trim().split(/\s+/).filter(Boolean);
+  if (!spokenTokens.length) return { ok: false, score: 0, detail: 'Tidak ada bacaan' };
+
+  const WORD_THRESHOLD = 0.58;
+  const BIGRAM_THRESHOLD = 0.62;
+  const refNorms = refWords.map(w => normalizeArabic(w));
+
+  let bestScore = 0, bestMatched = 0;
+  const maxStartOffset = Math.min(3, spokenTokens.length - 1);
+
+  for (let startOffset = 0; startOffset <= maxStartOffset; startOffset++) {
+    let matched = 0, si = startOffset;
+    for (let wi = 0; wi < refNorms.length && si < spokenTokens.length; wi++) {
+      if (wi + 1 < refNorms.length) {
+        const bg = refNorms[wi] + refNorms[wi + 1];
+        const bgScores = [simNorm(normalizeArabic(spokenTokens[si]), bg), ...spokenCandidates(spokenTokens[si]).map(c => simNorm(c, bg))];
+        if (Math.max(...bgScores) >= BIGRAM_THRESHOLD) { matched += 2; si++; wi++; continue; }
       }
-      const ws=wordSim(spokenTokens[si],refNorms[wi]);
-      if(ws>=WORD_THRESHOLD){matched++;si++;}
-      else{
-        if(wi+1<refNorms.length){const wsN=wordSim(spokenTokens[si],refNorms[wi+1]);if(wsN>=WORD_THRESHOLD){matched+=1;wi++;matched++;si++;continue;}}
-        if(si+1<spokenTokens.length){const wsS=wordSim(spokenTokens[si+1],refNorms[wi]);if(wsS>=WORD_THRESHOLD){matched++;si+=2;continue;}}
-        if(matched>0)continue;break;
+      const ws = wordSim(spokenTokens[si], refNorms[wi]);
+      if (ws >= WORD_THRESHOLD) { matched++; si++; }
+      else {
+        if (wi + 1 < refNorms.length) { const wsN = wordSim(spokenTokens[si], refNorms[wi+1]); if (wsN >= WORD_THRESHOLD) { matched += 1; wi++; matched++; si++; continue; } }
+        if (si + 1 < spokenTokens.length) { const wsS = wordSim(spokenTokens[si+1], refNorms[wi]); if (wsS >= WORD_THRESHOLD) { matched++; si += 2; continue; } }
+        if (matched > 0) continue; break;
       }
     }
-    const score=matched/refNorms.length;
-    if(score>bestScore){bestScore=score;bestMatched=matched;}
+    const score = matched / refNorms.length;
+    if (score > bestScore) { bestScore = score; bestMatched = matched; }
   }
-  const minPct=refWords.length<=2?0.80:refWords.length<=4?0.65:refWords.length<=7?0.50:0.40;
-  return{ok:bestScore>=minPct,score:bestScore,matched:bestMatched,total:refWords.length,detail:`${bestMatched}/${refWords.length} kata cocok`};
+
+  const minPct = refWords.length <= 2 ? 0.80 : refWords.length <= 4 ? 0.65 : refWords.length <= 7 ? 0.50 : 0.40;
+  return { ok: bestScore >= minPct, score: bestScore, matched: bestMatched, total: refWords.length, detail: `${bestMatched}/${refWords.length} kata cocok` };
 }
 
-function setDotSambung(state,text){
-  const dot=document.getElementById('sambung-dot');
-  const txt=document.getElementById('sambung-status-text');
-  dot.className='status-dot'+(state==='rec'?' rec':state==='ok'?' ok':'');
-  txt.textContent=text;
+function showSambungResult(result, refWords) {
+  const resultEl = document.getElementById('sambung-result-ar');
+
+  if (result.ok) {
+    sambungScoreOk++;
+    document.getElementById('sambung-score-ok').textContent = sambungScoreOk;
+    if (resultEl) { resultEl.textContent = refWords.join(' '); resultEl.className = 'sambung-result-ar correct'; }
+    setDotSambung('ok', '✅ Masyaa Allah! ' + result.detail);
+    playCorrectSound();
+    startSambungCountdown(3);
+  } else {
+    sambungScoreErr++;
+    document.getElementById('sambung-score-err').textContent = sambungScoreErr;
+    if (resultEl) { resultEl.textContent = 'Jawaban: ' + refWords.join(' '); resultEl.className = 'sambung-result-ar wrong'; }
+    setDotSambung('warn', '❌ Kurang tepat — ' + result.detail);
+    playWrongSound();
+    setTimeout(() => {
+      if (!sambungActive) return;
+      sambungWaitingForUser = true;
+      setDotSambung('rec', 'Coba lagi...');
+      startSambungRec();
+    }, 1800);
+  }
 }
 
-function startSambungCountdownNew(seconds){ /* disabled — manual next */ }
-function cancelSambungCountdown(){ clearInterval(sambungCountdownTimer); }
-function nextSambung(){if(sambungActive)nextSambungNew();}
+function startSambungCountdown(seconds) {
+  clearTimeout(sambungCountdownTimer);
+  const nextBtn = document.getElementById('sambung-next-btn');
+  if (nextBtn) nextBtn.style.display = 'flex';
+  setDotSambung('ok', `✅ Lanjut dalam ${seconds}...`);
+  let remaining = seconds;
+  function tick() {
+    remaining--;
+    if (remaining <= 0) { nextSambung(); }
+    else { setDotSambung('ok', `✅ Lanjut dalam ${remaining}...`); sambungCountdownTimer = setTimeout(tick, 1000); }
+  }
+  sambungCountdownTimer = setTimeout(tick, 1000);
+}
 
-function showSambungHint(){
-  if(!sambungActive)return;
-  const data=SURAHS[sambungTargetSurah];
-  const targetAyah=data?.ayahs.find(a=>a.n===sambungTargetAyahN);
-  if(!targetAyah||!targetAyah.words.length)return;
-  const hintWords=targetAyah.words.slice(0,2).join(' ');
-  const box=document.getElementById('sambung-hint-box');
-  const txt=document.getElementById('sambung-hint-text');
-  txt.textContent=hintWords+'...';
-  box.style.display=box.style.display==='none'?'block':'none';
+function cancelSambungCountdown() { clearTimeout(sambungCountdownTimer); }
+
+function stopSambungMode() {
+  sambungActive = false; sambungWaitingForUser = false;
+  stopSambungRec();
+  if (sambungCurrentAudio) { sambungCurrentAudio.pause(); sambungCurrentAudio = null; }
+  const g = id => document.getElementById(id);
+  if (g('sambung-prompt-card')) g('sambung-prompt-card').style.display = 'none';
+  if (g('sambung-controls')) g('sambung-controls').style.display = 'none';
+  if (g('sambung-start-btn')) { g('sambung-start-btn').style.display = 'flex'; g('sambung-start-btn').disabled = false; g('sambung-start-btn').textContent = 'Mulai Sambung Ayat'; }
+  if (g('sambung-surah-row')) g('sambung-surah-row').style.display = 'block';
+  if (g('sambung-result-ar')) g('sambung-result-ar').textContent = '—';
+  if (g('sambung-next-btn')) g('sambung-next-btn').style.display = 'none';
+  if (g('sambung-hint-box')) g('sambung-hint-box').style.display = 'none';
+  setDotSambung('', 'Selesai');
+}
+function stopSambung() { stopSambungMode(); }
+function stopSambungNew() { stopSambungMode(); }
+function nextSambungNew() { nextSambung(); }
+
+function showSambungHint() {
+  if (!sambungActive) return;
+  const data = SURAHS[sambungTargetSurah];
+  const targetAyah = data?.ayahs.find(a => a.n === sambungTargetAyahN);
+  if (!targetAyah || !targetAyah.words.length) return;
+  const hintWords = targetAyah.words.slice(0, 2).join(' ');
+  const box = document.getElementById('sambung-hint-box');
+  const txt = document.getElementById('sambung-hint-text');
+  if (txt) txt.textContent = hintWords + '...';
+  if (box) box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+function setDotSambung(state, text) {
+  const dot = document.getElementById('sambung-dot');
+  const txt = document.getElementById('sambung-status-text');
+  if (!dot || !txt) return;
+  dot.className = 'status-dot' + (state === 'rec' ? ' rec' : state === 'ok' ? ' ok' : '');
+  txt.textContent = text;
 }
 
 
-
-// Aliases to fix naming inconsistency
-function stopSambungRec() { stopSambungRecNew(); }
-function startSambungRec() { startSambungRecNew(); }
 
 window.addEventListener('DOMContentLoaded', async () => {
   // Populate all selectors
