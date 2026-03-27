@@ -742,9 +742,11 @@ body {
 }
 .mic-btn:hover { background: var(--accent-h); transform: scale(1.05); }
 .mic-btn.live { background: var(--err); box-shadow: 0 4px 14px rgba(217,79,79,0.3); animation: rec-pulse 1.5s infinite; }
+.mic-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
 
 .controls-row { display: flex; gap: 8px; align-items: center; }
-.controls-row .btn-icon {
+.controls-row .btn-icon,
+.btn-icon {
   flex: 1; padding: 10px;
   background: var(--surface2); border: 1px solid var(--border);
   border-radius: 10px; color: var(--muted);
@@ -753,7 +755,8 @@ body {
   transition: all 0.15s;
   display: flex; align-items: center; justify-content: center; gap: 5px;
 }
-.controls-row .btn-icon:hover { background: var(--accent-soft); color: var(--accent); border-color: rgba(45,155,111,0.2); }
+.controls-row .btn-icon:hover,
+.btn-icon:hover { background: var(--accent-soft); color: var(--accent); border-color: rgba(45,155,111,0.2); }
 
 /* Retry banner */
 .retry-banner {
@@ -816,25 +819,13 @@ body {
   border-radius: 20px; padding: 20px;
 }
 .audio-now-playing {
-  text-align: center; margin-bottom: 20px;
+  text-align: center; margin-bottom: 16px;
   font-family: 'Amiri', serif;
   font-size: 28px; direction: rtl;
   color: var(--accent-dark); line-height: 2;
 }
-.audio-play-btn {
-  width: 64px; height: 64px;
-  border-radius: 50%;
-  background: var(--accent); color: #fff;
-  border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 16px;
-  box-shadow: 0 6px 20px rgba(45,155,111,0.3);
-  transition: all 0.2s;
-}
-.audio-play-btn:hover { transform: scale(1.05); background: var(--accent-h); }
-.audio-play-btn.playing { background: var(--err); box-shadow: 0 6px 20px rgba(217,79,79,0.3); }
-.audio-status { text-align: center; font-size: 13px; color: var(--muted); margin-bottom: 16px; min-height: 18px; }
-.audio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.audio-status { text-align: center; font-size: 12px; color: var(--muted); margin-bottom: 16px; min-height: 16px; }
+.audio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
 .audio-field label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); font-family: var(--font-mono); display: block; margin-bottom: 6px; }
 
 /* ══════════════════════════════════════════
@@ -858,15 +849,15 @@ body {
 .sambung-surah-info { font-size: 12px; color: var(--muted); font-weight: 600; }
 .sambung-result-ar {
   font-family: var(--font-ar);
-  font-size: clamp(20px, 5vw, 28px);
+  font-size: 18px;
   direction: rtl; text-align: right;
-  min-height: 50px; line-height: 2.2;
-  padding: 12px; border-radius: 10px;
+  line-height: 1.8;
+  padding: 8px 12px; border-radius: 8px;
   background: var(--surface2);
-  color: var(--text);
+  color: var(--muted2);
 }
-.sambung-result-ar.correct { color: var(--ok); background: var(--ok-soft); }
-.sambung-result-ar.wrong { color: var(--err); background: var(--err-soft); }
+.sambung-result-ar.correct { color: #1A6640; background: #D6F0E0; border: 1px solid rgba(45,155,111,0.3); }
+.sambung-result-ar.wrong   { color: #8B1A1A; background: #FDDEDE; border: 1px solid rgba(217,79,79,0.3); }
 
 .sambung-controls {
   background: var(--surface); border-radius: 16px;
@@ -892,6 +883,27 @@ body {
 }
 .sambung-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 .sambung-chip.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.sambung-range-row {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 8px 10px;
+}
+.sambung-range-name {
+  font-size: 12px; font-weight: 700; color: var(--text);
+  flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sambung-range-sep { font-size: 11px; color: var(--muted2); flex-shrink: 0; }
+.sambung-range-input {
+  width: 52px; padding: 4px 6px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text);
+  font-family: var(--font-mono); font-size: 12px; font-weight: 600;
+  text-align: center; outline: none;
+  -moz-appearance: textfield;
+}
+.sambung-range-input::-webkit-inner-spin-button { opacity: 0; }
+.sambung-range-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
 
 /* ══════════════════════════════════════════
    AUTH MODAL
@@ -1218,12 +1230,6 @@ body {
           <div class="rec-sub">Pilih surat dan ayat yang ingin kamu dengarkan berulang</div>
         </div>
 
-        <div class="audio-now-playing" id="audioNowPlaying" style="display:none;min-height:60px;align-items:center;justify-content:center;font-size:14px;color:var(--muted)"></div>
-        <button class="audio-play-btn" id="audioPlayBtn" onclick="toggleAudioPlayer()">
-          <svg id="audioPlayIcon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        </button>
-        <div class="audio-status" id="audioStatus">Siap memutar</div>
-
         <div>
           <label class="field-label">Pilih Surah</label>
           <select class="select-input" id="audioSurahSel" onchange="syncAudioSurah()" style="margin-bottom:12px"></select>
@@ -1238,7 +1244,7 @@ body {
             <input class="num-input" type="number" id="audioEndAyah" value="5" min="1">
           </div>
           <div class="audio-field">
-            <label>Ulang (kali)</label>
+            <label>Jumlah Pengulangan (Kali)</label>
             <input class="num-input" type="number" id="audioRepeatCount" value="3" min="1" max="99">
           </div>
           <div class="audio-field">
@@ -1246,6 +1252,12 @@ body {
             <input class="num-input" type="number" id="audioPause" value="0" min="0" max="10" step="0.5">
           </div>
         </div>
+
+        <div class="audio-status" id="audioStatus" style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:12px">Siap memutar</div>
+        <button class="btn-primary" id="audioPlayBtn" onclick="toggleAudioPlayer()">
+          <svg id="audioPlayIcon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span id="audioPlayLabel">Putar Audio</span>
+        </button>
       </div>
     </div>
   </div>
@@ -1267,6 +1279,9 @@ body {
           <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:8px">Pilih Surah <span style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--muted2)">(bisa pilih lebih dari 1)</span></div>
           <input type="text" id="sambung-surah-search" placeholder="Cari nama surah..." style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:var(--font);font-size:13px;margin-bottom:8px;outline:none" oninput="renderSambungSurahChips()">
           <div id="sambung-surah-chips" style="display:flex;flex-wrap:wrap;gap:6px;max-height:180px;overflow-y:auto;padding:2px"></div>
+
+          <!-- Range ayat per surah yang dipilih -->
+          <div id="sambung-ayat-ranges" style="display:none;margin-top:12px;display:flex;flex-direction:column;gap:8px"></div>
         </div>
 
         <!-- Pilih Juz (hidden by default) -->
@@ -1286,57 +1301,84 @@ body {
 
       <!-- Prompt -->
       <div class="sambung-prompt-card" id="sambung-prompt-card" style="display:none">
-        <div class="sambung-lbl">🔊 Sistem akan membaca — sambung ayatnya!</div>
+        <!-- Header: judul kiri + 2 button kanan -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px">
+          <div>
+            <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:2px">Sambung Ayat</div>
+            <div class="sambung-surah-info" id="sambung-surah-info">—</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            <button class="btn-icon" onclick="replaySambungAudio()" style="padding:7px 10px;font-size:11px;flex:none">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+              Ulang Audio
+            </button>
+            <button class="btn-icon" onclick="stopSambungMode()" style="padding:7px 10px;font-size:11px;flex:none">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Atur Ulang
+            </button>
+          </div>
+        </div>
         <div class="sambung-prompt-ar" id="sambung-prompt-ar">—</div>
-        <div class="sambung-surah-info" id="sambung-surah-info">—</div>
       </div>
 
-      <!-- Controls -->
+      <!-- Controls (jawab section) -->
       <div class="sambung-controls" id="sambung-controls" style="display:none">
-        <div class="sambung-status">
-          <div class="status-dot" id="sambung-dot"></div>
-          <span class="status-text" id="sambung-status-text">Siap</span>
-        </div>
-        <div class="sambung-score">
-          <span>Benar: <span class="score-ok" id="sambung-score-ok">0</span></span>
-          <span>Salah: <span class="score-err" id="sambung-score-err">0</span></span>
-        </div>
-        <!-- Tertangkap mic box -->
-        <div id="sambung-captured-row" style="display:none;background:rgba(45,155,111,0.06);border:1px solid rgba(45,155,111,0.15);border-radius:8px;padding:6px 10px;margin-bottom:8px">
-          <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);display:block;margin-bottom:2px">Tertangkap mic:</span>
-          <span id="sambung-captured-ar" style="font-family:'UthmanicHafs','Amiri',serif;font-size:20px;direction:rtl;color:var(--accent-dark);display:block;min-height:26px;text-align:right">—</span>
-        </div>
-        <div class="sambung-result-ar" id="sambung-result-ar" style="margin-bottom:8px;white-space:pre-line">—</div>
-        <!-- Hint box -->
-        <div id="sambung-countdown" style="display:none;font-size:11px;color:var(--muted);text-align:center;padding:4px;font-family:var(--font-mono)"></div>
-        <div id="sambung-hint-box" style="display:none;background:rgba(45,155,111,0.08);border:1px solid rgba(45,155,111,0.2);border-radius:10px;padding:10px 14px;margin-bottom:8px;text-align:right">
-          <div style="font-size:10px;color:var(--muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Hint — 2 kata pertama</div>
-          <div id="sambung-hint-text" style="font-family:'UthmanicHafs','Amiri',serif;font-size:26px;direction:rtl;color:var(--accent-dark)">—</div>
+
+        <!-- Judul + Mic + Status -->
+        <div style="text-align:center;margin-bottom:10px">
+          <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:12px">Yuk Sambung Ayat Selanjutnya</div>
+          <button class="mic-btn" id="sambungMicBtn" onclick="toggleSambungRec()" style="width:64px;height:64px;margin:0 auto 10px">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+          </button>
+          <div style="font-size:12px;color:var(--muted);font-weight:500;margin-bottom:0" id="sambung-status-text">Siap</div>
+          <div id="sambung-dot" style="display:none"></div>
         </div>
 
-        <!-- Next soal button (shown after correct) -->
-        <button class="btn-primary" id="sambung-next-btn" onclick="nextSambungNew()" style="display:none;margin-bottom:10px">
+        <!-- Next soal button — di bawah status -->
+        <button class="btn-primary" id="sambung-next-btn" onclick="nextSambungNew()" style="display:none;margin-bottom:12px">
           Soal Berikutnya →
         </button>
 
+        <!-- Captured mic box (abu murni) -->
+        <div id="sambung-captured-row" style="display:none;background:#F0F0F0;border:1px solid #E0E0E0;border-radius:8px;padding:8px 12px;text-align:right;margin-bottom:6px">
+          <span id="sambung-captured-ar" style="font-family:'UthmanicHafs','Amiri',serif;font-size:18px;direction:rtl;color:#999;display:block;line-height:1.8">—</span>
+        </div>
+
+        <!-- Hint box (oranye muda) -->
+        <div id="sambung-countdown" style="display:none;font-size:11px;color:var(--muted);text-align:center;padding:4px;font-family:var(--font-mono)"></div>
+        <div id="sambung-hint-box" style="display:none;background:#FFF5E6;border:1px solid rgba(224,123,42,0.25);border-radius:8px;padding:8px 12px;text-align:right;margin-bottom:6px">
+          <div style="font-size:9px;color:#C96A00;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Hint — 2 kata pertama</div>
+          <div id="sambung-hint-text" style="font-family:'UthmanicHafs','Amiri',serif;font-size:18px;direction:rtl;color:#9A4E00;line-height:1.8">—</div>
+        </div>
+
+        <!-- Result jawaban benar/salah — hidden sampai validasi -->
+        <div class="sambung-result-ar" id="sambung-result-ar" style="display:none;margin-bottom:8px;white-space:pre-line">—</div>
+
+        <!-- 2 action buttons: Hint + Lewati -->
         <div class="controls-row">
-          <button class="btn-icon" onclick="stopSambungNew()" style="flex:0.8">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-            Selesai
-          </button>
-          <button class="mic-btn" id="sambungMicBtn" onclick="toggleSambungRec()">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-          </button>
-          <button class="btn-icon" onclick="showSambungHint()" style="flex:0.8">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <button class="btn-icon" onclick="showSambungHint()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.6-1.4 4.8-3.5 6.1V17a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-1.9C6.4 13.8 5 11.6 5 9a7 7 0 0 1 7-7z"/></svg>
             Hint
           </button>
-        </div>
-        <div style="text-align:center;margin-top:8px">
-          <button class="btn-icon" onclick="replaySambungAudio()" style="width:100%;font-size:11px">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-            Ulang Audio
+          <button class="btn-icon" onclick="skipSambung()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><rect x="17" y="4" width="2.5" height="16" rx="1"/></svg>
+            Lewati
           </button>
+        </div>
+      </div>
+
+      <!-- Skor — card terpisah di bawah -->
+      <div class="card" id="sambung-score-card" style="display:none;padding:14px 16px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:10px">Skor Sesi</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="background:var(--ok-soft);border-radius:10px;padding:12px;text-align:center">
+            <div style="font-size:24px;font-weight:800;color:var(--ok)" id="sambung-score-ok">0</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Benar</div>
+          </div>
+          <div style="background:var(--err-soft);border-radius:10px;padding:12px;text-align:center">
+            <div style="font-size:24px;font-weight:800;color:var(--err)" id="sambung-score-err">0</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Salah</div>
+          </div>
         </div>
       </div>
 
@@ -1415,34 +1457,34 @@ let currentUser = null;
 // ════════════════════════════════════════════════════════════
 const SURAHS = {
   1: { name:"Al-Fatihah", num:1, bismillah:false, ayahs:[
-    {n:1,words:["بِسْمِ","ٱللَّهِ","ٱلرَّحْمَٰنِ","ٱلرَّحِيمِ"]},
-    {n:2,words:["ٱلْحَمْدُ","لِلَّهِ","رَبِّ","ٱلْعَٰلَمِينَ"]},
-    {n:3,words:["ٱلرَّحْمَٰنِ","ٱلرَّحِيمِ"]},
-    {n:4,words:["مَٰلِكِ","يَوْمِ","ٱلدِّينِ"]},
+    {n:1,words:["بِسْمِ","اللَّهِ","الرَّحْمَٰنِ","الرَّحِيمِ"]},
+    {n:2,words:["الْحَمْدُ","لِلَّهِ","رَبِّ","الْعَالَمِينَ"]},
+    {n:3,words:["الرَّحْمَٰنِ","الرَّحِيمِ"]},
+    {n:4,words:["مَالِكِ","يَوْمِ","الدِّينِ"]},
     {n:5,words:["إِيَّاكَ","نَعْبُدُ","وَإِيَّاكَ","نَسْتَعِينُ"]},
-    {n:6,words:["ٱهْدِنَا","ٱلصِّرَٰطَ","ٱلْمُسْتَقِيمَ"]},
-    {n:7,words:["صِرَٰطَ","ٱلَّذِينَ","أَنْعَمْتَ","عَلَيْهِمْ","غَيْرِ","ٱلْمَغْضُوبِ","عَلَيْهِمْ","وَلَا","ٱلضَّآلِّينَ"]}
+    {n:6,words:["اهْدِنَا","الصِّرَاطَ","الْمُسْتَقِيمَ"]},
+    {n:7,words:["صِرَاطَ","الَّذِينَ","أَنْعَمْتَ","عَلَيْهِمْ","غَيْرِ","الْمَغْضُوبِ","عَلَيْهِمْ","وَلَا","الضَّالِّينَ"]}
   ]},
   112: { name:"Al-Ikhlas", num:112, bismillah:true, ayahs:[
-    {n:1,words:["قُلْ","هُوَ","ٱللَّهُ","أَحَدٌ"]},
-    {n:2,words:["ٱللَّهُ","ٱلصَّمَدُ"]},
+    {n:1,words:["قُلْ","هُوَ","اللَّهُ","أَحَدٌ"]},
+    {n:2,words:["اللَّهُ","الصَّمَدُ"]},
     {n:3,words:["لَمْ","يَلِدْ","وَلَمْ","يُولَدْ"]},
-    {n:4,words:["وَلَمْ","يَكُن","لَّهُۥ","كُفُوًا","أَحَدٌۢ"]}
+    {n:4,words:["وَلَمْ","يَكُن","لَّهُ","كُفُوًا","أَحَدٌ"]}
   ]},
   113: { name:"Al-Falaq", num:113, bismillah:true, ayahs:[
-    {n:1,words:["قُلْ","أَعُوذُ","بِرَبِّ","ٱلْفَلَقِ"]},
+    {n:1,words:["قُلْ","أَعُوذُ","بِرَبِّ","الْفَلَقِ"]},
     {n:2,words:["مِن","شَرِّ","مَا","خَلَقَ"]},
     {n:3,words:["وَمِن","شَرِّ","غَاسِقٍ","إِذَا","وَقَبَ"]},
-    {n:4,words:["وَمِن","شَرِّ","ٱلنَّفَّٰثَٰتِ","فِى","ٱلْعُقَدِ"]},
+    {n:4,words:["وَمِن","شَرِّ","النَّفَّاثَاتِ","فِي","الْعُقَدِ"]},
     {n:5,words:["وَمِن","شَرِّ","حَاسِدٍ","إِذَا","حَسَدَ"]}
   ]},
   114: { name:"An-Nas", num:114, bismillah:true, ayahs:[
-    {n:1,words:["قُلْ","أَعُوذُ","بِرَبِّ","ٱلنَّاسِ"]},
-    {n:2,words:["مَلِكِ","ٱلنَّاسِ"]},
-    {n:3,words:["إِلَٰهِ","ٱلنَّاسِ"]},
-    {n:4,words:["مِن","شَرِّ","ٱلْوَسْوَاسِ","ٱلْخَنَّاسِ"]},
-    {n:5,words:["ٱلَّذِى","يُوَسْوِسُ","فِى","صُدُورِ","ٱلنَّاسِ"]},
-    {n:6,words:["مِنَ","ٱلْجِنَّةِ","وَٱلنَّاسِ"]}
+    {n:1,words:["قُلْ","أَعُوذُ","بِرَبِّ","النَّاسِ"]},
+    {n:2,words:["مَلِكِ","النَّاسِ"]},
+    {n:3,words:["إِلَٰهِ","النَّاسِ"]},
+    {n:4,words:["مِن","شَرِّ","الْوَسْوَاسِ","الْخَنَّاسِ"]},
+    {n:5,words:["الَّذِي","يُوَسْوِسُ","فِي","صُدُورِ","النَّاسِ"]},
+    {n:6,words:["مِنَ","الْجِنَّةِ","وَالنَّاسِ"]}
   ]}
 };
 
@@ -1566,10 +1608,10 @@ const JUZ_SURAHS = {
 
 const dynamicSurahCache = {};
 const DAILY_QUOTES = [
-  {ar:"وَرَتِّلِ ٱلْقُرْءَانَ تَرْتِيلًا", tr:"Dan bacalah Al-Qur'an itu dengan perlahan-lahan.", src:"QS. Al-Muzzammil: 4"},
-  {ar:"إِنَّ هَٰذَا ٱلْقُرْءَانَ يَهْدِى لِلَّتِى هِىَ أَقْوَمُ", tr:"Sesungguhnya Al-Qur'an ini memberikan petunjuk kepada (jalan) yang paling lurus.", src:"QS. Al-Isra': 9"},
-  {ar:"خَيْرُكُمْ مَنْ تَعَلَّمَ ٱلْقُرْءَانَ وَعَلَّمَهُۥ", tr:"Sebaik-baik kalian adalah yang belajar Al-Qur'an dan mengajarkannya.", src:"HR. Bukhari"},
-  {ar:"وَلَقَدْ يَسَّرْنَا ٱلْقُرْءَانَ لِلذِّكْرِ", tr:"Dan sesungguhnya telah Kami mudahkan Al-Qur'an untuk pelajaran.", src:"QS. Al-Qamar: 17"}
+  {ar:"وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا", tr:"Dan bacalah Al-Qur'an itu dengan perlahan-lahan.", src:"QS. Al-Muzzammil: 4"},
+  {ar:"إِنَّ هَٰذَا الْقُرْآنَ يَهْدِي لِلَّتِي هِيَ أَقْوَمُ", tr:"Sesungguhnya Al-Qur'an ini memberikan petunjuk kepada (jalan) yang paling lurus.", src:"QS. Al-Isra: 9"},
+  {ar:"خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ", tr:"Sebaik-baik kalian adalah yang belajar Al-Qur'an dan mengajarkannya.", src:"HR. Bukhari"},
+  {ar:"وَلَقَدْ يَسَّرْنَا الْقُرْآنَ لِلذِّكْرِ", tr:"Dan sesungguhnya telah Kami mudahkan Al-Qur'an untuk pelajaran.", src:"QS. Al-Qamar: 17"}
 ];
 
 // ════════════════════════════════════════════════════════════
@@ -2272,9 +2314,6 @@ async function fetchSurahFromCDN(surahNum, meta) {
     SURAHS[surahNum] = dynamicSurahCache[surahNum];
     return dynamicSurahCache[surahNum];
   }
-  // Hanya strip karakter noise, BUKAN harakat dan tanda Uthmani penting
-  // U+06D6-U+06DC = tanda tilawah (sajdah, dll) — boleh di-strip untuk matching
-  // U+0670 superscript alif, U+0671 alif washl — JANGAN di-strip, bagian rasm
   const STRIP = /[\u0600-\u0605\u0616-\u061A\u06D6-\u06E4\u06E7-\u06E9\u0615\u0640]/g;
   function parseWords(text, n) {
     let words = text.trim().split(/\s+/).map(w => w.replace(STRIP,'').trim()).filter(w => w.length > 0);
@@ -2285,9 +2324,8 @@ async function fetchSurahFromCDN(surahNum, meta) {
     return words;
   }
   const urls = [
-    // Utamakan quran-uthmani dari alquran.cloud (teks paling akurat)
-    'https://api.alquran.cloud/v1/surah/' + surahNum + '/quran-uthmani',
     'https://cdn.jsdelivr.net/npm/quran-json@3.1.2/dist/chapters/' + surahNum + '.json',
+    'https://api.alquran.cloud/v1/surah/' + surahNum + '/quran-uthmani'
   ];
   for (const url of urls) {
     try {
@@ -2480,8 +2518,7 @@ function renderMushaf(surah){
   if(surah.bismillah&&surah.num!==1&&surah.num!==9){
     const bis=document.createElement('div');
     bis.className='bismillah';
-    // Bismillah rasm Uthmani yang benar
-    bis.textContent='بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ';
+    bis.textContent='\u0628\u0650\u0633\u0652\u0645\u0650 \u0627\u0644\u0644\u0651\u064e\u0647\u0650 \u0627\u0644\u0631\u0651\u064e\u062d\u0652\u0645\u064e\u0670\u0646\u0650 \u0627\u0644\u0631\u0651\u064e\u062d\u0650\u064a\u0645\u0650';
     body.appendChild(bis);
   }
   surah.ayahs.forEach((ayah,ayahIdx)=>{
@@ -2577,22 +2614,35 @@ function startSession(){
   sessionActive=true;transcriptBuffer=[];lastTranscriptTime=Date.now();sessionRunStart=cursor;
 
   window.srWarmingUp=true;
-  setTimeout(()=>{window.srWarmingUp=false;log('✅ Siap — mulai membaca');},500);
+  window._interimDisplayTimer=null;
+  setTimeout(()=>{window.srWarmingUp=false;log('✅ Siap — mulai membaca');},_SR_WARMUP_MS);
   try{rec.start();}catch(e){}
   document.getElementById('btnMic').classList.add('live');
 }
 function stopSession(){
   sessionActive=false;
+  clearTimeout(window._hafaFeedbackTimer); window._hafaFeedbackTimer=null;
+  clearTimeout(window._interimDisplayTimer); window._interimDisplayTimer=null;
   if(rec){try{rec.stop();}catch(e){}}
   recRunning=false;setMicOff();
 }
 function setupRec(){if(rec)return true;rec=createRec();return!!rec;}
+// Deteksi mobile sekali saja — HP butuh debounce lebih panjang karena SR lebih lambat
+const _isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+const _SR_FINAL_DEBOUNCE  = _isMobile ? 80  : 20;  // ms tunggu sebelum proses final
+const _SR_INTERIM_DELAY   = _isMobile ? 60  : 0;   // ms tunggu sebelum terapkan interim
+const _SR_RESTART_DELAY   = _isMobile ? 300 : 200; // ms tunggu sebelum restart SR
+const _SR_WARMUP_MS       = _isMobile ? 600 : 500; // ms warming up saat pertama start
+
 function createRec(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR)return null;
   const r=new SR();
-  r.lang='ar-SA';r.continuous=true;r.interimResults=true;r.maxAlternatives=3;r._lastFinalIdx=-1;
+  r.lang='ar-SA';r.continuous=true;r.interimResults=true;r.maxAlternatives=3;
+  r._lastFinalIdx=-1;
+
   r.onstart=()=>{recRunning=true;setDot('rec','Mendengarkan...');};
+
   r.onresult=(e)=>{
     if(!sessionActive)return;
     if(window.srWarmingUp)return;
@@ -2603,51 +2653,63 @@ function createRec(){
       if(res.isFinal){
         if(i<=r._lastFinalIdx)continue;
         r._lastFinalIdx=i;
-        // Ambil best alternative
         for(let a=0;a<Math.min(res.length,3);a++){
           const alt=res[a].transcript.trim();
           if(alt){newFinal+=alt+' ';break;}
         }
       } else {
-        const alt=res[0].transcript.trim();
-        if(alt) interim=alt;
+        // Hanya ambil interim jika belum ada final di iterasi yang sama
+        if(!newFinal){
+          const alt=res[0].transcript.trim();
+          if(alt) interim=alt;
+        }
       }
     }
 
-    // KARAOKE MODE: interim suara → langsung highlight kata di mushaf
-    if(interim && !newFinal){
-      if(cursor<allWords.length){
-        const w=allWords[cursor];
-        // Highlight kata yang sedang diucapkan (oranye pulse)
-        if(!['w correct','w wrong','w passed'].includes(w.el.className)){
-          w.el.className='w interim';
-          // Scroll smooth ke kata aktif
-          w.el.scrollIntoView({behavior:'smooth',block:'center'});
-        }
-      }
-      // Tampilkan interim di captured text bar
+    // === FINAL RESULT — prioritas utama ===
+    if(newFinal.trim()){
+      clearTimeout(window._hafaFeedbackTimer);
+      clearTimeout(window._interimDisplayTimer);
+      window._hafaFeedbackTimer=null;
+      clearInterimMark();
+
+      const clean=newFinal.trim();
       const ctRow=document.getElementById('capturedTextRow');
       const ctAr=document.getElementById('capturedTextAr');
-      if(ctRow&&ctAr){ctRow.style.display='block';ctAr.textContent=interim+' ⏳';ctAr.style.color='#B05A00';}
+      if(ctRow&&ctAr){ctRow.style.display='block';ctAr.textContent=clean;ctAr.style.color='var(--accent-dark)';}
+
+      // Desktop: 20ms (responsif), Mobile: 80ms (antisipasi event final ganda di HP)
+      window._hafaFeedbackTimer=setTimeout(()=>{
+        window._hafaFeedbackTimer=null;
+        if(!sessionActive)return;
+        const tokens=clean.split(/\s+/).filter(Boolean);
+        processTokensStream(tokens);
+      }, _SR_FINAL_DEBOUNCE);
       return;
     }
 
-    if(!newFinal.trim()) return;
-
-    // Tampilkan final text yang ditangkap mic
-    const ctRow=document.getElementById('capturedTextRow');
-    const ctAr=document.getElementById('capturedTextAr');
-    if(ctRow&&ctAr){ctRow.style.display='block';ctAr.textContent=newFinal.trim();ctAr.style.color='var(--accent-dark)';}
-
-    // Final result: clear interim highlight, proses setelah 20ms jeda
-    clearInterimMark();
-    const clean=newFinal.trim();
-    clearTimeout(window._hafaFeedbackTimer);
-    window._hafaFeedbackTimer=setTimeout(()=>{
-      const tokens=clean.split(/\s+/).filter(Boolean);
-      processTokensStream(tokens);
-    },20);
+    // === INTERIM RESULT — hanya jika tidak ada final pending ===
+    if(interim && !window._hafaFeedbackTimer){
+      clearTimeout(window._interimDisplayTimer);
+      const applyInterim=()=>{
+        if(!sessionActive||window._hafaFeedbackTimer)return;
+        if(cursor<allWords.length){
+          const w=allWords[cursor];
+          if(!['w correct','w wrong','w passed'].includes(w.el.className)){
+            w.el.className='w interim';
+            w.el.scrollIntoView({behavior:'smooth',block:'center'});
+          }
+        }
+        const ctRow=document.getElementById('capturedTextRow');
+        const ctAr=document.getElementById('capturedTextAr');
+        if(ctRow&&ctAr){ctRow.style.display='block';ctAr.textContent=interim+' ⏳';ctAr.style.color='#B05A00';}
+      };
+      // Desktop: langsung (0ms), Mobile: delay 60ms antisipasi race condition
+      if(_SR_INTERIM_DELAY===0) applyInterim();
+      else window._interimDisplayTimer=setTimeout(applyInterim, _SR_INTERIM_DELAY);
+    }
   };
+
   r.onerror=(e)=>{
     if(e.error==='not-allowed'){showToast('❌ Izinkan mikrofon');stopSession();}
     else if(e.error!=='no-speech'&&e.error!=='aborted'){log('⚠️ '+e.error);recRunning=false;rec=null;}
@@ -2656,10 +2718,11 @@ function createRec(){
     recRunning=false;
     if(!sessionActive){setMicOff();return;}
     rec=createRec();if(!rec)return;
-    setTimeout(()=>{if(sessionActive&&rec){try{rec.start();}catch(e){}}},200);
+    setTimeout(()=>{if(sessionActive&&rec){try{rec.start();}catch(e){}}}, _SR_RESTART_DELAY);
   };
   return r;
 }
+
 
 function clearInterimMark(){
   if(cursor<allWords.length){
@@ -2840,6 +2903,8 @@ function skipWrongWord(){
 function skipForward(){skipWrongWord();}
 function resetSession(){
   stopSession();cursor=0;correctCount=0;wrongCount=0;currentAyahIndex=0;
+  clearTimeout(window._hafaFeedbackTimer); window._hafaFeedbackTimer=null;
+  clearTimeout(window._interimDisplayTimer); window._interimDisplayTimer=null;
 
   allWords.forEach(w=>w.el.className='w idle');
   document.getElementById('retryBanner').classList.remove('show');
@@ -2903,18 +2968,17 @@ function startAudioPlayer(){
   const repeat=parseInt(document.getElementById('audioRepeatCount').value);
   const pause=parseFloat(document.getElementById('audioPause').value)*1000;
   audioPlaying=true;audioCurrentRepeat=0;audioCurrentAyah=start;
-  document.getElementById('audioPlayBtn').classList.add('playing');
+  const btn=document.getElementById('audioPlayBtn');
+  btn.style.background='var(--err)';btn.style.boxShadow='0 4px 12px rgba(217,79,79,0.3)';
   document.getElementById('audioPlayIcon').innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+  document.getElementById('audioPlayLabel').textContent='Stop';
   playNextAudio(start,end,repeat,pause);
 }
 function playNextAudio(start,end,totalRepeats,pause){
   if(!audioPlaying)return;
   if(audioCurrentAyah>end){audioCurrentRepeat++;if(audioCurrentRepeat>=totalRepeats){stopAudioPlayer();document.getElementById('audioStatus').textContent='✅ Selesai';return;}audioCurrentAyah=start;}
   const surah=SURAHS[audioCurrentSurah]||JUZ_SURAHS[audioCurrentSurah]||{name:'Surah'};
-  document.getElementById('audioStatus').textContent=`${surah.name} · Ayat ${audioCurrentAyah} · Ulang ${audioCurrentRepeat+1}/${totalRepeats}`;
-  const nowEl=document.getElementById('audioNowPlaying');
-  nowEl.textContent=`${surah.name} · ${audioCurrentAyah}`;
-  nowEl.style.display='flex';
+  document.getElementById('audioStatus').textContent=`${surah.name} · Ayat ${audioCurrentAyah} · Pengulangan ke- ${audioCurrentRepeat+1}/${totalRepeats}`;
   const audio=new Audio(getAudioUrl(audioCurrentSurah,audioCurrentAyah));
   audioCurrentEl=audio;
   audio.onended=()=>{if(!audioPlaying)return;audioCurrentAyah++;audioTimeoutId=setTimeout(()=>playNextAudio(start,end,totalRepeats,pause),pause);};
@@ -2924,13 +2988,12 @@ function playNextAudio(start,end,totalRepeats,pause){
 function stopAudioPlayer(){
   audioPlaying=false;
   clearTimeout(audioTimeoutId);
-  // Langsung stop audio yang sedang diputar tanpa tunggu selesai
   if(audioCurrentEl){audioCurrentEl.pause();audioCurrentEl.src='';audioCurrentEl=null;}
-  document.getElementById('audioPlayBtn').classList.remove('playing');
+  const btn=document.getElementById('audioPlayBtn');
+  btn.style.background='';btn.style.boxShadow='';
   document.getElementById('audioPlayIcon').innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';
+  document.getElementById('audioPlayLabel').textContent='Putar Audio';
   document.getElementById('audioStatus').textContent='Dihentikan';
-  const nowEl=document.getElementById('audioNowPlaying');
-  nowEl.style.display='none'; nowEl.textContent='';
 }
 
 // ════════════════════════════════════════════════════════════
@@ -2954,8 +3017,8 @@ let sambungQuestionQueue = [];
 let sambungRecentHistory = []; // history soal yang sudah ditanya (max 1/3 pool)
 const SAMBUNG_HISTORY_RATIO = 0.4; // hindari 40% soal terakhir
 
-let sambungSelectedJuz = new Set([30]);
-let sambungSelectedSurahs = new Set([112, 113, 114]); // default: 3 surah terakhir
+let sambungSelectedJuz = new Set();
+let sambungSelectedSurahs = new Set(); // tidak ada default — user pilih sendiri
 let sambungTabMode = 'surah'; // default Per Surah
 
 // Juz → surah range mapping
@@ -3016,6 +3079,9 @@ function sambungSwitchTab(tab) {
   updateSambungSummary();
 }
 
+// Map surahNum → {from, to} — user bisa override range ayat per surah
+const sambungSurahRangeOverrides = {};
+
 function renderSambungJuzChips() {
   const container = document.getElementById('sambung-juz-chips');
   if (!container) return;
@@ -3046,13 +3112,98 @@ function renderSambungSurahChips() {
       chip.className = 'sambung-chip' + (sambungSelectedSurahs.has(s.num) ? ' selected' : '');
       chip.textContent = s.num + '. ' + s.name;
       chip.onclick = () => {
-        if (sambungSelectedSurahs.has(s.num)) sambungSelectedSurahs.delete(s.num);
-        else sambungSelectedSurahs.add(s.num);
+        if (sambungSelectedSurahs.has(s.num)) {
+          sambungSelectedSurahs.delete(s.num);
+          delete sambungSurahRangeOverrides[s.num];
+        } else {
+          sambungSelectedSurahs.add(s.num);
+          // Auto-fill default range (1 sampai max ayat)
+          const meta = JUZ_SURAHS[s.num] || SURAHS[s.num];
+          const maxAyah = meta ? (meta.ayahs ? meta.ayahs.length : meta.ayahCount) : 1;
+          sambungSurahRangeOverrides[s.num] = { from: 1, to: maxAyah };
+        }
         renderSambungSurahChips();
+        renderSambungAyatRanges();
         updateSambungSummary();
       };
       container.appendChild(chip);
     });
+  renderSambungAyatRanges();
+}
+
+function renderSambungAyatRanges() {
+  const container = document.getElementById('sambung-ayat-ranges');
+  if (!container) return;
+  const selected = [...sambungSelectedSurahs].sort((a,b) => a-b);
+  if (selected.length === 0) { container.style.display = 'none'; return; }
+  container.style.display = 'flex';
+  container.innerHTML = '';
+
+  // Label header
+  const hdr = document.createElement('div');
+  hdr.style.cssText = 'font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:2px';
+  hdr.textContent = 'Range Ayat';
+  container.appendChild(hdr);
+
+  selected.forEach(num => {
+    const meta = JUZ_SURAHS[num] || SURAHS[num];
+    const maxAyah = meta ? (meta.ayahs ? meta.ayahs.length : meta.ayahCount) : 1;
+    const name = meta ? meta.name : 'Surah ' + num;
+
+    if (!sambungSurahRangeOverrides[num]) {
+      sambungSurahRangeOverrides[num] = { from: 1, to: maxAyah };
+    }
+    const ov = sambungSurahRangeOverrides[num];
+
+    const row = document.createElement('div');
+    row.className = 'sambung-range-row';
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'sambung-range-name';
+    nameEl.textContent = num + '. ' + name;
+
+    const fromInput = document.createElement('input');
+    fromInput.type = 'number'; fromInput.className = 'sambung-range-input';
+    fromInput.min = 1; fromInput.max = maxAyah; fromInput.value = ov.from;
+    fromInput.title = 'Dari ayat';
+    fromInput.oninput = () => {
+      let v = parseInt(fromInput.value) || 1;
+      v = Math.max(1, Math.min(v, maxAyah));
+      sambungSurahRangeOverrides[num].from = v;
+      if (sambungSurahRangeOverrides[num].to < v) {
+        sambungSurahRangeOverrides[num].to = v;
+        toInput.value = v;
+      }
+    };
+
+    const sep = document.createElement('span');
+    sep.className = 'sambung-range-sep'; sep.textContent = '–';
+
+    const toInput = document.createElement('input');
+    toInput.type = 'number'; toInput.className = 'sambung-range-input';
+    toInput.min = 1; toInput.max = maxAyah; toInput.value = ov.to;
+    toInput.title = 'Sampai ayat';
+    toInput.oninput = () => {
+      let v = parseInt(toInput.value) || maxAyah;
+      v = Math.max(1, Math.min(v, maxAyah));
+      sambungSurahRangeOverrides[num].to = v;
+      if (sambungSurahRangeOverrides[num].from > v) {
+        sambungSurahRangeOverrides[num].from = v;
+        fromInput.value = v;
+      }
+    };
+
+    const maxLbl = document.createElement('span');
+    maxLbl.style.cssText = 'font-size:10px;color:var(--muted2);font-family:var(--font-mono);flex-shrink:0';
+    maxLbl.textContent = '/' + maxAyah;
+
+    row.appendChild(nameEl);
+    row.appendChild(fromInput);
+    row.appendChild(sep);
+    row.appendChild(toInput);
+    row.appendChild(maxLbl);
+    container.appendChild(row);
+  });
 }
 
 function updateSambungSummary() {
@@ -3070,6 +3221,7 @@ function updateSambungSummary() {
 function initSambungPage() {
   renderSambungJuzChips();
   renderSambungSurahChips();
+  renderSambungAyatRanges();
   // Aktifkan tab Per Surah sebagai default
   sambungSwitchTab('surah');
   updateSambungSummary();
@@ -3097,7 +3249,8 @@ async function startSambungMode() {
       if (!surahsToLoad.includes(s)) surahsToLoad.push(s);
       const meta = JUZ_SURAHS[s] || SURAHS[s];
       const ayahCount = meta ? (meta.ayahs ? meta.ayahs.length : meta.ayahCount) : 1;
-      ranges.push({ surahNum: s, fromAyah: 1, toAyah: ayahCount });
+      const ov = sambungSurahRangeOverrides[s];
+      ranges.push({ surahNum: s, fromAyah: ov ? ov.from : 1, toAyah: ov ? ov.to : ayahCount });
     });
   }
 
@@ -3136,6 +3289,7 @@ async function startSambungMode() {
 
   document.getElementById('sambung-prompt-card').style.display = 'block';
   document.getElementById('sambung-controls').style.display = 'block';
+  document.getElementById('sambung-score-card').style.display = 'block';
   btn.style.display = 'none';
   document.getElementById('sambung-surah-row').style.display = 'none';
 
@@ -3158,7 +3312,7 @@ async function nextSambung() {
   sambungWaitingForUser = false;
 
   const resultEl = document.getElementById('sambung-result-ar');
-  if (resultEl) { resultEl.textContent = '—'; resultEl.className = 'sambung-result-ar'; }
+  if (resultEl) { resultEl.style.display = 'none'; resultEl.textContent = '—'; resultEl.className = 'sambung-result-ar'; }
   const nextBtn = document.getElementById('sambung-next-btn');
   if (nextBtn) nextBtn.style.display = 'none';
   const hintBox = document.getElementById('sambung-hint-box');
@@ -3167,9 +3321,8 @@ async function nextSambung() {
   // Reset captured text box setiap soal baru
   const capRow = document.getElementById('sambung-captured-row');
   const capAr  = document.getElementById('sambung-captured-ar');
-  if (capRow) capRow.style.display = 'none';
-  if (capAr)  { capAr.textContent = '—'; capAr.style.color = 'var(--accent-dark)'; }
-
+  if (capRow) capRow.style.display = 'block';
+  if (capAr)  { capAr.textContent = '—'; capAr.style.color = 'var(--muted2)'; }
   // KUNCI: reset buffer setiap soal baru
   sambungBuffer = [];
   clearTimeout(sambungSilenceTimeout);
@@ -3345,7 +3498,7 @@ function startSambungRec() {
       if (capRow && capAr) {
         capRow.style.display = 'block';
         capAr.textContent = interimText + ' ⏳';
-        capAr.style.color = '#B05A00';
+        capAr.style.color = 'var(--muted2)';
       }
     }
 
@@ -3356,7 +3509,7 @@ function startSambungRec() {
       if (capRow && capAr) {
         capRow.style.display = 'block';
         capAr.textContent = finalText.trim();
-        capAr.style.color = 'var(--accent-dark)';
+        capAr.style.color = 'var(--muted)';
       }
       clearTimeout(sambungSilenceTimeout);
       // Jeda 20ms sebelum proses feedback
@@ -3469,19 +3622,17 @@ function showSambungResult(result, refWords) {
   if (result.ok) {
     sambungScoreOk++;
     document.getElementById('sambung-score-ok').textContent = sambungScoreOk;
-    if (resultEl) { resultEl.textContent = refWords.join(' '); resultEl.className = 'sambung-result-ar correct'; }
+    if (resultEl) { resultEl.style.display = 'block'; resultEl.textContent = refWords.join(' '); resultEl.className = 'sambung-result-ar correct'; }
     setDotSambung('ok', '✅ Masyaa Allah! ' + result.detail);
     playCorrectSound();
-    // Tidak auto next — tampilkan tombol, user klik sendiri
     const nextBtn = document.getElementById('sambung-next-btn');
     if (nextBtn) nextBtn.style.display = 'flex';
   } else {
     sambungScoreErr++;
     document.getElementById('sambung-score-err').textContent = sambungScoreErr;
-    if (resultEl) { resultEl.textContent = 'Jawaban: ' + refWords.join(' '); resultEl.className = 'sambung-result-ar wrong'; }
+    if (resultEl) { resultEl.style.display = 'block'; resultEl.textContent = 'Jawaban: ' + refWords.join(' '); resultEl.className = 'sambung-result-ar wrong'; }
     setDotSambung('warn', '❌ Kurang tepat — ' + result.detail);
     playWrongSound();
-    // Tidak auto on mic — beri waktu user baca jawaban, lalu klik mic sendiri
     setTimeout(() => {
       if (!sambungActive) return;
       sambungWaitingForUser = true;
@@ -3513,19 +3664,21 @@ function stopSambungMode() {
   const g = id => document.getElementById(id);
   if (g('sambung-prompt-card')) g('sambung-prompt-card').style.display = 'none';
   if (g('sambung-controls')) g('sambung-controls').style.display = 'none';
+  if (g('sambung-score-card')) g('sambung-score-card').style.display = 'none';
   if (g('sambung-start-btn')) { g('sambung-start-btn').style.display = 'flex'; g('sambung-start-btn').disabled = false; g('sambung-start-btn').textContent = 'Mulai Sambung Ayat'; }
   if (g('sambung-surah-row')) g('sambung-surah-row').style.display = 'block';
-  if (g('sambung-result-ar')) g('sambung-result-ar').textContent = '—';
+  if (g('sambung-result-ar')) { g('sambung-result-ar').style.display = 'none'; g('sambung-result-ar').textContent = '—'; g('sambung-result-ar').className = 'sambung-result-ar'; }
   if (g('sambung-next-btn')) g('sambung-next-btn').style.display = 'none';
   if (g('sambung-hint-box')) g('sambung-hint-box').style.display = 'none';
   // Reset captured box
   if (g('sambung-captured-row')) g('sambung-captured-row').style.display = 'none';
-  if (g('sambung-captured-ar')) { g('sambung-captured-ar').textContent = '—'; g('sambung-captured-ar').style.color = 'var(--accent-dark)'; }
+  if (g('sambung-captured-ar')) { g('sambung-captured-ar').textContent = '—'; g('sambung-captured-ar').style.color = 'var(--muted2)'; }
   setDotSambung('', 'Selesai');
 }
 function stopSambung() { stopSambungMode(); }
 function stopSambungNew() { stopSambungMode(); }
 function nextSambungNew() { nextSambung(); }
+function skipSambung() { if (sambungActive) nextSambung(); }
 
 function showSambungHint() {
   if (!sambungActive) return;
