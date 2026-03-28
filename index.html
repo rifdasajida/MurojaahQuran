@@ -71,6 +71,14 @@ body {
 /* interim: kata yg sedang diucapkan - warna oranye */
 .w.interim { color: #B05A00; background: rgba(230,140,0,0.22); box-shadow: 0 0 0 2px rgba(230,140,0,0.35); border-radius: 4px; }
 
+/* Sambung header buttons — mobile: show below, desktop: show inline */
+.sambung-header-btns-desktop { display: none; }
+.sambung-header-btns-mobile  { display: flex; }
+@media (min-width: 520px) {
+  .sambung-header-btns-desktop { display: flex; }
+  .sambung-header-btns-mobile  { display: none; }
+}
+
 /* ══════════════════════════════════════════
    LAYOUT
 ══════════════════════════════════════════ */
@@ -906,88 +914,8 @@ body {
 .sambung-range-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
 
 /* ══════════════════════════════════════════
-   FEEDBACK AI CARD
+   AUTH MODAL
 ══════════════════════════════════════════ */
-.feedback-card {
-  background: var(--surface);
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  padding: 16px;
-  box-shadow: var(--shadow-sm);
-  margin-top: 0;
-}
-.feedback-header {
-  display: flex; align-items: center; gap: 8px;
-  margin-bottom: 14px;
-}
-.feedback-title { font-size: 14px; font-weight: 800; color: var(--text); }
-.feedback-badge {
-  font-size: 9px; font-weight: 700; letter-spacing: 1px;
-  text-transform: uppercase; font-family: var(--font-mono);
-  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-  color: #fff; padding: 3px 7px; border-radius: 100px;
-}
-.feedback-score-row {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 8px; margin-bottom: 14px;
-}
-.feedback-score-item {
-  background: var(--surface2);
-  border-radius: 10px; padding: 10px 8px;
-  text-align: center;
-}
-.feedback-score-val {
-  font-size: 22px; font-weight: 800; line-height: 1;
-  margin-bottom: 3px;
-}
-.feedback-score-lbl { font-size: 10px; color: var(--muted); font-weight: 600; }
-.feedback-score-val.ok { color: var(--ok); }
-.feedback-score-val.warn { color: var(--warn); }
-.feedback-score-val.err { color: var(--err); }
-.feedback-section { margin-bottom: 12px; }
-.feedback-section-title {
-  font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
-  text-transform: uppercase; color: var(--muted);
-  font-family: var(--font-mono); margin-bottom: 6px;
-}
-.feedback-item {
-  display: flex; gap: 8px; align-items: flex-start;
-  padding: 8px 10px; border-radius: 8px;
-  margin-bottom: 5px; font-size: 12px; line-height: 1.5;
-}
-.feedback-item.ok { background: rgba(45,155,111,0.07); color: #1A5C35; }
-.feedback-item.warn { background: rgba(224,123,42,0.08); color: #7A3D00; }
-.feedback-item.err { background: rgba(217,79,79,0.08); color: #7A1A1A; }
-.feedback-item-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
-.feedback-overall {
-  background: linear-gradient(135deg, rgba(45,155,111,0.08), rgba(45,155,111,0.04));
-  border: 1px solid rgba(45,155,111,0.2);
-  border-radius: 10px; padding: 12px;
-  font-size: 12px; color: var(--text); line-height: 1.6;
-}
-.feedback-loading {
-  display: flex; align-items: center; gap: 10px;
-  padding: 16px; color: var(--muted); font-size: 13px; font-weight: 600;
-}
-.feedback-transcript {
-  background: var(--surface2); border-radius: 8px;
-  padding: 8px 12px; margin-bottom: 10px;
-  font-family: 'Amiri', serif; font-size: 16px;
-  direction: rtl; text-align: right; color: var(--muted);
-  line-height: 1.8; border: 1px solid var(--border);
-}
-.btn-feedback {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  width: 100%; padding: 12px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-  color: #fff; border: none; border-radius: 12px;
-  font-size: 13px; font-weight: 700; cursor: pointer;
-  font-family: var(--font); transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(45,155,111,0.25);
-  margin-top: 10px;
-}
-.btn-feedback:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(45,155,111,0.3); }
-.btn-feedback:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 #auth-backdrop {
   position: fixed; inset: 0; z-index: 9998;
   background: rgba(26,40,32,0.5);
@@ -1213,23 +1141,6 @@ body {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
           Simpan Setoran
         </button>
-
-        <!-- Feedback AI button — muncul setelah rekaman selesai -->
-        <button class="btn-feedback" id="btn-get-feedback" onclick="getFeedbackAI()" style="display:none">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.6-1.4 4.8-3.5 6.1V17a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-1.9C6.4 13.8 5 11.6 5 9a7 7 0 0 1 7-7z"/></svg>
-          Analisa Bacaan dengan AI
-        </button>
-      </div>
-
-      <!-- Feedback AI card -->
-      <div class="feedback-card" id="feedback-card" style="display:none">
-        <div class="feedback-header">
-          <div class="feedback-title">Feedback Bacaan</div>
-          <div class="feedback-badge">AI</div>
-        </div>
-        <div id="feedback-content">
-          <!-- Diisi oleh JS -->
-        </div>
       </div>
 
       <!-- Riwayat setoran -->
@@ -1340,14 +1251,12 @@ body {
             <label>Sampai Ayat</label>
             <input class="num-input" type="number" id="audioEndAyah" value="5" min="1">
           </div>
-          <div class="audio-field">
+          <div class="audio-field" style="grid-column:1/-1">
             <label>Jumlah Pengulangan (Kali)</label>
             <input class="num-input" type="number" id="audioRepeatCount" value="3" min="1" max="99">
           </div>
-          <div class="audio-field">
-            <label>Jeda (detik)</label>
-            <input class="num-input" type="number" id="audioPause" value="0" min="0" max="10" step="0.5">
-          </div>
+          <!-- audioPause hidden with fixed value so JS still works -->
+          <input type="hidden" id="audioPause" value="0">
         </div>
 
         <div class="audio-status" id="audioStatus" style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:12px">Siap memutar</div>
@@ -1398,24 +1307,24 @@ body {
 
       <!-- Prompt -->
       <div class="sambung-prompt-card" id="sambung-prompt-card" style="display:none">
-        <!-- Header: judul kiri + 2 button kanan -->
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px">
-          <div>
-            <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:2px">Sambung Ayat</div>
-            <div class="sambung-surah-info" id="sambung-surah-info">—</div>
-          </div>
-          <div style="display:flex;gap:6px;flex-shrink:0">
-            <button class="btn-icon" onclick="replaySambungAudio()" style="padding:7px 10px;font-size:11px;flex:none">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-              Ulang Audio
-            </button>
-            <button class="btn-icon" onclick="stopSambungMode()" style="padding:7px 10px;font-size:11px;flex:none">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              Atur Ulang
-            </button>
-          </div>
+        <!-- Header: judul + info surah -->
+        <div style="margin-bottom:10px">
+          <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:2px">Sambung Ayat</div>
+          <div class="sambung-surah-info" id="sambung-surah-info" style="font-weight:400">—</div>
         </div>
+        <!-- Ayat Arab -->
         <div class="sambung-prompt-ar" id="sambung-prompt-ar">—</div>
+        <!-- Tombol di bawah ayat -->
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn-icon" onclick="replaySambungAudio()" style="padding:9px 12px;font-size:12px;flex:1">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            Ulang Audio
+          </button>
+          <button class="btn-icon" onclick="stopSambungMode()" style="padding:9px 12px;font-size:12px;flex:1">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Atur Ulang
+          </button>
+        </div>
       </div>
 
       <!-- Controls (jawab section) -->
@@ -2130,25 +2039,6 @@ let audioObjectURL = null;
 let playbackAudio = null;
 let isRecording = false;
 
-// Speech recognition paralel saat rekam
-let setoranSR = null;
-let setoranTranscript = '';
-
-function initSetoranSR() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) return null;
-  const r = new SR();
-  r.lang = 'ar-SA'; r.continuous = true; r.interimResults = false; r.maxAlternatives = 1;
-  r.onresult = (e) => {
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) setoranTranscript += e.results[i][0].transcript + ' ';
-    }
-  };
-  r.onerror = () => {};
-  r.onend = () => { if (isRecording && setoranSR) { try { setoranSR.start(); } catch(e) {} } };
-  return r;
-}
-
 function initSetoranPage() {
   populateSurahSel('setoran-surah-sel');
 }
@@ -2186,10 +2076,6 @@ async function startRecording() {
     mediaRecorder.start();
     isRecording = true;
     recordingSeconds = 0;
-    // Mulai speech recognition paralel
-    setoranTranscript = '';
-    setoranSR = initSetoranSR();
-    if (setoranSR) { try { setoranSR.start(); } catch(e) {} }
 
     const btn = document.getElementById('rec-btn');
     btn.classList.add('recording');
@@ -2216,8 +2102,6 @@ function stopRecording() {
   }
   clearInterval(recordingInterval);
   isRecording = false;
-  // Stop speech recognition
-  if (setoranSR) { try { setoranSR.abort(); } catch(e) {} setoranSR = null; }
   const btn = document.getElementById('rec-btn');
   btn.classList.remove('recording');
   btn.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>';
@@ -2234,9 +2118,6 @@ function onRecordingDone() {
   durEl.textContent = `${recordingSeconds}s`;
   document.getElementById('rec-audio-player').classList.add('show');
   document.getElementById('btn-simpan-setoran').style.display = 'flex';
-  // Tampilkan tombol feedback
-  document.getElementById('btn-get-feedback').style.display = 'flex';
-  document.getElementById('feedback-card').style.display = 'none';
 }
 
 function togglePlayback() {
@@ -2328,164 +2209,6 @@ function resetRecording() {
   document.getElementById('rec-area').classList.remove('recording', 'has-audio');
   document.getElementById('rec-audio-player').classList.remove('show');
   document.getElementById('btn-simpan-setoran').style.display = 'none';
-  document.getElementById('btn-get-feedback').style.display = 'none';
-  document.getElementById('feedback-card').style.display = 'none';
-  setoranTranscript = '';
-}
-
-// ════════════════════════════════════════════════════════════
-//  FEEDBACK AI
-// ════════════════════════════════════════════════════════════
-async function getFeedbackAI() {
-  const surahSel = document.getElementById('setoran-surah-sel');
-  const surahNum = parseInt(surahSel.value);
-  const surahName = surahSel.options[surahSel.selectedIndex].text;
-  const dari = parseInt(document.getElementById('setoran-ayat-dari').value);
-  const ke = parseInt(document.getElementById('setoran-ayat-ke').value);
-
-  // Ambil teks referensi dari SURAHS
-  const surahData = await loadDynamicSurah(surahNum);
-  let refLines = [];
-  if (surahData && surahData.ayahs) {
-    surahData.ayahs.forEach(a => {
-      if (a.n >= dari && a.n <= ke) {
-        refLines.push(`Ayat ${a.n}: ${a.words.join(' ')}`);
-      }
-    });
-  }
-  const refText = refLines.join('\n');
-  const transcript = setoranTranscript.trim();
-
-  // Tampilkan card + loading
-  const card = document.getElementById('feedback-card');
-  const content = document.getElementById('feedback-content');
-  card.style.display = 'block';
-  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-  content.innerHTML = `
-    <div class="feedback-loading">
-      <div class="auth-spinner" style="width:18px;height:18px;border-width:2px;border-color:var(--accent-glow);border-top-color:var(--accent);flex-shrink:0"></div>
-      Menganalisa bacaan...
-    </div>`;
-
-  const btn = document.getElementById('btn-get-feedback');
-  btn.disabled = true;
-
-  // Siapkan prompt
-  const hasTranscript = transcript.length > 3;
-  const prompt = `Kamu adalah ustadz ahli tahsin Al-Quran yang membantu santri memperbaiki bacaan.
-
-Santri baru selesai merekam setoran hafalan:
-- Surah: ${surahName}
-- Ayat: ${dari} sampai ${ke}
-
-TEKS REFERENSI AL-QURAN:
-${refText || '(tidak tersedia)'}
-
-${hasTranscript ? `TRANSKRIPSI OTOMATIS BACAAN SANTRI (dari speech recognition, mungkin tidak sempurna):
-${transcript}` : 'Transkripsi bacaan tidak berhasil ditangkap (mikrofon mungkin tidak mendukung AR).'}
-
-Berikan feedback dalam format JSON berikut (tidak ada teks di luar JSON):
-{
-  "skor_kelancaran": 0-100,
-  "skor_tajwid": 0-100,
-  "skor_keseluruhan": 0-100,
-  "transkripsi_bersih": "transkripsi yang sudah dirapikan (kosong jika tidak ada)",
-  "pujian": "1 kalimat pujian singkat",
-  "catatan_tajwid": [
-    {"tipe": "ok|warn|err", "pesan": "..."}
-  ],
-  "catatan_makhroj": [
-    {"tipe": "ok|warn|err", "pesan": "..."}
-  ],
-  "saran_perbaikan": "1-2 kalimat saran konkret",
-  "motivasi": "1 kalimat motivasi"
-}
-
-Berikan maksimal 3 catatan tajwid dan 2 catatan makhroj. Jika transkripsi tidak tersedia, fokus pada catatan umum berdasarkan surah yang dibaca.`;
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const data = await res.json();
-    const raw = data.content?.[0]?.text || '';
-    let fb;
-    try {
-      fb = JSON.parse(raw.replace(/```json|```/g, '').trim());
-    } catch(e) {
-      throw new Error('Parse gagal');
-    }
-    renderFeedback(fb, hasTranscript);
-  } catch(e) {
-    content.innerHTML = `<div class="feedback-item err"><span class="feedback-item-icon">❌</span><span>Gagal mendapatkan feedback. Coba lagi.</span></div>`;
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 7 7c0 2.6-1.4 4.8-3.5 6.1V17a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-1.9C6.4 13.8 5 11.6 5 9a7 7 0 0 1 7-7z"/></svg> Analisa Ulang`;
-  }
-}
-
-function scoreColor(s) {
-  if (s >= 80) return 'ok';
-  if (s >= 60) return 'warn';
-  return 'err';
-}
-
-function renderFeedback(fb, hasTranscript) {
-  const content = document.getElementById('feedback-content');
-  const iconMap = { ok: '✅', warn: '⚠️', err: '❌' };
-
-  const tajwidItems = (fb.catatan_tajwid || []).map(c =>
-    `<div class="feedback-item ${c.tipe}"><span class="feedback-item-icon">${iconMap[c.tipe]||'📌'}</span><span>${c.pesan}</span></div>`
-  ).join('');
-
-  const makhrojItems = (fb.catatan_makhroj || []).map(c =>
-    `<div class="feedback-item ${c.tipe}"><span class="feedback-item-icon">${iconMap[c.tipe]||'📌'}</span><span>${c.pesan}</span></div>`
-  ).join('');
-
-  const transcriptHtml = (hasTranscript && fb.transkripsi_bersih) ? `
-    <div class="feedback-section">
-      <div class="feedback-section-title">Yang Tertangkap Mic</div>
-      <div class="feedback-transcript">${fb.transkripsi_bersih}</div>
-    </div>` : '';
-
-  content.innerHTML = `
-    ${fb.pujian ? `<div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:12px">🌟 ${fb.pujian}</div>` : ''}
-
-    <div class="feedback-score-row">
-      <div class="feedback-score-item">
-        <div class="feedback-score-val ${scoreColor(fb.skor_kelancaran)}">${fb.skor_kelancaran}</div>
-        <div class="feedback-score-lbl">Kelancaran</div>
-      </div>
-      <div class="feedback-score-item">
-        <div class="feedback-score-val ${scoreColor(fb.skor_tajwid)}">${fb.skor_tajwid}</div>
-        <div class="feedback-score-lbl">Tajwid</div>
-      </div>
-      <div class="feedback-score-item">
-        <div class="feedback-score-val ${scoreColor(fb.skor_keseluruhan)}">${fb.skor_keseluruhan}</div>
-        <div class="feedback-score-lbl">Overall</div>
-      </div>
-    </div>
-
-    ${transcriptHtml}
-
-    ${tajwidItems ? `<div class="feedback-section"><div class="feedback-section-title">Catatan Tajwid</div>${tajwidItems}</div>` : ''}
-    ${makhrojItems ? `<div class="feedback-section"><div class="feedback-section-title">Makhroj Huruf</div>${makhrojItems}</div>` : ''}
-
-    ${fb.saran_perbaikan ? `
-    <div class="feedback-section">
-      <div class="feedback-section-title">Saran Perbaikan</div>
-      <div class="feedback-overall">${fb.saran_perbaikan}</div>
-    </div>` : ''}
-
-    ${fb.motivasi ? `<div style="font-size:12px;color:var(--muted);font-style:italic;text-align:center;margin-top:8px;padding-top:10px;border-top:1px solid var(--border)">💬 ${fb.motivasi}</div>` : ''}
-  `;
 }
 
 async function refreshRiwayat() {
@@ -2906,16 +2629,16 @@ function stopSession(){
   sessionActive=false;
   clearTimeout(window._hafaFeedbackTimer); window._hafaFeedbackTimer=null;
   clearTimeout(window._interimDisplayTimer); window._interimDisplayTimer=null;
-  if(rec){try{rec.stop();}catch(e){}}
+  if(rec){ rec._finalBuffer=''; try{rec.stop();}catch(e){} }
   recRunning=false;setMicOff();
 }
 function setupRec(){if(rec)return true;rec=createRec();return!!rec;}
 // Deteksi mobile sekali saja — HP butuh debounce lebih panjang karena SR lebih lambat
 const _isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-const _SR_FINAL_DEBOUNCE  = _isMobile ? 80  : 20;  // ms tunggu sebelum proses final
-const _SR_INTERIM_DELAY   = _isMobile ? 60  : 0;   // ms tunggu sebelum terapkan interim
-const _SR_RESTART_DELAY   = _isMobile ? 300 : 200; // ms tunggu sebelum restart SR
-const _SR_WARMUP_MS       = _isMobile ? 600 : 500; // ms warming up saat pertama start
+const _SR_FINAL_DEBOUNCE  = _isMobile ? 350 : 20;  // ms rolling debounce sebelum proses final (HP: diperbesar jadi 350ms)
+const _SR_INTERIM_DELAY   = _isMobile ? 180 : 0;   // ms tunggu sebelum terapkan interim (HP: 180ms — cukup lama untuk skip false-interim)
+const _SR_RESTART_DELAY   = _isMobile ? 400 : 200; // ms tunggu sebelum restart SR
+const _SR_WARMUP_MS       = _isMobile ? 800 : 500; // ms warming up saat pertama start
 
 function createRec(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -2925,6 +2648,9 @@ function createRec(){
   r._lastFinalIdx=-1;
 
   r.onstart=()=>{recRunning=true;setDot('rec','Mendengarkan...');};
+
+  // Buffer akumulasi final di HP — rolling debounce
+  r._finalBuffer = '';
 
   r.onresult=(e)=>{
     if(!sessionActive)return;
@@ -2941,7 +2667,7 @@ function createRec(){
           if(alt){newFinal+=alt+' ';break;}
         }
       } else {
-        // Hanya ambil interim jika belum ada final di iterasi yang sama
+        // Interim hanya diambil jika tidak ada final baru di event ini
         if(!newFinal){
           const alt=res[0].transcript.trim();
           if(alt) interim=alt;
@@ -2951,31 +2677,40 @@ function createRec(){
 
     // === FINAL RESULT — prioritas utama ===
     if(newFinal.trim()){
-      clearTimeout(window._hafaFeedbackTimer);
+      // Batalkan interim yang pending — final menang
       clearTimeout(window._interimDisplayTimer);
-      window._hafaFeedbackTimer=null;
+      window._interimDisplayTimer=null;
       clearInterimMark();
 
-      const clean=newFinal.trim();
+      // Akumulasi final ke buffer (rolling debounce)
+      r._finalBuffer += ' ' + newFinal.trim();
+      const accumulated = r._finalBuffer.trim();
+
+      // Update tampilan captured text (tapi belum proses feedback)
       const ctRow=document.getElementById('capturedTextRow');
       const ctAr=document.getElementById('capturedTextAr');
-      if(ctRow&&ctAr){ctRow.style.display='block';ctAr.textContent=clean;ctAr.style.color='var(--accent-dark)';}
+      if(ctRow&&ctAr){ctRow.style.display='block';ctAr.textContent=accumulated;ctAr.style.color='var(--accent-dark)';}
 
-      // Desktop: 20ms (responsif), Mobile: 80ms (antisipasi event final ganda di HP)
+      // Rolling debounce — tiap final baru reset timer
+      clearTimeout(window._hafaFeedbackTimer);
       window._hafaFeedbackTimer=setTimeout(()=>{
         window._hafaFeedbackTimer=null;
         if(!sessionActive)return;
-        const tokens=clean.split(/\s+/).filter(Boolean);
+        const finalText = r._finalBuffer.trim();
+        r._finalBuffer = '';
+        if(!finalText)return;
+        const tokens=finalText.split(/\s+/).filter(Boolean);
         processTokensStream(tokens);
       }, _SR_FINAL_DEBOUNCE);
       return;
     }
 
-    // === INTERIM RESULT — hanya jika tidak ada final pending ===
-    if(interim && !window._hafaFeedbackTimer){
+    // === INTERIM RESULT — hanya jika tidak ada final pending sama sekali ===
+    if(interim && !window._hafaFeedbackTimer && !r._finalBuffer){
       clearTimeout(window._interimDisplayTimer);
       const applyInterim=()=>{
-        if(!sessionActive||window._hafaFeedbackTimer)return;
+        // Double-check: batalkan jika ada final yang sudah datang saat delay
+        if(!sessionActive || window._hafaFeedbackTimer || r._finalBuffer) return;
         if(cursor<allWords.length){
           const w=allWords[cursor];
           if(!['w correct','w wrong','w passed'].includes(w.el.className)){
@@ -2987,7 +2722,7 @@ function createRec(){
         const ctAr=document.getElementById('capturedTextAr');
         if(ctRow&&ctAr){ctRow.style.display='block';ctAr.textContent=interim+' ⏳';ctAr.style.color='#B05A00';}
       };
-      // Desktop: langsung (0ms), Mobile: delay 60ms antisipasi race condition
+      // Desktop: langsung (0ms), Mobile: delay panjang — biar final punya waktu datang duluan
       if(_SR_INTERIM_DELAY===0) applyInterim();
       else window._interimDisplayTimer=setTimeout(applyInterim, _SR_INTERIM_DELAY);
     }
@@ -3188,6 +2923,7 @@ function resetSession(){
   stopSession();cursor=0;correctCount=0;wrongCount=0;currentAyahIndex=0;
   clearTimeout(window._hafaFeedbackTimer); window._hafaFeedbackTimer=null;
   clearTimeout(window._interimDisplayTimer); window._interimDisplayTimer=null;
+  if(rec) rec._finalBuffer='';
 
   allWords.forEach(w=>w.el.className='w idle');
   document.getElementById('retryBanner').classList.remove('show');
