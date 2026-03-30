@@ -822,21 +822,21 @@ body {
 ══════════════════════════════════════════ */
 .mode-toggle-wrap {
   display: flex; align-items: center; gap: 0;
-  background: var(--surface2); border-radius: 10px;
+  background: var(--surface2); border-radius: 12px;
   padding: 3px; border: 1px solid var(--border);
 }
 .mode-toggle-btn {
-  flex: 1; padding: 7px 10px; border: none; border-radius: 8px;
-  font-size: 11px; font-weight: 700; cursor: pointer;
+  flex: 1; padding: 9px 8px; border: none; border-radius: 9px;
+  font-size: 13px; font-weight: 700; cursor: pointer;
   font-family: var(--font); transition: all 0.2s;
-  display: flex; align-items: center; justify-content: center; gap: 4px;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
   background: transparent; color: var(--muted);
 }
 .mode-toggle-btn.active {
-  background: var(--surface); color: var(--accent);
+  background: var(--accent); color: #fff;
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
-.mode-toggle-btn:not(.active):hover { color: var(--text); }
+.mode-toggle-btn:not(.active):hover { color: var(--text); background: rgba(0,0,0,0.03); }
 
 /* Mode Uji — blurred words */
 .hafalan-mushaf.mode-uji .w.idle,
@@ -1083,6 +1083,42 @@ body {
   display: flex; align-items: center; gap: 8px;
   margin-bottom: 10px;
 }
+
+/* Collapsible ayat scroll for long surahs */
+.ayat-scroll-wrap {
+  position: relative;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+.ayat-scroll-wrap.collapsed {
+  max-height: 140px;
+}
+.ayat-scroll-wrap.expanded {
+  max-height: none;
+}
+.ayat-scroll-fade {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 40px;
+  background: linear-gradient(transparent, var(--surface));
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.ayat-scroll-wrap.expanded .ayat-scroll-fade {
+  opacity: 0;
+}
+.ayat-expand-btn {
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  width: 100%; padding: 6px 0; margin-top: 4px;
+  background: none; border: none;
+  color: var(--accent); font-size: 11px; font-weight: 700;
+  cursor: pointer; font-family: var(--font);
+  transition: color 0.15s;
+}
+.ayat-expand-btn:hover { color: var(--accent-h); }
+.ayat-expand-btn svg { transition: transform 0.2s; }
+.ayat-expand-btn.expanded svg { transform: rotate(180deg); }
+
 .hk-range-input {
   width: 60px; padding: 6px 8px;
   background: var(--surface); border: 1px solid var(--border);
@@ -1311,7 +1347,7 @@ body {
           </div>
           <div class="gstat">
             <div class="gstat-val" id="stat-total">0</div>
-            <div class="gstat-lbl">📚 Total Setoran</div>
+            <div class="gstat-lbl">📖 Hari Aktif</div>
           </div>
         </div>
       </div>
@@ -1365,22 +1401,14 @@ body {
       <!-- Calendar -->
       <div class="cal-card">
         <div class="cal-header">
-          <div class="cal-title">Kalender Setoran</div>
+          <div>
+            <div class="cal-title">Kalender Aktivitas</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px;line-height:1.4">Yuk murojaah atau tambah hafalan untuk checklist istiqomahmu</div>
+          </div>
           <div class="cal-month" id="cal-month">—</div>
         </div>
         <div class="cal-grid" id="cal-grid">
           <!-- Rendered by JS -->
-        </div>
-      </div>
-
-      <!-- Riwayat -->
-      <div>
-        <div class="section-label" style="margin-bottom:10px">Setoran Terakhir</div>
-        <div class="setoran-list" id="beranda-setoran-list">
-          <div class="riwayat-empty">
-            <div class="riwayat-empty-icon">📭</div>
-            <div class="riwayat-empty-text">Belum ada setoran</div>
-          </div>
         </div>
       </div>
 
@@ -1459,59 +1487,32 @@ body {
 
       <!-- Top controls -->
       <div class="hafalan-top">
+        <!-- Mode Toggle — FIRST -->
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="mode-toggle-wrap" style="flex:1">
+            <button class="mode-toggle-btn active" id="mode-baca-btn" onclick="setMurojaahMode('baca')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Mode Baca
+            </button>
+            <button class="mode-toggle-btn" id="mode-uji-btn" onclick="setMurojaahMode('uji')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              Mode Murojaah
+            </button>
+          </div>
+        </div>
+        <!-- Surah & Ayat selectors -->
         <div class="hafalan-selectors">
           <div>
             <label class="field-label">Surah</label>
             <select class="select-input" id="hafalanSurahSel" onchange="loadSurah()"></select>
           </div>
           <div>
-            <label class="field-label">Mulai</label>
+            <label class="field-label">Ayat</label>
             <select class="select-input" id="hafalanAyatSel" onchange="syncStartAyat()" style="width:80px"></select>
           </div>
         </div>
-        <!-- Mode Baca / Mode Uji Toggle -->
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-          <div class="mode-toggle-wrap" style="flex:1">
-            <button class="mode-toggle-btn active" id="mode-baca-btn" onclick="setMurojaahMode('baca')">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              Baca
-            </button>
-            <button class="mode-toggle-btn" id="mode-uji-btn" onclick="setMurojaahMode('uji')">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-              Uji
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Setoran banner — only visible in Mode Uji -->
-      <div class="setoran-float-banner" id="setoran-float-banner">
-        <div class="setoran-toggle-row">
-          <span class="setoran-toggle-label">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
-            Simpan sebagai Setoran
-          </span>
-          <label class="setoran-toggle-switch">
-            <input type="checkbox" id="setoran-toggle-cb" onchange="toggleSetoranMode()">
-            <span class="setoran-toggle-track"></span>
-            <span class="setoran-toggle-thumb"></span>
-          </label>
-        </div>
-        <div id="setoran-rec-area" style="display:none">
-          <div class="rec-mini-area">
-            <button class="rec-mini-btn" id="rec-mini-btn" onclick="toggleMiniRecording()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
-            </button>
-            <div class="rec-mini-info">
-              <div class="rec-mini-label" id="rec-mini-label">Tap untuk rekam</div>
-              <div class="rec-mini-timer" id="rec-mini-timer" style="display:none">00:00</div>
-            </div>
-            <button class="btn-simpan-mini" id="btn-simpan-mini" onclick="simpanSetoranFromMurojaah()">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              Simpan
-            </button>
-          </div>
-        </div>
+        <!-- Context wording -->
+        <div id="mode-context-text" style="font-size:11px;color:var(--muted);line-height:1.5;padding:2px 0">Kamu dalam mode baca Al-Quran saat ini. Pindah ke Mode Murojaah untuk cek ulang hafalan kamu.</div>
       </div>
 
       <!-- Mushaf display -->
@@ -1615,7 +1616,7 @@ body {
       <div class="card" style="padding:16px" id="sambung-surah-row">
         <!-- Segmented control pill (like reference image) -->
         <div style="background:var(--surface2);border-radius:12px;padding:3px;display:flex;gap:0;margin-bottom:14px;border:1px solid var(--border)">
-          <button id="sambung-tab-surah" onclick="sambungSwitchTab('surah')" style="flex:1;padding:9px 8px;border-radius:9px;border:none;background:var(--surface);color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.08)">Per Surah</button>
+          <button id="sambung-tab-surah" onclick="sambungSwitchTab('surah')" style="flex:1;padding:9px 8px;border-radius:9px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.08)">Per Surah</button>
           <button id="sambung-tab-juz" onclick="sambungSwitchTab('juz')" style="flex:1;padding:9px 8px;border-radius:9px;border:none;background:transparent;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all 0.2s;box-shadow:none">Per Juz</button>
         </div>
 
@@ -1765,15 +1766,15 @@ body {
     </div>
   </div>
 
-  <!-- ══ MODAL: Rekam Hafalan (bottom sheet) ══ -->
+  <!-- ══ MODAL: Setor Hafalan (bottom sheet) ══ -->
   <div class="modal-backdrop" id="hk-rec-modal" onclick="closeHkRecModal(event)">
     <div class="modal-sheet" style="max-height:70vh">
       <div class="modal-handle"></div>
-      <div class="modal-title" id="hk-rec-modal-title">Rekam Hafalan</div>
+      <div class="modal-title" id="hk-rec-modal-title">Setor Hafalan</div>
       <div id="hk-rec-modal-content">
         <div style="text-align:center;margin-bottom:16px">
           <div style="font-size:13px;color:var(--muted);margin-bottom:4px" id="hk-rec-range-label">Ayat 1 – 5</div>
-          <div style="font-size:12px;color:var(--muted2)">Rekam bacaanmu sebagai bukti hafalan</div>
+          <div style="font-size:12px;color:var(--muted2)">Setor bacaan hafalanmu sebagai bukti</div>
         </div>
 
         <!-- Rec area -->
@@ -1781,7 +1782,7 @@ body {
           <button class="rec-btn" id="hk-rec-btn" onclick="toggleHkRecording()" style="margin:0 auto 10px">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
           </button>
-          <div style="font-size:13px;font-weight:700;color:var(--muted)" id="hk-rec-label">Tap untuk mulai rekam</div>
+          <div style="font-size:13px;font-weight:700;color:var(--muted)" id="hk-rec-label">Tap untuk rekam</div>
           <div style="font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--text);margin-top:4px;display:none" id="hk-rec-timer">00:00</div>
         </div>
 
@@ -1796,8 +1797,12 @@ body {
 
         <!-- Save button -->
         <button class="btn-primary" id="hk-rec-save-btn" onclick="saveHkRecording()" style="display:none;margin-top:12px">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          Simpan & Centang Hafalan
+          Setor Hafalan
+        </button>
+
+        <!-- Kembali button -->
+        <button class="btn-secondary" onclick="closeHkRecModal()" style="margin-top:8px">
+          Kembali
         </button>
       </div>
     </div>
@@ -2189,27 +2194,43 @@ function renderDailyQuote() {
   document.querySelector('.quote-src').textContent = q.src;
 }
 
+// ════════════════════════════════════════════════════════════
+//  ACTIVITY TRACKING (localStorage based)
+// ════════════════════════════════════════════════════════════
+function getActivityDates() {
+  return JSON.parse(localStorage.getItem('murajaah_activity_dates') || '[]');
+}
+function trackDailyActivity(type) {
+  const today = new Date().toISOString().split('T')[0];
+  let dates = getActivityDates();
+  if (!dates.includes(today)) {
+    dates.push(today);
+    dates.sort();
+    localStorage.setItem('murajaah_activity_dates', JSON.stringify(dates));
+    if (currentPage === 'beranda') refreshBeranda();
+  }
+}
+function calcActivityStreak() {
+  const dates = getActivityDates().sort().reverse();
+  const total = dates.length;
+  if (!total) return { streak: 0, total: 0 };
+  let streak = 0, d = new Date(); d.setHours(0,0,0,0);
+  for (const dateStr of dates) {
+    const ds = new Date(dateStr); ds.setHours(0,0,0,0);
+    const diff = Math.round((d - ds) / 86400000);
+    if (diff === 0 || diff === 1) { streak++; d = ds; } else break;
+  }
+  return { streak, total };
+}
+
 async function refreshBeranda() {
-  renderCalendar();
-  if (!sbClient || !currentUser) {
-    updateStreakUI(0, 0);
-    document.getElementById('psych-banner').classList.add('hidden');
-    renderMilestones(0, 0);
-    renderBerandaSetoran([]);
-    return;
-  }
-  try {
-    const { data } = await sbClient.from('setoran').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-    const list = data || [];
-    const { streak, total } = calcStreak(list);
-    updateStreakUI(streak, total);
-    checkPsychTrigger(list);
-    renderCalendarWithData(list);
-    renderMilestones(streak, total);
-    renderBerandaSetoran(list.slice(0, 5));
-  } catch(e) {
-    console.error('refreshBeranda:', e);
-  }
+  const actDates = getActivityDates();
+  const { streak, total } = calcActivityStreak();
+  updateStreakUI(streak, total);
+  checkPsychTrigger(actDates);
+  renderCalendar(actDates);
+  renderMilestones(streak, total);
+  renderHafalankuBeranda();
 }
 
 function calcStreak(list) {
@@ -2237,20 +2258,20 @@ function updateStreakUI(streak, total) {
 function checkPsychTrigger(list) {
   const banner = document.getElementById('psych-banner');
   const today = new Date().toISOString().split('T')[0];
-  const hasToday = list.some(s => s.date === today);
+  const hasToday = list.includes ? list.includes(today) : list.some(s => s.date === today);
   if (hasToday) { banner.classList.add('hidden'); return; }
   
   const hour = new Date().getHours();
   let title, sub;
   if (hour < 12) {
-    title = '🌅 Mulai hari ini dengan setoran!';
-    sub = 'Pagi adalah waktu terbaik untuk murajaah. Tap untuk mulai sekarang.';
+    title = '🌅 Mulai hari dengan murajaah!';
+    sub = 'Pagi adalah waktu terbaik. Tap untuk mulai sekarang.';
   } else if (hour < 17) {
-    title = '⏰ Belum setoran hari ini';
-    sub = 'Jangan putus streakmu! Luangkan 5 menit untuk setoran sekarang.';
+    title = '⏰ Belum aktif hari ini';
+    sub = 'Jangan putus streakmu! Luangkan 5 menit untuk murajaah.';
   } else {
-    title = '🌙 Masih belum setoran nih!';
-    sub = 'Hari hampir berakhir. Jangan lewatkan setoran hari ini ya!';
+    title = '🌙 Masih belum murajaah nih!';
+    sub = 'Hari hampir berakhir. Jaga streak istiqomahmu!';
   }
   document.getElementById('psych-title').textContent = title;
   document.getElementById('psych-sub').textContent = sub;
@@ -2411,28 +2432,6 @@ function renderCalendar(setoranDates = []) {
     if (setoranDates.includes(dateStr)) el.classList.add('has-setoran');
     grid.appendChild(el);
   }
-}
-
-function renderCalendarWithData(list) {
-  const dates = [...new Set(list.map(s => s.date))];
-  renderCalendar(dates);
-}
-
-function renderBerandaSetoran(list) {
-  const el = document.getElementById('beranda-setoran-list');
-  if (!list.length) {
-    el.innerHTML = '<div class="riwayat-empty"><div class="riwayat-empty-icon">📭</div><div class="riwayat-empty-text">Belum ada setoran</div></div>';
-    return;
-  }
-  el.innerHTML = list.map(s => `
-    <div class="setoran-item" onclick="openSetoranDetail('${s.id}')">
-      <div class="setoran-dot"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg></div>
-      <div class="setoran-info">
-        <div class="setoran-surah">${s.surah_name}</div>
-        <div class="setoran-meta">Ayat ${s.ayat_dari}–${s.ayat_ke} · ${s.duration ? Math.round(s.duration)+'s' : '—'}</div>
-      </div>
-      <div class="setoran-date">${formatDate(s.date)}</div>
-    </div>`).join('');
 }
 
 function formatDate(dateStr) {
@@ -2847,7 +2846,7 @@ function spokenCandidates(spoken) {
   return [...c].filter(Boolean);
 }
 const LETTER_NAMES={'\u0646\u0648\u0646':'\u0646','\u0642\u0627\u0641':'\u0642','\u0635\u0627\u062F':'\u0635','\u0633\u064A\u0646':'\u0633','\u0645\u064A\u0645':'\u0645','\u0644\u0627\u0645':'\u0644','\u0643\u0627\u0641':'\u0643','\u0639\u064A\u0646':'\u0639','\u0637\u0627\u0621':'\u0637','\u062D\u0627\u0621':'\u062D','\u064A\u0627\u0621':'\u064A','\u0647\u0627\u0621':'\u0647','\u0646\u0646':'\u0646','\u0642\u0641':'\u0642'};
-const MATCH_THRESHOLD=0.68;
+const MATCH_THRESHOLD=0.58;
 
 function wordSim(spokenRaw,refNorm){
   if(!refNorm)return 0;
@@ -2921,6 +2920,7 @@ async function loadSurah(){
   const sel=document.getElementById('hafalanSurahSel');
   const num=parseInt(sel.value);
   currentSurah=num;
+  localStorage.setItem('murajaah_last_surah', num);
   sessionActive=false;
   if(rec){try{rec.stop();}catch(e){}rec=null;recRunning=false;}
   setMicOff();
@@ -2990,6 +2990,8 @@ function syncStartAyat(){
   if(surah)renderMushaf(surah);
 }
 function highlightCursor(){
+  // Only highlight cursor in Mode Uji
+  if(murojaahMode !== 'uji') return;
   allWords.forEach((w,i)=>{
     if(i===cursor){
       if(retryMode&&i===retryAyahStart)w.el.className='w retry-cursor';
@@ -3029,9 +3031,11 @@ function setMicOff(){
 function toggleSession(){if(sessionActive)stopSession();else startSession();}
 function startSession(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){showToast('❌ Gunakan Chrome/Edge');return;}
+  if(!SR){showToast('❌ Browser tidak mendukung speech recognition');return;}
   if(!setupRec()){showToast('❌ Gagal setup mikrofon');return;}
   sessionActive=true;transcriptBuffer=[];lastTranscriptTime=Date.now();sessionRunStart=cursor;
+  // Track activity
+  trackDailyActivity('murojaah');
 
   window.srWarmingUp=true;
   window._interimDisplayTimer=null;
@@ -3047,23 +3051,28 @@ function stopSession(){
   recRunning=false;setMicOff();
 }
 function setupRec(){if(rec)return true;rec=createRec();return!!rec;}
-// Deteksi mobile sekali saja — HP butuh debounce lebih panjang karena SR lebih lambat
+// Deteksi platform
 const _isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-const _SR_FINAL_DEBOUNCE  = _isMobile ? 350 : 20;  // ms rolling debounce sebelum proses final (HP: diperbesar jadi 350ms)
-const _SR_INTERIM_DELAY   = _isMobile ? 180 : 0;   // ms tunggu sebelum terapkan interim (HP: 180ms — cukup lama untuk skip false-interim)
-const _SR_RESTART_DELAY   = _isMobile ? 400 : 200; // ms tunggu sebelum restart SR
-const _SR_WARMUP_MS       = _isMobile ? 800 : 500; // ms warming up saat pertama start
+const _isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) || (navigator.userAgent.includes('AppleWebKit') && !navigator.userAgent.includes('Chrome'));
+const _SR_FINAL_DEADLINE  = _isMobile ? 300 : 50;    // ms fixed deadline — timer set once, NOT reset on new tokens
+const _SR_INTERIM_DELAY   = _isMobile ? 200 : 0;     // ms wait before applying interim visual
+const _SR_RESTART_DELAY   = _isMobile ? 350 : 150;   // ms before restarting SR after onend
+const _SR_WARMUP_MS       = _isMobile ? 700 : 350;   // ms warmup to ignore initial noise
 
 function createRec(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR)return null;
   const r=new SR();
-  r.lang='ar-SA';r.continuous=true;r.interimResults=true;r.maxAlternatives=3;
+  r.lang='ar-SA';
+  // Safari doesn't support continuous well — use non-continuous on Safari
+  r.continuous = !_isSafari;
+  r.interimResults=true;
+  r.maxAlternatives=3;
   r._lastFinalIdx=-1;
 
   r.onstart=()=>{recRunning=true;setDot('rec','Mendengarkan...');};
 
-  // Buffer akumulasi final di HP — rolling debounce
+  // Buffer akumulasi final — rolling debounce to avoid premature processing
   r._finalBuffer = '';
 
   r.onresult=(e)=>{
@@ -3076,12 +3085,14 @@ function createRec(){
       if(res.isFinal){
         if(i<=r._lastFinalIdx)continue;
         r._lastFinalIdx=i;
+        // Take best alternative
+        let bestAlt = '';
         for(let a=0;a<Math.min(res.length,3);a++){
           const alt=res[a].transcript.trim();
-          if(alt){newFinal+=alt+' ';break;}
+          if(alt){ bestAlt = alt; break; }
         }
+        if(bestAlt) newFinal += bestAlt + ' ';
       } else {
-        // Interim hanya diambil jika tidak ada final baru di event ini
         if(!newFinal){
           const alt=res[0].transcript.trim();
           if(alt) interim=alt;
@@ -3091,39 +3102,42 @@ function createRec(){
 
     // === FINAL RESULT — prioritas utama ===
     if(newFinal.trim()){
-      // Batalkan interim yang pending — final menang
       clearTimeout(window._interimDisplayTimer);
       window._interimDisplayTimer=null;
       clearInterimMark();
 
-      // Akumulasi final ke buffer (rolling debounce)
+      // Accumulate into buffer
       r._finalBuffer += ' ' + newFinal.trim();
       const accumulated = r._finalBuffer.trim();
 
-      // Update tampilan captured text (tapi belum proses feedback)
+      // Show captured text live
       const ctRow=document.getElementById('capturedTextRow');
       const ctAr=document.getElementById('capturedTextAr');
       if(ctRow&&ctAr){ctRow.style.display='block';ctAr.textContent=accumulated;ctAr.style.color='var(--accent-dark)';}
 
-      // Rolling debounce — tiap final baru reset timer
-      clearTimeout(window._hafaFeedbackTimer);
-      window._hafaFeedbackTimer=setTimeout(()=>{
-        window._hafaFeedbackTimer=null;
-        if(!sessionActive)return;
-        const finalText = r._finalBuffer.trim();
-        r._finalBuffer = '';
-        if(!finalText)return;
-        const tokens=finalText.split(/\s+/).filter(Boolean);
-        processTokensStream(tokens);
-      }, _SR_FINAL_DEBOUNCE);
+      // Fixed deadline — set timer ONCE when first token arrives, don't reset
+      // Extra tokens accumulate in buffer but timer stays the same
+      // This gives consistent ~300ms response on mobile, ~50ms on desktop
+      if(!window._hafaFeedbackTimer){
+        window._hafaFeedbackTimer=setTimeout(()=>{
+          window._hafaFeedbackTimer=null;
+          if(!sessionActive)return;
+          const finalText = r._finalBuffer.trim();
+          r._finalBuffer = '';
+          if(!finalText)return;
+          const tokens = finalText.split(/\s+/).filter(Boolean);
+          if(tokens.length > 0){
+            processTokensStream(tokens);
+          }
+        }, _SR_FINAL_DEADLINE);
+      }
       return;
     }
 
-    // === INTERIM RESULT — hanya jika tidak ada final pending sama sekali ===
+    // === INTERIM RESULT — visual only, never trigger errors ===
     if(interim && !window._hafaFeedbackTimer && !r._finalBuffer){
       clearTimeout(window._interimDisplayTimer);
       const applyInterim=()=>{
-        // Double-check: batalkan jika ada final yang sudah datang saat delay
         if(!sessionActive || window._hafaFeedbackTimer || r._finalBuffer) return;
         if(cursor<allWords.length){
           const w=allWords[cursor];
@@ -3136,7 +3150,6 @@ function createRec(){
         const ctAr=document.getElementById('capturedTextAr');
         if(ctRow&&ctAr){ctRow.style.display='block';ctAr.textContent=interim+' ⏳';ctAr.style.color='#B05A00';}
       };
-      // Desktop: langsung (0ms), Mobile: delay panjang — biar final punya waktu datang duluan
       if(_SR_INTERIM_DELAY===0) applyInterim();
       else window._interimDisplayTimer=setTimeout(applyInterim, _SR_INTERIM_DELAY);
     }
@@ -3144,11 +3157,16 @@ function createRec(){
 
   r.onerror=(e)=>{
     if(e.error==='not-allowed'){showToast('❌ Izinkan mikrofon');stopSession();}
-    else if(e.error!=='no-speech'&&e.error!=='aborted'){log('⚠️ '+e.error);recRunning=false;rec=null;}
+    else if(e.error==='no-speech'){
+      // Normal — just restart silently
+      recRunning=false;
+    }
+    else if(e.error!=='aborted'){log('⚠️ '+e.error);recRunning=false;rec=null;}
   };
   r.onend=()=>{
     recRunning=false;
     if(!sessionActive){setMicOff();return;}
+    // Restart SR — create fresh instance to avoid stale state on Safari
     rec=createRec();if(!rec)return;
     setTimeout(()=>{if(sessionActive&&rec){try{rec.start();}catch(e){}}}, _SR_RESTART_DELAY);
   };
@@ -3176,20 +3194,30 @@ function processTokensStream(tokens){
 
   // Cari best start offset (SR kadang prepend noise)
   let bestOffset=0, bestScore=-1;
-  for(let off=0;off<Math.min(3,tokens.length);off++){
+  const maxOff = Math.min(4, tokens.length);
+  for(let off=0;off<maxOff;off++){
     const s=wordSim(tokens[off], allWords[cursor].norm);
     if(s>bestScore){bestScore=s;bestOffset=off;}
   }
-  // Kalau tidak ada yang cocok sama sekali = salah posisi
-  if(bestScore<0.38){
-    markWrongAndRetry(cursor);
+  // More lenient threshold — don't mark wrong from just one bad token
+  if(bestScore<0.30){
+    // Tokens don't match current word — give feedback, show what was captured
+    setDot('warn','⚠️ Bacaan tidak cocok — coba ulangi dari kata yang disorot');
+    // Flash the current cursor word to show user where they should be reading
+    if(cursor<allWords.length){
+      const w = allWords[cursor];
+      w.el.style.transition = 'all 0.15s';
+      w.el.style.outline = '2px solid var(--warn)';
+      w.el.style.outlineOffset = '2px';
+      setTimeout(()=>{ w.el.style.outline=''; w.el.style.outlineOffset=''; }, 2000);
+    }
     return;
   }
   si=bestOffset;
 
   const startCursor=cursor;
   const startAyahIdx=allWords[cursor].ayahIndex;
-  let correctInBatch=0, firstWrongIdx=-1;
+  let correctInBatch=0, wrongWords=[];
 
   while(si<tokens.length && cursor<allWords.length){
     // Jangan lewat batas ayat — validasi per ayat
@@ -3203,7 +3231,21 @@ function processTokensStream(tokens){
     if(sim<MATCH_THRESHOLD && si+1<tokens.length){
       const merged=normalizeArabic(tokens[si])+normalizeArabic(tokens[si+1]);
       const ngSim=simNorm(merged, w.norm);
-      if(ngSim>=MATCH_THRESHOLD){sim=ngSim;}
+      if(ngSim>=MATCH_THRESHOLD){sim=ngSim; si++;} // consume extra token
+    }
+
+    // Coba reverse ngram: 1 spoken token = 2 ref words
+    if(sim<MATCH_THRESHOLD && cursor+1<allWords.length && allWords[cursor+1].ayahIndex===startAyahIdx){
+      const mergedRef = w.norm + allWords[cursor+1].norm;
+      const rngSim = simNorm(normalizeArabic(token), mergedRef);
+      if(rngSim >= MATCH_THRESHOLD){
+        w.el.className='w correct';
+        allWords[cursor+1].el.className='w correct';
+        correctInBatch+=2; cursor+=2; si++;
+        updateProgress();
+        if(cursor<allWords.length) allWords[cursor].el.scrollIntoView({behavior:'smooth',block:'center'});
+        continue;
+      }
     }
 
     if(sim>=MATCH_THRESHOLD){
@@ -3211,46 +3253,63 @@ function processTokensStream(tokens){
       correctInBatch++;
       cursor++;si++;
       updateProgress();
-      // Auto-scroll ngikutin bacaan
       if(cursor<allWords.length){
         allWords[cursor].el.scrollIntoView({behavior:'smooth',block:'center'});
       }
     } else {
       // Tidak cocok — cek apakah token ini ada di kata berikutnya (SR skip 1 kata)
       let foundAhead=false;
-      if(cursor+1<allWords.length && allWords[cursor+1].ayahIndex===startAyahIdx){
-        const nextSim=wordSim(token, allWords[cursor+1].norm);
-        if(nextSim>=MATCH_THRESHOLD){
-          // Kata cursor dilewati → salah
-          if(firstWrongIdx<0) firstWrongIdx=cursor;
-          allWords[cursor].el.className='w wrong';
-          cursor++;
-          // Kata cursor+1 benar
+      for(let look=1;look<=2 && cursor+look<allWords.length;look++){
+        if(allWords[cursor+look].ayahIndex!==startAyahIdx) break;
+        const aheadSim=wordSim(token, allWords[cursor+look].norm);
+        if(aheadSim>=MATCH_THRESHOLD){
+          // Words between cursor and cursor+look were skipped → mark wrong
+          for(let skip=0;skip<look;skip++){
+            wrongWords.push(cursor);
+            allWords[cursor].el.className='w wrong';
+            cursor++;
+          }
           allWords[cursor].el.className='w correct';
           correctInBatch++;cursor++;si++;
           updateProgress();foundAhead=true;
+          break;
         }
       }
       if(!foundAhead){
-        // Genuine error
-        if(firstWrongIdx<0) firstWrongIdx=cursor;
-        allWords[cursor].el.className='w wrong';
-        si++;// skip token ini, coba lanjut
+        // Token doesn't match current or next words — skip the token (SR noise)
+        // Only mark wrong if we have NO correct matches at all in this batch
+        si++;
       }
     }
   }
 
-  // Cek apakah ayat selesai (semua kata sudah diproses)
+  // Only enter retry mode if we have wrong words AND at least some correct ones
+  // (this means the user is reading but made mistakes, not just noise)
   const ayahComplete=checkAyahComplete(startAyahIdx);
 
-  if(firstWrongIdx>=0){
-    // Ada kata salah
+  if(wrongWords.length > 0 && correctInBatch > 0){
     playWrongSound();
-    enterRetryMode(firstWrongIdx);
+    enterRetryMode(wrongWords[0]);
     setDot('warn','⚠️ Ada kesalahan');
+  } else if(wrongWords.length > 0 && correctInBatch === 0){
+    // All wrong with no correct — likely misalignment or user reading wrong section
+    // Revert wrong marks, but give clear feedback
+    wrongWords.forEach(idx => {
+      if(allWords[idx]) allWords[idx].el.className='w idle';
+    });
+    cursor = startCursor; // reset cursor
+    playWrongSound();
+    setDot('warn','⚠️ Bacaan tidak sesuai — coba baca ulang dari kata yang disorot');
+    // Highlight cursor word with orange outline to guide user
+    if(cursor<allWords.length){
+      const w = allWords[cursor];
+      w.el.style.outline = '2px solid var(--warn)';
+      w.el.style.outlineOffset = '2px';
+      setTimeout(()=>{ w.el.style.outline=''; w.el.style.outlineOffset=''; }, 3000);
+      w.el.scrollIntoView({behavior:'smooth',block:'center'});
+    }
   } else if(correctInBatch>0){
     if(ayahComplete){
-      // Ayat selesai benar semua → ding + lanjut
       playCorrectSound();
       exitRetryMode();
       sessionRunStart=cursor;
@@ -3259,7 +3318,6 @@ function processTokensStream(tokens){
       setDot('ok','✓ Ayat selesai — lanjut!');
       highlightCursor();
     } else {
-      // Ayat belum selesai, cursor sudah maju — highlight cursor baru
       highlightCursor();
       setDot('ok','✓ Lanjut...');
     }
@@ -3337,7 +3395,7 @@ function resetSession(){
   stopSession();cursor=0;correctCount=0;wrongCount=0;currentAyahIndex=0;
   clearTimeout(window._hafaFeedbackTimer); window._hafaFeedbackTimer=null;
   clearTimeout(window._interimDisplayTimer); window._interimDisplayTimer=null;
-  if(rec) rec._finalBuffer='';
+  if(rec) { rec._finalBuffer=''; }
 
   allWords.forEach(w=>w.el.className='w idle');
   document.getElementById('retryBanner').classList.remove('show');
@@ -3393,7 +3451,7 @@ function onSurahComplete(){
 let audioPlaying=false,audioCurrentRepeat=0,audioCurrentAyah=0,audioTimeoutId=null,audioCurrentSurah=68;
 let audioCurrentEl=null; // track elemen audio yg sedang diputar
 function getAudioUrl(s,a){return `https://everyayah.com/data/Alafasy_128kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`;}
-function syncAudioSurah(){audioCurrentSurah=parseInt(document.getElementById('audioSurahSel').value);}
+function syncAudioSurah(){audioCurrentSurah=parseInt(document.getElementById('audioSurahSel').value);localStorage.setItem('murajaah_last_audio_surah',audioCurrentSurah);}
 function toggleAudioPlayer(){if(audioPlaying)stopAudioPlayer();else startAudioPlayer();}
 function startAudioPlayer(){
   const start=parseInt(document.getElementById('audioStartAyah').value);
@@ -3497,14 +3555,14 @@ function sambungSwitchTab(tab) {
 
   if (tab === 'surah') {
     surahPanel.style.display = 'block'; juzPanel.style.display = 'none';
-    tabSurah.style.background  = 'var(--surface)'; tabSurah.style.color = 'var(--accent)';
+    tabSurah.style.background  = 'var(--accent)'; tabSurah.style.color = '#fff';
     tabSurah.style.boxShadow   = '0 1px 4px rgba(0,0,0,0.08)';
     tabJuz.style.background    = 'transparent'; tabJuz.style.color = 'var(--muted)';
     tabJuz.style.boxShadow     = 'none';
     renderSambungSurahChips();
   } else {
     juzPanel.style.display = 'block'; surahPanel.style.display = 'none';
-    tabJuz.style.background    = 'var(--surface)'; tabJuz.style.color = 'var(--accent)';
+    tabJuz.style.background    = 'var(--accent)'; tabJuz.style.color = '#fff';
     tabJuz.style.boxShadow     = '0 1px 4px rgba(0,0,0,0.08)';
     tabSurah.style.background  = 'transparent'; tabSurah.style.color = 'var(--muted)';
     tabSurah.style.boxShadow   = 'none';
@@ -4145,31 +4203,26 @@ function setMurojaahMode(mode) {
   const bacaBtn = document.getElementById('mode-baca-btn');
   const ujiBtn = document.getElementById('mode-uji-btn');
   const controls = document.getElementById('hafalan-controls');
-  const setoranBanner = document.getElementById('setoran-float-banner');
+  const ctxText = document.getElementById('mode-context-text');
 
   if (mode === 'uji') {
     mushaf.classList.add('mode-uji');
     ujiBtn.classList.add('active');
     bacaBtn.classList.remove('active');
-    // Show controls & setoran banner in Uji mode
     controls.style.display = '';
-    setoranBanner.classList.add('show');
-    showToast('Mode Uji — tap kata untuk mengintip');
+    if (ctxText) ctxText.textContent = 'Yuk mulai cek ulang hafalan kamu dengan klik tombol mic di bawah.';
+    showToast('Mode Murojaah — tap kata untuk mengintip');
+    trackDailyActivity('murojaah');
   } else {
     mushaf.classList.remove('mode-uji');
     bacaBtn.classList.add('active');
     ujiBtn.classList.remove('active');
-    // Hide controls & setoran banner in Baca mode
     controls.style.display = 'none';
-    setoranBanner.classList.remove('show');
-    // Stop any active mic session
+    if (ctxText) ctxText.textContent = 'Kamu dalam mode baca Al-Quran saat ini. Pindah ke Mode Murojaah untuk cek ulang hafalan kamu.';
     if (sessionActive) stopSession();
-    // Remove revealed states
     mushaf.querySelectorAll('.w.revealed, .w.revealing').forEach(w => {
       w.classList.remove('revealed', 'revealing');
     });
-    // Reset mini recording if active
-    if (miniIsRecording) stopMiniRecording();
   }
 }
 
@@ -4430,6 +4483,25 @@ function toggleHafalankuExpand(surahNum) {
   if (grid) grid.classList.toggle('open');
 }
 
+function toggleAyatScroll(gridId) {
+  const wrap = document.getElementById(gridId);
+  const btn = document.getElementById(gridId + '-btn');
+  const label = document.getElementById(gridId + '-label');
+  if (!wrap) return;
+  const isCollapsed = wrap.classList.contains('collapsed');
+  if (isCollapsed) {
+    wrap.classList.remove('collapsed');
+    wrap.classList.add('expanded');
+    btn.classList.add('expanded');
+    if (label) label.textContent = 'Sembunyikan';
+  } else {
+    wrap.classList.remove('expanded');
+    wrap.classList.add('collapsed');
+    btn.classList.remove('expanded');
+    if (label) label.textContent = 'Tampilkan semua ayat';
+  }
+}
+
 // ── Recording modal state ──
 let hkRecState = {
   surahNum: 0, from: 1, to: 5,
@@ -4461,9 +4533,9 @@ function openHkRecModal(surahNum) {
   hkRecState.isRecording = false;
   hkRecState.seconds = 0;
 
-  document.getElementById('hk-rec-modal-title').textContent = `Rekam · ${name}`;
+  document.getElementById('hk-rec-modal-title').textContent = `Setor Hafalan · ${name}`;
   document.getElementById('hk-rec-range-label').textContent = `Ayat ${suggestFrom} – ${suggestTo}`;
-  document.getElementById('hk-rec-label').textContent = 'Tap untuk mulai rekam';
+  document.getElementById('hk-rec-label').textContent = 'Tap untuk rekam';
   document.getElementById('hk-rec-timer').style.display = 'none';
   document.getElementById('hk-rec-player').classList.remove('show');
   document.getElementById('hk-rec-save-btn').style.display = 'none';
@@ -4509,8 +4581,7 @@ function updateHkRangeLabel() {
 }
 
 function closeHkRecModal(e) {
-  if (e && e.target !== document.getElementById('hk-rec-modal')) return;
-  // Stop recording if active
+  if (e && e.target && e.target !== document.getElementById('hk-rec-modal')) return;
   if (hkRecState.isRecording) stopHkRec();
   if (hkRecState.playback) { hkRecState.playback.pause(); hkRecState.playback = null; }
   document.getElementById('hk-rec-modal').classList.remove('open');
@@ -4623,6 +4694,7 @@ function saveHkRecording() {
   saveHafalankuData(data);
   renderHafalankuList();
   renderHafalankuBeranda();
+  trackDailyActivity('hafalan');
 
   // Close modal
   document.getElementById('hk-rec-modal').classList.remove('open');
@@ -4664,19 +4736,31 @@ function renderHafalankuList() {
     const pct = totalAyahs > 0 ? Math.round((checked / totalAyahs) * 100) : 0;
     const isComplete = pct >= 100;
 
-    // Ayat visual grid (read-only, shows which are checked)
+    // Ayat grid — always individual boxes, capped height for long surahs
     let ayatHtml = '';
     for (let i = 1; i <= totalAyahs; i++) {
       const isChecked = entry.checkedAyahs && entry.checkedAyahs.includes(i);
       ayatHtml += `<div class="ayat-check${isChecked ? ' checked' : ''}" style="cursor:default;font-size:11px">${i}</div>`;
     }
+    const needsScroll = totalAyahs > 50;
+    const gridId = 'hk-ayat-scroll-' + entry.surahNum;
+    const ayatGridWrapped = needsScroll
+      ? `<div class="ayat-scroll-wrap collapsed" id="${gridId}">
+           <div class="ayat-checks">${ayatHtml}</div>
+           <div class="ayat-scroll-fade" id="${gridId}-fade"></div>
+         </div>
+         <button class="ayat-expand-btn" id="${gridId}-btn" onclick="event.stopPropagation();toggleAyatScroll('${gridId}')">
+           <span id="${gridId}-label">Tampilkan semua ${totalAyahs} ayat</span>
+           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+         </button>`
+      : `<div class="ayat-checks">${ayatHtml}</div>`;
 
     // Recording history
     const recs = entry.recordings || [];
     let recsHtml = '';
     if (recs.length > 0) {
       recsHtml = `<div class="hk-rec-history">
-        <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:4px">Riwayat Rekaman</div>
+        <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:4px">Riwayat Setoran</div>
         ${recs.map((r, idx) => `
           <div class="hk-rec-item">
             <button class="hk-rec-item-play" onclick="event.stopPropagation();playHkArchive(${entry.surahNum},${idx})">
@@ -4696,24 +4780,28 @@ function renderHafalankuList() {
       <div class="hafalanku-item">
         <div class="hafalanku-item-top hafalanku-item-expand" onclick="toggleHafalankuExpand(${entry.surahNum})">
           <span class="hafalanku-item-name">${isComplete ? '✅ ' : ''}${entry.surahNum}. ${name}</span>
-          <span class="hafalanku-item-pct">${pct}%</span>
+          <span style="display:flex;align-items:center;gap:6px">
+            <span class="hafalanku-item-pct">${pct}%</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="2.5" style="transition:transform 0.2s"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
         </div>
         <div class="hafalanku-item-bar">
           <div class="hafalanku-item-fill" style="width:${pct}%"></div>
         </div>
         <div class="hafalanku-item-meta">
-          <span>${checked}/${totalAyahs} ayat · ${recs.length} rekaman</span>
+          <span>${checked}/${totalAyahs} ayat · ${recs.length} setoran</span>
           <span style="cursor:pointer;color:var(--err);font-weight:700;font-size:11px" onclick="event.stopPropagation();removeHafalanSurah(${entry.surahNum})">Hapus</span>
         </div>
         <div class="hafalanku-ayat-grid" id="hk-grid-${entry.surahNum}">
-          <!-- Record new range -->
-          <button class="hk-rec-start-btn" onclick="event.stopPropagation();openHkRecModal(${entry.surahNum})" style="width:100%;justify-content:center;margin-bottom:10px">
+          <!-- Setor hafalan -->
+          <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:8px;line-height:1.5">Setor hafalan untuk dapat checklist progres ayat</div>
+          <button class="hk-rec-start-btn" onclick="event.stopPropagation();openHkRecModal(${entry.surahNum})" style="width:100%;justify-content:center;margin-bottom:12px">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
-            Rekam & Tambah Ayat
+            Setor Tambah Hafalan
           </button>
-          <!-- Ayat grid (visual only) -->
+          <!-- Ayat grid -->
           <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:6px">Progress Ayat</div>
-          <div class="ayat-checks">${ayatHtml}</div>
+          ${ayatGridWrapped}
           ${recsHtml}
         </div>
       </div>`;
@@ -4764,10 +4852,14 @@ function initHafalankuPage() {
 
 
 window.addEventListener('DOMContentLoaded', async () => {
+  // Remember last surah picks or default to Al-Fatihah (1)
+  const lastMurojaahSurah = parseInt(localStorage.getItem('murajaah_last_surah')) || 1;
+  const lastAudioSurah = parseInt(localStorage.getItem('murajaah_last_audio_surah')) || 1;
+
   // Populate all selectors
-  populateSurahSel('hafalanSurahSel', 68);
-  populateSurahSel('audioSurahSel', 68);
-  populateSurahSel('setoran-surah-sel', 68);
+  populateSurahSel('hafalanSurahSel', lastMurojaahSurah);
+  populateSurahSel('audioSurahSel', lastAudioSurah);
+  populateSurahSel('setoran-surah-sel', 1);
 
   // Init sambung ayat multi-select
   initSambungPage();
