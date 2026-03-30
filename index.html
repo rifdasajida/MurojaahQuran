@@ -818,9 +818,290 @@ body {
 .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-h)); transition: width 0.3s; border-radius: 2px; width: 0%; }
 
 /* ══════════════════════════════════════════
+   MODE BACA / UJI TOGGLE
+══════════════════════════════════════════ */
+.mode-toggle-wrap {
+  display: flex; align-items: center; gap: 0;
+  background: var(--surface2); border-radius: 10px;
+  padding: 3px; border: 1px solid var(--border);
+}
+.mode-toggle-btn {
+  flex: 1; padding: 7px 10px; border: none; border-radius: 8px;
+  font-size: 11px; font-weight: 700; cursor: pointer;
+  font-family: var(--font); transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  background: transparent; color: var(--muted);
+}
+.mode-toggle-btn.active {
+  background: var(--surface); color: var(--accent);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.mode-toggle-btn:not(.active):hover { color: var(--text); }
+
+/* Mode Uji — blurred words */
+.hafalan-mushaf.mode-uji .w.idle,
+.hafalan-mushaf.mode-uji .w.cursor {
+  filter: blur(7px);
+  transition: filter 0.3s ease, background 0.2s, color 0.2s;
+  cursor: pointer;
+  user-select: none;
+}
+.hafalan-mushaf.mode-uji .w.idle:hover,
+.hafalan-mushaf.mode-uji .w.idle:active,
+.hafalan-mushaf.mode-uji .w.idle.revealed,
+.hafalan-mushaf.mode-uji .w.cursor:hover,
+.hafalan-mushaf.mode-uji .w.cursor:active,
+.hafalan-mushaf.mode-uji .w.cursor.revealed {
+  filter: blur(0);
+}
+.hafalan-mushaf.mode-uji .w.correct,
+.hafalan-mushaf.mode-uji .w.wrong,
+.hafalan-mushaf.mode-uji .w.passed,
+.hafalan-mushaf.mode-uji .w.skipped,
+.hafalan-mushaf.mode-uji .w.interim {
+  filter: blur(0);
+}
+
+/* Reveal animation */
+.hafalan-mushaf.mode-uji .w.revealing {
+  animation: revealWord 0.4s ease forwards;
+}
+@keyframes revealWord {
+  0% { filter: blur(7px); }
+  100% { filter: blur(0); }
+}
+
+/* Setoran from Murojaah — floating banner */
+.setoran-float-banner {
+  background: linear-gradient(135deg, rgba(45,155,111,0.08), rgba(45,155,111,0.03));
+  border: 1.5px solid rgba(45,155,111,0.25);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin: 0 16px 8px;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  animation: slideDown 0.3s ease;
+}
+.setoran-float-banner.show { display: flex; }
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.setoran-toggle-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.setoran-toggle-label {
+  font-size: 12px; font-weight: 700; color: var(--accent-dark);
+  display: flex; align-items: center; gap: 6px;
+}
+.setoran-toggle-switch {
+  position: relative; width: 44px; height: 24px; cursor: pointer;
+}
+.setoran-toggle-switch input { display: none; }
+.setoran-toggle-track {
+  position: absolute; inset: 0; background: var(--border); border-radius: 12px;
+  transition: background 0.2s;
+}
+.setoran-toggle-switch input:checked + .setoran-toggle-track {
+  background: var(--accent);
+}
+.setoran-toggle-thumb {
+  position: absolute; top: 2px; left: 2px;
+  width: 20px; height: 20px; background: #fff;
+  border-radius: 50%; transition: transform 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+.setoran-toggle-switch input:checked ~ .setoran-toggle-thumb {
+  transform: translateX(20px);
+}
+
+/* Rec mini inline */
+.rec-mini-area {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface); border-radius: 10px;
+  border: 1px solid var(--border); padding: 8px 12px;
+}
+.rec-mini-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--err); color: #fff; border: none;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(217,79,79,0.25);
+}
+.rec-mini-btn.recording { animation: rec-pulse 1.5s ease infinite; }
+.rec-mini-btn.done { background: var(--accent); box-shadow: 0 2px 8px rgba(45,155,111,0.25); }
+.rec-mini-info { flex: 1; }
+.rec-mini-label { font-size: 11px; font-weight: 600; color: var(--muted); }
+.rec-mini-timer { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--text); }
+.btn-simpan-mini {
+  padding: 8px 16px; background: var(--accent); color: #fff;
+  border: none; border-radius: 10px; font-size: 12px; font-weight: 700;
+  cursor: pointer; font-family: var(--font); transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(45,155,111,0.25);
+  display: none;
+}
+.btn-simpan-mini:hover { background: var(--accent-h); }
+.btn-simpan-mini.show { display: flex; align-items: center; gap: 4px; }
+
+/* ══════════════════════════════════════════
    PAGE: AUDIO REPEAT
 ══════════════════════════════════════════ */
 .audio-page { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+/* ══════════════════════════════════════════
+   PAGE: HAFALAN SAYA (Tracking)
+══════════════════════════════════════════ */
+.hafalanku-page { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+/* Beranda summary card */
+.hafalanku-summary {
+  background: var(--surface);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.hafalanku-summary:hover { border-color: rgba(45,155,111,0.3); transform: translateY(-1px); }
+.hafalanku-summary-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.hafalanku-summary-title { font-size: 14px; font-weight: 800; color: var(--text); }
+.hafalanku-summary-count { font-size: 12px; color: var(--accent); font-weight: 700; font-family: var(--font-mono); }
+.hafalanku-summary-bar { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; margin-bottom: 8px; }
+.hafalanku-summary-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #3DC98F); border-radius: 3px; transition: width 0.6s ease; }
+.hafalanku-summary-stats { display: flex; gap: 16px; }
+.hafalanku-summary-stat { font-size: 11px; color: var(--muted); }
+.hafalanku-summary-stat strong { color: var(--text); font-weight: 800; }
+
+/* Tambah hafalan modal-card */
+.hafalanku-add-card {
+  background: var(--surface);
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.hafalanku-add-title { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 2px; }
+.hafalanku-add-sub { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+
+/* Surah hafalan list */
+.hafalanku-list { display: flex; flex-direction: column; gap: 10px; }
+.hafalanku-item {
+  background: var(--surface);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s;
+}
+.hafalanku-item:hover { border-color: rgba(45,155,111,0.3); }
+.hafalanku-item-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.hafalanku-item-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.hafalanku-item-pct { font-size: 12px; font-weight: 800; color: var(--accent); font-family: var(--font-mono); }
+.hafalanku-item-bar { height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
+.hafalanku-item-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #3DC98F); border-radius: 3px; transition: width 0.4s; }
+.hafalanku-item-meta { font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; }
+.hafalanku-item-expand {
+  cursor: pointer; user-select: none;
+}
+/* Ayat checkboxes grid */
+.hafalanku-ayat-grid {
+  display: none; margin-top: 10px;
+  padding-top: 10px; border-top: 1px solid var(--border);
+}
+.hafalanku-ayat-grid.open { display: block; }
+.ayat-checks {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 4px; margin-bottom: 10px;
+}
+.ayat-check {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  border-radius: 8px; font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: all 0.15s; user-select: none;
+  border: 1.5px solid var(--border); background: var(--surface);
+  color: var(--muted); font-family: var(--font-mono);
+}
+.ayat-check:hover { border-color: var(--accent); color: var(--accent); }
+.ayat-check.checked {
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  color: #fff; border-color: var(--accent);
+  box-shadow: 0 2px 6px rgba(45,155,111,0.3);
+}
+.ayat-check.checked::after { content: ''; }
+
+/* Select all / deselect row */
+.ayat-actions {
+  display: flex; gap: 6px; justify-content: flex-end; margin-bottom: 8px;
+}
+.ayat-action-btn {
+  padding: 4px 10px; border-radius: 6px;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--muted); font-size: 10px; font-weight: 700;
+  cursor: pointer; font-family: var(--font); transition: all 0.15s;
+}
+.ayat-action-btn:hover { background: var(--accent-soft); color: var(--accent); border-color: rgba(45,155,111,0.2); }
+
+/* Tambah hafalan — rec option */
+.hafalanku-rec-row {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface2); border-radius: 10px;
+  padding: 8px 12px; margin-top: 8px;
+}
+
+/* Empty state */
+.hafalanku-empty {
+  text-align: center; padding: 40px 20px;
+  background: var(--surface); border-radius: 16px;
+  border: 1px solid var(--border);
+}
+.hafalanku-empty-icon { font-size: 40px; margin-bottom: 10px; }
+.hafalanku-empty-text { font-size: 14px; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+.hafalanku-empty-sub { font-size: 12px; color: var(--muted2); }
+
+/* Recording history per surah */
+.hk-rec-history { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.hk-rec-item {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface2); border-radius: 10px;
+  padding: 8px 12px; border: 1px solid var(--border);
+}
+.hk-rec-item-play {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  background: var(--accent); color: #fff; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.hk-rec-item-play:hover { background: var(--accent-h); transform: scale(1.05); }
+.hk-rec-item-info { flex: 1; min-width: 0; }
+.hk-rec-item-range { font-size: 12px; font-weight: 700; color: var(--text); }
+.hk-rec-item-date { font-size: 10px; color: var(--muted2); font-family: var(--font-mono); }
+.hk-rec-item-dur { font-size: 11px; color: var(--muted); font-family: var(--font-mono); flex-shrink: 0; }
+
+/* Setoran range selector inside expanded card */
+.hk-range-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px;
+}
+.hk-range-input {
+  width: 60px; padding: 6px 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text);
+  font-family: var(--font-mono); font-size: 13px; font-weight: 600;
+  text-align: center; outline: none;
+  -moz-appearance: textfield;
+}
+.hk-range-input::-webkit-inner-spin-button { opacity: 0; }
+.hk-range-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
+.hk-range-sep { font-size: 12px; color: var(--muted2); font-weight: 600; }
+.hk-rec-start-btn {
+  padding: 8px 16px; background: var(--accent); color: #fff;
+  border: none; border-radius: 10px; font-size: 12px; font-weight: 700;
+  cursor: pointer; font-family: var(--font); transition: all 0.2s;
+  display: flex; align-items: center; gap: 5px;
+  box-shadow: 0 2px 8px rgba(45,155,111,0.25);
+}
+.hk-rec-start-btn:hover { background: var(--accent-h); }
 .audio-player-card {
   background: #ffffff;
   border: 1px solid rgba(45,155,111,0.15);
@@ -1036,7 +1317,7 @@ body {
       </div>
 
       <!-- Psychology trigger -->
-      <div class="psych-banner hidden" id="psych-banner" onclick="navTo('setoran')">
+      <div class="psych-banner hidden" id="psych-banner" onclick="navTo('hafalan')">
         <div class="psych-icon">⏰</div>
         <div class="psych-text">
           <div class="psych-title" id="psych-title">Belum setoran hari ini</div>
@@ -1044,6 +1325,21 @@ body {
         </div>
         <div class="psych-arrow">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+
+      <!-- Hafalan Saya summary -->
+      <div class="hafalanku-summary" id="hafalanku-beranda" onclick="navTo('hafalanku')" style="display:none">
+        <div class="hafalanku-summary-top">
+          <span class="hafalanku-summary-title">📖 Hafalan Saya</span>
+          <span class="hafalanku-summary-count" id="hk-beranda-count">0 surah</span>
+        </div>
+        <div class="hafalanku-summary-bar">
+          <div class="hafalanku-summary-fill" id="hk-beranda-fill" style="width:0%"></div>
+        </div>
+        <div class="hafalanku-summary-stats">
+          <span class="hafalanku-summary-stat"><strong id="hk-beranda-ayat">0</strong> ayat dihafal</span>
+          <span class="hafalanku-summary-stat"><strong id="hk-beranda-total">0</strong> total ayat</span>
         </div>
       </div>
 
@@ -1091,12 +1387,12 @@ body {
     </div>
   </div>
 
-  <!-- ══ PAGE: SETORAN ══ -->
+  <!-- ══ PAGE: SETORAN (now Riwayat only, accessed from Beranda) ══ -->
   <div class="page" id="page-setoran">
     <div class="setoran-page">
 
-      <!-- Record card -->
-      <div class="rec-card">
+      <!-- Record card — kept for backward compat but hidden by default -->
+      <div class="rec-card" id="rec-card-standalone" style="display:none">
         <div class="rec-header">
           <div class="rec-title">Setoran Hafalan</div>
           <div class="rec-sub">Rekam bacaan kamu, lalu simpan</div>
@@ -1173,6 +1469,49 @@ body {
             <select class="select-input" id="hafalanAyatSel" onchange="syncStartAyat()" style="width:80px"></select>
           </div>
         </div>
+        <!-- Mode Baca / Mode Uji Toggle -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <div class="mode-toggle-wrap" style="flex:1">
+            <button class="mode-toggle-btn active" id="mode-baca-btn" onclick="setMurojaahMode('baca')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Baca
+            </button>
+            <button class="mode-toggle-btn" id="mode-uji-btn" onclick="setMurojaahMode('uji')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              Uji
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Setoran banner — only visible in Mode Uji -->
+      <div class="setoran-float-banner" id="setoran-float-banner">
+        <div class="setoran-toggle-row">
+          <span class="setoran-toggle-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+            Simpan sebagai Setoran
+          </span>
+          <label class="setoran-toggle-switch">
+            <input type="checkbox" id="setoran-toggle-cb" onchange="toggleSetoranMode()">
+            <span class="setoran-toggle-track"></span>
+            <span class="setoran-toggle-thumb"></span>
+          </label>
+        </div>
+        <div id="setoran-rec-area" style="display:none">
+          <div class="rec-mini-area">
+            <button class="rec-mini-btn" id="rec-mini-btn" onclick="toggleMiniRecording()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+            </button>
+            <div class="rec-mini-info">
+              <div class="rec-mini-label" id="rec-mini-label">Tap untuk rekam</div>
+              <div class="rec-mini-timer" id="rec-mini-timer" style="display:none">00:00</div>
+            </div>
+            <button class="btn-simpan-mini" id="btn-simpan-mini" onclick="simpanSetoranFromMurojaah()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Simpan
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Mushaf display -->
@@ -1180,8 +1519,8 @@ body {
         <!-- Rendered by JS -->
       </div>
 
-      <!-- Controls bottom -->
-      <div class="hafalan-controls">
+      <!-- Controls bottom — only visible in Mode Uji -->
+      <div class="hafalan-controls" id="hafalan-controls" style="display:none">
         <div class="retry-banner" id="retryBanner">
           <div class="retry-banner-header">
             <span style="font-size:10px;font-weight:700;color:var(--err);letter-spacing:1px;text-transform:uppercase;font-family:var(--font-mono)" id="retryAyahNum">AYAT —</span>
@@ -1391,6 +1730,79 @@ body {
     </div>
   </div>
 
+  <!-- ══ PAGE: HAFALAN SAYA ══ -->
+  <div class="page" id="page-hafalanku">
+    <div class="hafalanku-page">
+
+      <!-- Tambah hafalan card -->
+      <div class="hafalanku-add-card">
+        <div class="hafalanku-add-title">Tambah Hafalan</div>
+        <div class="hafalanku-add-sub">Pilih surah yang sedang kamu hafal</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <label class="field-label">Pilih Surah</label>
+            <select class="select-input" id="hk-add-surah-sel"></select>
+          </div>
+          <button class="btn-primary" onclick="addHafalanSurah()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Tambahkan Surah
+          </button>
+        </div>
+      </div>
+
+      <!-- Daftar hafalan -->
+      <div>
+        <div class="section-label" style="margin-bottom:10px">Hafalan Saya</div>
+        <div class="hafalanku-list" id="hafalanku-list">
+          <div class="hafalanku-empty" id="hafalanku-empty">
+            <div class="hafalanku-empty-icon">📚</div>
+            <div class="hafalanku-empty-text">Belum ada hafalan</div>
+            <div class="hafalanku-empty-sub">Tambahkan surah yang sedang kamu hafal di atas</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ MODAL: Rekam Hafalan (bottom sheet) ══ -->
+  <div class="modal-backdrop" id="hk-rec-modal" onclick="closeHkRecModal(event)">
+    <div class="modal-sheet" style="max-height:70vh">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="hk-rec-modal-title">Rekam Hafalan</div>
+      <div id="hk-rec-modal-content">
+        <div style="text-align:center;margin-bottom:16px">
+          <div style="font-size:13px;color:var(--muted);margin-bottom:4px" id="hk-rec-range-label">Ayat 1 – 5</div>
+          <div style="font-size:12px;color:var(--muted2)">Rekam bacaanmu sebagai bukti hafalan</div>
+        </div>
+
+        <!-- Rec area -->
+        <div style="text-align:center;margin-bottom:16px">
+          <button class="rec-btn" id="hk-rec-btn" onclick="toggleHkRecording()" style="margin:0 auto 10px">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+          </button>
+          <div style="font-size:13px;font-weight:700;color:var(--muted)" id="hk-rec-label">Tap untuk mulai rekam</div>
+          <div style="font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--text);margin-top:4px;display:none" id="hk-rec-timer">00:00</div>
+        </div>
+
+        <!-- Playback (after recording) -->
+        <div class="rec-audio-player" id="hk-rec-player">
+          <button class="rec-play-btn" id="hk-rec-play-btn" onclick="toggleHkPlayback()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </button>
+          <span class="rec-audio-label">Hasil rekaman</span>
+          <span class="rec-audio-duration" id="hk-rec-duration">—</span>
+        </div>
+
+        <!-- Save button -->
+        <button class="btn-primary" id="hk-rec-save-btn" onclick="saveHkRecording()" style="display:none;margin-top:12px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Simpan & Centang Hafalan
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /app -->
 
 <!-- Bottom Nav -->
@@ -1403,17 +1815,17 @@ body {
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
     Murojaah
   </button>
-  <button class="nav-item" id="nav-setoran" onclick="navTo('setoran')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="12" y2="12"/><polyline points="9 9 12 12 15 9"/></svg>
-    Setoran
+  <button class="nav-item" id="nav-hafalanku" onclick="navTo('hafalanku')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><polyline points="9 7 13 7"/><polyline points="9 11 15 11"/><polyline points="9 15 12 15"/></svg>
+    Hafalan
   </button>
   <button class="nav-item" id="nav-audio" onclick="navTo('audio')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
     Audio
   </button>
   <button class="nav-item" id="nav-sambung" onclick="navTo('sambung')">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-    Sambung Ayat
+    Sambung
   </button>
 </nav>
 
@@ -1629,11 +2041,13 @@ function navTo(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
-  document.getElementById('nav-' + page).classList.add('active');
+  const navBtn = document.getElementById('nav-' + page);
+  if (navBtn) navBtn.classList.add('active');
   document.getElementById('app').scrollTop = 0;
   currentPage = page;
   if (page === 'beranda') refreshBeranda();
   if (page === 'setoran') refreshRiwayat();
+  if (page === 'hafalanku') { renderHafalankuList(); renderHafalankuBeranda(); }
 }
 
 // ════════════════════════════════════════════════════════════
@@ -3720,6 +4134,634 @@ function setDotSambung(state, text) {
 }
 
 
+// ════════════════════════════════════════════════════════════
+//  MODE BACA / UJI
+// ════════════════════════════════════════════════════════════
+let murojaahMode = 'baca'; // 'baca' or 'uji'
+
+function setMurojaahMode(mode) {
+  murojaahMode = mode;
+  const mushaf = document.getElementById('mushafBody');
+  const bacaBtn = document.getElementById('mode-baca-btn');
+  const ujiBtn = document.getElementById('mode-uji-btn');
+  const controls = document.getElementById('hafalan-controls');
+  const setoranBanner = document.getElementById('setoran-float-banner');
+
+  if (mode === 'uji') {
+    mushaf.classList.add('mode-uji');
+    ujiBtn.classList.add('active');
+    bacaBtn.classList.remove('active');
+    // Show controls & setoran banner in Uji mode
+    controls.style.display = '';
+    setoranBanner.classList.add('show');
+    showToast('Mode Uji — tap kata untuk mengintip');
+  } else {
+    mushaf.classList.remove('mode-uji');
+    bacaBtn.classList.add('active');
+    ujiBtn.classList.remove('active');
+    // Hide controls & setoran banner in Baca mode
+    controls.style.display = 'none';
+    setoranBanner.classList.remove('show');
+    // Stop any active mic session
+    if (sessionActive) stopSession();
+    // Remove revealed states
+    mushaf.querySelectorAll('.w.revealed, .w.revealing').forEach(w => {
+      w.classList.remove('revealed', 'revealing');
+    });
+    // Reset mini recording if active
+    if (miniIsRecording) stopMiniRecording();
+  }
+}
+
+// Touch/click to reveal words in Mode Uji
+document.addEventListener('click', (e) => {
+  if (murojaahMode !== 'uji') return;
+  const w = e.target.closest('.w');
+  if (!w) return;
+  const mushaf = document.getElementById('mushafBody');
+  if (!mushaf.classList.contains('mode-uji')) return;
+
+  // Only reveal idle/cursor words
+  if (w.classList.contains('idle') || w.classList.contains('cursor')) {
+    w.classList.add('revealing');
+    w.classList.add('revealed');
+    // Auto-hide after 2 seconds
+    setTimeout(() => {
+      if (murojaahMode === 'uji') {
+        w.classList.remove('revealed', 'revealing');
+      }
+    }, 2500);
+  }
+});
+
+// Reveal whole ayah on ayah-number click
+document.addEventListener('click', (e) => {
+  if (murojaahMode !== 'uji') return;
+  const ayahNum = e.target.closest('.ayah-number');
+  if (!ayahNum) return;
+  const row = ayahNum.closest('.ayah-row');
+  if (!row) return;
+  const words = row.querySelectorAll('.w');
+  words.forEach(w => {
+    if (w.classList.contains('idle') || w.classList.contains('cursor')) {
+      w.classList.add('revealing', 'revealed');
+    }
+  });
+  // Auto-hide after 4 seconds
+  setTimeout(() => {
+    if (murojaahMode === 'uji') {
+      words.forEach(w => w.classList.remove('revealed', 'revealing'));
+    }
+  }, 4000);
+});
+
+// ════════════════════════════════════════════════════════════
+//  SETORAN FROM MUROJAAH
+// ════════════════════════════════════════════════════════════
+let miniRecorder = null;
+let miniAudioChunks = [];
+let miniRecordingInterval = null;
+let miniRecordingSeconds = 0;
+let miniAudioBlob = null;
+let miniIsRecording = false;
+let setoranModeActive = false;
+
+function toggleSetoranMode() {
+  const cb = document.getElementById('setoran-toggle-cb');
+  setoranModeActive = cb.checked;
+  const recArea = document.getElementById('setoran-rec-area');
+  recArea.style.display = setoranModeActive ? 'block' : 'none';
+}
+
+async function toggleMiniRecording() {
+  if (miniIsRecording) {
+    stopMiniRecording();
+  } else {
+    await startMiniRecording();
+  }
+}
+
+async function startMiniRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    miniAudioChunks = [];
+    miniRecorder = new MediaRecorder(stream);
+    miniRecorder.ondataavailable = e => { if (e.data.size > 0) miniAudioChunks.push(e.data); };
+    miniRecorder.onstop = () => {
+      miniAudioBlob = new Blob(miniAudioChunks, { type: 'audio/webm' });
+      onMiniRecordingDone();
+      stream.getTracks().forEach(t => t.stop());
+    };
+    miniRecorder.start();
+    miniIsRecording = true;
+    miniRecordingSeconds = 0;
+
+    const btn = document.getElementById('rec-mini-btn');
+    btn.classList.add('recording');
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
+    document.getElementById('rec-mini-label').textContent = 'Merekam...';
+    document.getElementById('rec-mini-timer').style.display = 'block';
+
+    miniRecordingInterval = setInterval(() => {
+      miniRecordingSeconds++;
+      const m = Math.floor(miniRecordingSeconds / 60), s = miniRecordingSeconds % 60;
+      document.getElementById('rec-mini-timer').textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }, 1000);
+  } catch (e) {
+    showToast('❌ Izinkan akses mikrofon');
+  }
+}
+
+function stopMiniRecording() {
+  if (miniRecorder && miniRecorder.state !== 'inactive') miniRecorder.stop();
+  clearInterval(miniRecordingInterval);
+  miniIsRecording = false;
+  const btn = document.getElementById('rec-mini-btn');
+  btn.classList.remove('recording');
+  btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>';
+}
+
+function onMiniRecordingDone() {
+  const btn = document.getElementById('rec-mini-btn');
+  btn.classList.add('done');
+  document.getElementById('rec-mini-label').textContent = `Rekaman selesai · ${miniRecordingSeconds}s`;
+  document.getElementById('btn-simpan-mini').classList.add('show');
+}
+
+async function simpanSetoranFromMurojaah() {
+  if (!miniAudioBlob) { showToast('❌ Rekam audio dulu'); return; }
+  const surahSel = document.getElementById('hafalanSurahSel');
+  const surahNum = parseInt(surahSel.value);
+  const surahName = surahSel.options[surahSel.selectedIndex].text;
+  const startAyat = parseInt(document.getElementById('hafalanAyatSel').value) || 1;
+  const surah = SURAHS[surahNum];
+  const endAyat = surah ? surah.ayahs[surah.ayahs.length - 1].n : startAyat;
+  const today = new Date().toISOString().split('T')[0];
+
+  const btn = document.getElementById('btn-simpan-mini');
+  btn.textContent = 'Menyimpan...';
+  btn.disabled = true;
+
+  let audioUrl = null;
+
+  if (sbClient && currentUser) {
+    try {
+      const fileName = `${currentUser.id}/${Date.now()}.webm`;
+      const { data: uploadData, error: uploadErr } = await sbClient.storage.from('setoran-audio').upload(fileName, miniAudioBlob, { contentType: 'audio/webm' });
+      if (!uploadErr) {
+        const { data: urlData } = sbClient.storage.from('setoran-audio').getPublicUrl(fileName);
+        audioUrl = urlData?.publicUrl;
+      }
+      await sbClient.from('setoran').insert({
+        user_id: currentUser.id,
+        surah_num: surahNum,
+        surah_name: surahName,
+        ayat_dari: startAyat,
+        ayat_ke: endAyat,
+        audio_url: audioUrl,
+        duration: miniRecordingSeconds,
+        date: today
+      });
+      showToast('✅ Setoran berhasil disimpan!');
+      resetMiniRecording();
+      refreshBeranda();
+    } catch (e) {
+      console.error('simpanSetoranFromMurojaah:', e);
+      showToast('❌ Gagal menyimpan, coba lagi');
+    }
+  } else {
+    // Local save
+    const localData = JSON.parse(localStorage.getItem('murajaah_setoran') || '[]');
+    localData.unshift({
+      id: Date.now(),
+      surah_num: surahNum,
+      surah_name: surahName,
+      ayat_dari: startAyat,
+      ayat_ke: endAyat,
+      duration: miniRecordingSeconds,
+      date: today,
+      created_at: new Date().toISOString()
+    });
+    localStorage.setItem('murajaah_setoran', JSON.stringify(localData));
+    showToast('✅ Setoran disimpan (lokal)');
+    resetMiniRecording();
+    refreshBeranda();
+  }
+
+  btn.disabled = false;
+}
+
+function resetMiniRecording() {
+  miniAudioBlob = null;
+  miniIsRecording = false;
+  miniRecordingSeconds = 0;
+  const btn = document.getElementById('rec-mini-btn');
+  if (btn) {
+    btn.classList.remove('recording', 'done');
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>';
+  }
+  const lbl = document.getElementById('rec-mini-label');
+  if (lbl) lbl.textContent = 'Tap untuk rekam';
+  const timer = document.getElementById('rec-mini-timer');
+  if (timer) { timer.style.display = 'none'; timer.textContent = '00:00'; }
+  const simpanBtn = document.getElementById('btn-simpan-mini');
+  if (simpanBtn) { simpanBtn.classList.remove('show'); simpanBtn.textContent = 'Simpan'; }
+}
+
+// ════════════════════════════════════════════════════════════
+//  HAFALAN SAYA — Tracking per-ayat with recording proof
+// ════════════════════════════════════════════════════════════
+/*
+  Data structure (localStorage key: 'murajaah_hafalanku'):
+  [
+    {
+      surahNum: 114,
+      checkedAyahs: [1,2,3,5],
+      recordings: [
+        { from: 1, to: 5, duration: 32, date: '2026-03-30', audioUrl: 'blob:...' or null }
+      ],
+      addedAt: '2026-03-30'
+    }
+  ]
+*/
+
+function getHafalankuData() {
+  return JSON.parse(localStorage.getItem('murajaah_hafalanku') || '[]');
+}
+function saveHafalankuData(data) {
+  localStorage.setItem('murajaah_hafalanku', JSON.stringify(data));
+}
+
+function addHafalanSurah() {
+  const sel = document.getElementById('hk-add-surah-sel');
+  const surahNum = parseInt(sel.value);
+  if (!surahNum) return;
+
+  const data = getHafalankuData();
+  if (data.find(d => d.surahNum === surahNum)) {
+    showToast('Surah ini sudah ada di daftar hafalan');
+    return;
+  }
+
+  data.push({
+    surahNum,
+    checkedAyahs: [],
+    recordings: [],
+    addedAt: new Date().toISOString().split('T')[0]
+  });
+  saveHafalankuData(data);
+  renderHafalankuList();
+  renderHafalankuBeranda();
+  showToast('✅ Surah ditambahkan!');
+}
+
+function removeHafalanSurah(surahNum) {
+  if (!confirm('Hapus surah ini dari daftar hafalan?')) return;
+  let data = getHafalankuData();
+  data = data.filter(d => d.surahNum !== surahNum);
+  saveHafalankuData(data);
+  renderHafalankuList();
+  renderHafalankuBeranda();
+  showToast('Surah dihapus');
+}
+
+function toggleHafalankuExpand(surahNum) {
+  const grid = document.getElementById('hk-grid-' + surahNum);
+  if (grid) grid.classList.toggle('open');
+}
+
+// ── Recording modal state ──
+let hkRecState = {
+  surahNum: 0, from: 1, to: 5,
+  recorder: null, chunks: [], blob: null, objectUrl: null,
+  isRecording: false, seconds: 0, interval: null,
+  playback: null
+};
+
+function openHkRecModal(surahNum) {
+  const meta = JUZ_SURAHS[surahNum] || SURAHS[surahNum];
+  const name = meta ? meta.name : 'Surah ' + surahNum;
+  const totalAyahs = meta ? (meta.ayahs ? meta.ayahs.length : meta.ayahCount) : 1;
+  const data = getHafalankuData();
+  const entry = data.find(d => d.surahNum === surahNum);
+  // Find first unchecked ayah as start suggestion
+  let suggestFrom = 1;
+  if (entry && entry.checkedAyahs.length > 0) {
+    const sorted = [...entry.checkedAyahs].sort((a,b) => a - b);
+    suggestFrom = sorted[sorted.length - 1] + 1;
+    if (suggestFrom > totalAyahs) suggestFrom = 1;
+  }
+  const suggestTo = Math.min(suggestFrom + 4, totalAyahs);
+
+  hkRecState.surahNum = surahNum;
+  hkRecState.from = suggestFrom;
+  hkRecState.to = suggestTo;
+  hkRecState.blob = null;
+  hkRecState.objectUrl = null;
+  hkRecState.isRecording = false;
+  hkRecState.seconds = 0;
+
+  document.getElementById('hk-rec-modal-title').textContent = `Rekam · ${name}`;
+  document.getElementById('hk-rec-range-label').textContent = `Ayat ${suggestFrom} – ${suggestTo}`;
+  document.getElementById('hk-rec-label').textContent = 'Tap untuk mulai rekam';
+  document.getElementById('hk-rec-timer').style.display = 'none';
+  document.getElementById('hk-rec-player').classList.remove('show');
+  document.getElementById('hk-rec-save-btn').style.display = 'none';
+  const btn = document.getElementById('hk-rec-btn');
+  btn.classList.remove('recording', 'done');
+  btn.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>';
+
+  // Render range inputs inside the modal content
+  const content = document.getElementById('hk-rec-modal-content');
+  // Check if range row already exists, if not create
+  let rangeRow = document.getElementById('hk-rec-range-row');
+  if (!rangeRow) {
+    rangeRow = document.createElement('div');
+    rangeRow.id = 'hk-rec-range-row';
+    rangeRow.className = 'hk-range-row';
+    rangeRow.style.cssText = 'justify-content:center;margin-bottom:14px';
+    rangeRow.innerHTML = `
+      <span class="field-label" style="margin:0;font-size:10px">AYAT</span>
+      <input class="hk-range-input" type="number" id="hk-rec-from" min="1" max="${totalAyahs}" value="${suggestFrom}" onchange="updateHkRangeLabel()">
+      <span class="hk-range-sep">–</span>
+      <input class="hk-range-input" type="number" id="hk-rec-to" min="1" max="${totalAyahs}" value="${suggestTo}" onchange="updateHkRangeLabel()">
+      <span style="font-size:10px;color:var(--muted2);font-family:var(--font-mono)">/ ${totalAyahs}</span>
+    `;
+    content.insertBefore(rangeRow, content.children[0]);
+  } else {
+    document.getElementById('hk-rec-from').max = totalAyahs;
+    document.getElementById('hk-rec-from').value = suggestFrom;
+    document.getElementById('hk-rec-to').max = totalAyahs;
+    document.getElementById('hk-rec-to').value = suggestTo;
+    rangeRow.querySelector('span:last-child').textContent = '/ ' + totalAyahs;
+  }
+
+  const modal = document.getElementById('hk-rec-modal');
+  modal.classList.add('open');
+}
+
+function updateHkRangeLabel() {
+  const from = parseInt(document.getElementById('hk-rec-from').value) || 1;
+  const to = parseInt(document.getElementById('hk-rec-to').value) || from;
+  hkRecState.from = from;
+  hkRecState.to = Math.max(from, to);
+  document.getElementById('hk-rec-range-label').textContent = `Ayat ${hkRecState.from} – ${hkRecState.to}`;
+}
+
+function closeHkRecModal(e) {
+  if (e && e.target !== document.getElementById('hk-rec-modal')) return;
+  // Stop recording if active
+  if (hkRecState.isRecording) stopHkRec();
+  if (hkRecState.playback) { hkRecState.playback.pause(); hkRecState.playback = null; }
+  document.getElementById('hk-rec-modal').classList.remove('open');
+}
+
+async function toggleHkRecording() {
+  if (hkRecState.isRecording) {
+    stopHkRec();
+  } else {
+    await startHkRec();
+  }
+}
+
+async function startHkRec() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    hkRecState.chunks = [];
+    hkRecState.recorder = new MediaRecorder(stream);
+    hkRecState.recorder.ondataavailable = e => { if (e.data.size > 0) hkRecState.chunks.push(e.data); };
+    hkRecState.recorder.onstop = () => {
+      hkRecState.blob = new Blob(hkRecState.chunks, { type: 'audio/webm' });
+      if (hkRecState.objectUrl) URL.revokeObjectURL(hkRecState.objectUrl);
+      hkRecState.objectUrl = URL.createObjectURL(hkRecState.blob);
+      onHkRecDone();
+      stream.getTracks().forEach(t => t.stop());
+    };
+    hkRecState.recorder.start();
+    hkRecState.isRecording = true;
+    hkRecState.seconds = 0;
+
+    const btn = document.getElementById('hk-rec-btn');
+    btn.classList.add('recording');
+    btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
+    document.getElementById('hk-rec-label').textContent = 'Merekam... tap untuk stop';
+    document.getElementById('hk-rec-timer').style.display = 'block';
+    document.getElementById('hk-rec-save-btn').style.display = 'none';
+    document.getElementById('hk-rec-player').classList.remove('show');
+
+    hkRecState.interval = setInterval(() => {
+      hkRecState.seconds++;
+      const m = Math.floor(hkRecState.seconds / 60), s = hkRecState.seconds % 60;
+      document.getElementById('hk-rec-timer').textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }, 1000);
+  } catch (e) {
+    showToast('❌ Izinkan akses mikrofon');
+  }
+}
+
+function stopHkRec() {
+  if (hkRecState.recorder && hkRecState.recorder.state !== 'inactive') hkRecState.recorder.stop();
+  clearInterval(hkRecState.interval);
+  hkRecState.isRecording = false;
+  const btn = document.getElementById('hk-rec-btn');
+  btn.classList.remove('recording');
+}
+
+function onHkRecDone() {
+  const btn = document.getElementById('hk-rec-btn');
+  btn.classList.add('done');
+  btn.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+  document.getElementById('hk-rec-label').textContent = `Rekaman selesai · ${hkRecState.seconds}s`;
+  document.getElementById('hk-rec-duration').textContent = hkRecState.seconds + 's';
+  document.getElementById('hk-rec-player').classList.add('show');
+  document.getElementById('hk-rec-save-btn').style.display = 'flex';
+}
+
+function toggleHkPlayback() {
+  if (!hkRecState.objectUrl) return;
+  const btn = document.getElementById('hk-rec-play-btn');
+  if (hkRecState.playback && !hkRecState.playback.paused) {
+    hkRecState.playback.pause();
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+  } else {
+    if (!hkRecState.playback) {
+      hkRecState.playback = new Audio(hkRecState.objectUrl);
+      hkRecState.playback.onended = () => {
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+      };
+    }
+    hkRecState.playback.play();
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+  }
+}
+
+function saveHkRecording() {
+  if (!hkRecState.blob) { showToast('❌ Rekam audio dulu'); return; }
+  const from = parseInt(document.getElementById('hk-rec-from').value) || hkRecState.from;
+  const to = parseInt(document.getElementById('hk-rec-to').value) || hkRecState.to;
+  const surahNum = hkRecState.surahNum;
+
+  const data = getHafalankuData();
+  const entry = data.find(d => d.surahNum === surahNum);
+  if (!entry) return;
+
+  // Check ayahs in range
+  for (let i = from; i <= to; i++) {
+    if (!entry.checkedAyahs.includes(i)) entry.checkedAyahs.push(i);
+  }
+  entry.checkedAyahs.sort((a, b) => a - b);
+
+  // Save recording metadata
+  if (!entry.recordings) entry.recordings = [];
+  entry.recordings.push({
+    from, to,
+    duration: hkRecState.seconds,
+    date: new Date().toISOString().split('T')[0],
+    audioUrl: hkRecState.objectUrl || null
+  });
+
+  saveHafalankuData(data);
+  renderHafalankuList();
+  renderHafalankuBeranda();
+
+  // Close modal
+  document.getElementById('hk-rec-modal').classList.remove('open');
+  showToast(`✅ Ayat ${from}–${to} tercatat & rekaman tersimpan!`);
+  playCorrectSound();
+}
+
+// Play archived recording
+let _hkArchiveAudio = null;
+function playHkArchive(surahNum, recIdx) {
+  const data = getHafalankuData();
+  const entry = data.find(d => d.surahNum === surahNum);
+  if (!entry || !entry.recordings[recIdx]) return;
+  const rec = entry.recordings[recIdx];
+  if (!rec.audioUrl) { showToast('Audio tidak tersedia'); return; }
+
+  if (_hkArchiveAudio) { _hkArchiveAudio.pause(); _hkArchiveAudio = null; }
+  _hkArchiveAudio = new Audio(rec.audioUrl);
+  _hkArchiveAudio.play().catch(() => showToast('Gagal memutar audio'));
+}
+
+// ── Render ──
+
+function renderHafalankuList() {
+  const data = getHafalankuData();
+  const container = document.getElementById('hafalanku-list');
+
+  if (data.length === 0) {
+    container.innerHTML = '';
+    container.appendChild(createHafalankuEmpty());
+    return;
+  }
+
+  container.innerHTML = data.map(entry => {
+    const meta = JUZ_SURAHS[entry.surahNum] || SURAHS[entry.surahNum];
+    const name = meta ? meta.name : 'Surah ' + entry.surahNum;
+    const totalAyahs = meta ? (meta.ayahs ? meta.ayahs.length : meta.ayahCount) : 0;
+    const checked = entry.checkedAyahs ? entry.checkedAyahs.length : 0;
+    const pct = totalAyahs > 0 ? Math.round((checked / totalAyahs) * 100) : 0;
+    const isComplete = pct >= 100;
+
+    // Ayat visual grid (read-only, shows which are checked)
+    let ayatHtml = '';
+    for (let i = 1; i <= totalAyahs; i++) {
+      const isChecked = entry.checkedAyahs && entry.checkedAyahs.includes(i);
+      ayatHtml += `<div class="ayat-check${isChecked ? ' checked' : ''}" style="cursor:default;font-size:11px">${i}</div>`;
+    }
+
+    // Recording history
+    const recs = entry.recordings || [];
+    let recsHtml = '';
+    if (recs.length > 0) {
+      recsHtml = `<div class="hk-rec-history">
+        <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:4px">Riwayat Rekaman</div>
+        ${recs.map((r, idx) => `
+          <div class="hk-rec-item">
+            <button class="hk-rec-item-play" onclick="event.stopPropagation();playHkArchive(${entry.surahNum},${idx})">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </button>
+            <div class="hk-rec-item-info">
+              <div class="hk-rec-item-range">Ayat ${r.from}–${r.to}</div>
+              <div class="hk-rec-item-date">${r.date || '—'}</div>
+            </div>
+            <div class="hk-rec-item-dur">${r.duration || 0}s</div>
+          </div>
+        `).join('')}
+      </div>`;
+    }
+
+    return `
+      <div class="hafalanku-item">
+        <div class="hafalanku-item-top hafalanku-item-expand" onclick="toggleHafalankuExpand(${entry.surahNum})">
+          <span class="hafalanku-item-name">${isComplete ? '✅ ' : ''}${entry.surahNum}. ${name}</span>
+          <span class="hafalanku-item-pct">${pct}%</span>
+        </div>
+        <div class="hafalanku-item-bar">
+          <div class="hafalanku-item-fill" style="width:${pct}%"></div>
+        </div>
+        <div class="hafalanku-item-meta">
+          <span>${checked}/${totalAyahs} ayat · ${recs.length} rekaman</span>
+          <span style="cursor:pointer;color:var(--err);font-weight:700;font-size:11px" onclick="event.stopPropagation();removeHafalanSurah(${entry.surahNum})">Hapus</span>
+        </div>
+        <div class="hafalanku-ayat-grid" id="hk-grid-${entry.surahNum}">
+          <!-- Record new range -->
+          <button class="hk-rec-start-btn" onclick="event.stopPropagation();openHkRecModal(${entry.surahNum})" style="width:100%;justify-content:center;margin-bottom:10px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+            Rekam & Tambah Ayat
+          </button>
+          <!-- Ayat grid (visual only) -->
+          <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:6px">Progress Ayat</div>
+          <div class="ayat-checks">${ayatHtml}</div>
+          ${recsHtml}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function createHafalankuEmpty() {
+  const div = document.createElement('div');
+  div.className = 'hafalanku-empty';
+  div.id = 'hafalanku-empty';
+  div.innerHTML = `
+    <div class="hafalanku-empty-icon">📚</div>
+    <div class="hafalanku-empty-text">Belum ada hafalan</div>
+    <div class="hafalanku-empty-sub">Tambahkan surah yang sedang kamu hafal di atas</div>`;
+  return div;
+}
+
+function renderHafalankuBeranda() {
+  const data = getHafalankuData();
+  const card = document.getElementById('hafalanku-beranda');
+  if (data.length === 0) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = 'block';
+
+  let totalAyahs = 0, totalChecked = 0, totalRecs = 0;
+  data.forEach(entry => {
+    const meta = JUZ_SURAHS[entry.surahNum] || SURAHS[entry.surahNum];
+    const count = meta ? (meta.ayahs ? meta.ayahs.length : meta.ayahCount) : 0;
+    totalAyahs += count;
+    totalChecked += entry.checkedAyahs ? entry.checkedAyahs.length : 0;
+    totalRecs += entry.recordings ? entry.recordings.length : 0;
+  });
+
+  const pct = totalAyahs > 0 ? Math.round((totalChecked / totalAyahs) * 100) : 0;
+  document.getElementById('hk-beranda-count').textContent = data.length + ' surah';
+  document.getElementById('hk-beranda-fill').style.width = pct + '%';
+  document.getElementById('hk-beranda-ayat').textContent = totalChecked;
+  document.getElementById('hk-beranda-total').textContent = totalAyahs;
+}
+
+function initHafalankuPage() {
+  populateSurahSel('hk-add-surah-sel', 114);
+  renderHafalankuList();
+  renderHafalankuBeranda();
+}
+
 
 window.addEventListener('DOMContentLoaded', async () => {
   // Populate all selectors
@@ -3735,6 +4777,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // Init beranda
   initBeranda();
+
+  // Init Hafalan Saya
+  initHafalankuPage();
 
   // Init Supabase
   initSupabase();
