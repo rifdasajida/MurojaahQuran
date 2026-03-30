@@ -1684,7 +1684,7 @@ async function doGoogleLogin() {
   btn.innerHTML = '<div class="auth-spinner"></div> Menghubungkan...';
   const { error } = await sbClient.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: window.location.href }
+    options: { redirectTo: 'https://smartmurojaahquran.vercel.app' }
   });
   if (error) {
     document.getElementById('auth-err').textContent = error.message;
