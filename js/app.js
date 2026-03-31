@@ -274,7 +274,7 @@ function initSupabase() {
 
     // From here: these are real user-initiated auth changes
     if (event === 'SIGNED_IN' && session) {
-      // Real new login — clear guest data and reload
+      // Real new login — clear guest data, then reload so onLoggedIn loads from cloud
       localStorage.removeItem('murajaah_hafalanku');
       window.location.reload();
       return;
@@ -323,7 +323,7 @@ async function doLogout() {
   showToast('Berhasil keluar');
 }
 
-function onLoggedIn(user) {
+async function onLoggedIn(user) {
   closeAuthModal();
   const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '?';
   const initials = name.substring(0, 2).toUpperCase();
@@ -332,6 +332,25 @@ function onLoggedIn(user) {
   document.getElementById('topbar-user').style.display = 'flex';
   document.getElementById('topbar-login-btn').style.display = 'none';
   document.getElementById('greeting-name').textContent = `Assalamualaikum, ${name.split(' ')[0]} 👋`;
+
+  // Load hafalan data from cloud and merge with local
+  const loaded = await loadHafalankuFromCloud();
+  if (loaded) {
+    // Re-render hafalan UI with cloud data
+    renderHafalankuList();
+    renderHafalankuBeranda();
+  } else {
+    // No cloud data — sync current local data to cloud for first time
+    const localData = getHafalankuData();
+    if (localData.length > 0) {
+      syncHafalankuToCloud(localData);
+    }
+  }
+
+  // Update login banner visibility
+  const banner = document.getElementById('hk-login-banner');
+  if (banner) banner.style.display = 'none';
+
   refreshBeranda();
 }
 
@@ -1111,9 +1130,15 @@ let sessionRunStart=-1;
 let retryMode=false, retryCursor=-1, retryAyahStart=-1;
 
 // ════════════════════════════════════════════════════════════
-//  SOUND FEEDBACK
+//  SOUND FEEDBACK (with debounce to prevent duplicate sounds on mobile)
 // ════════════════════════════════════════════════════════════
+let _lastSoundTime = 0;
+const _SOUND_DEBOUNCE = 400; // ms — prevent same sound firing multiple times
+
 function playCorrectSound(){
+  const now = Date.now();
+  if (now - _lastSoundTime < _SOUND_DEBOUNCE) return;
+  _lastSoundTime = now;
   try{
     const ctx=new(window.AudioContext||window.webkitAudioContext)();
     [800,1000].forEach((freq,i)=>{
@@ -1128,6 +1153,9 @@ function playCorrectSound(){
   }catch(e){}
 }
 function playWrongSound(){
+  const now = Date.now();
+  if (now - _lastSoundTime < _SOUND_DEBOUNCE) return;
+  _lastSoundTime = now;
   try{
     const ctx=new(window.AudioContext||window.webkitAudioContext)();
     const osc=ctx.createOscillator(),gain=ctx.createGain();
@@ -1394,6 +1422,21 @@ function createRec(){
   r.onend=()=>{
     recRunning=false;
     if(!sessionActive){setMicOff();return;}
+    // Process any remaining buffer from old rec before creating new one
+    if(r._finalBuffer && r._finalBuffer.trim()){
+      clearTimeout(window._hafaFeedbackTimer);
+      window._hafaFeedbackTimer=null;
+      const finalText = r._finalBuffer.trim();
+      r._finalBuffer = '';
+      if(finalText){
+        window._lastProcessedText = finalText;
+        const tokens = finalText.split(/\s+/).filter(Boolean);
+        if(tokens.length > 0) processTokensStream(tokens);
+      }
+    }
+    // Clear any pending timer from old rec
+    clearTimeout(window._hafaFeedbackTimer);
+    window._hafaFeedbackTimer=null;
     // Restart SR — create fresh instance to avoid stale state on Safari
     rec=createRec();if(!rec)return;
     setTimeout(()=>{if(sessionActive&&rec){try{rec.start();}catch(e){}}}, _SR_RESTART_DELAY);
@@ -1415,8 +1458,19 @@ function clearInterimMark(){
 //  STREAMING TOKEN PROCESSOR
 //  Proses setiap final token langsung, kata per kata
 // ════════════════════════════════════════════════════════════
+let _lastProcessCursor = -1;
+let _lastProcessTime = 0;
+
 function processTokensStream(tokens){
   if(!tokens.length||cursor>=allWords.length)return;
+
+  // Dedup guard: if same cursor position processed very recently, skip
+  const now = Date.now();
+  if(cursor === _lastProcessCursor && now - _lastProcessTime < 500){
+    return;
+  }
+  _lastProcessCursor = cursor;
+  _lastProcessTime = now;
 
   let si=0;
 
@@ -1429,7 +1483,8 @@ function processTokensStream(tokens){
   }
   // More lenient threshold — don't mark wrong from just one bad token
   if(bestScore<0.22){
-    // Tokens don't match current word — give feedback, show what was captured
+    // Tokens don't match current word — give feedback with sound
+    playWrongSound();
     setDot('warn','⚠️ Bacaan tidak cocok — coba ulangi dari kata yang disorot');
     // Flash the current cursor word to show user where they should be reading
     if(cursor<allWords.length){
@@ -1439,6 +1494,10 @@ function processTokensStream(tokens){
       w.el.style.outlineOffset = '2px';
       setTimeout(()=>{ w.el.style.outline=''; w.el.style.outlineOffset=''; }, 2000);
     }
+    // Flush buffer to prevent stale tokens on mobile
+    if(rec){ rec._finalBuffer=''; }
+    clearTimeout(window._hafaFeedbackTimer);
+    window._hafaFeedbackTimer=null;
     return;
   }
   si=bestOffset;
@@ -2698,6 +2757,77 @@ function getHafalankuData() {
 }
 function saveHafalankuData(data) {
   localStorage.setItem('murajaah_hafalanku', JSON.stringify(data));
+  // Auto-sync to cloud if logged in
+  syncHafalankuToCloud(data);
+}
+
+// ════════════════════════════════════════════════════════════
+//  HAFALANKU CLOUD SYNC (Supabase)
+// ════════════════════════════════════════════════════════════
+let _hafalankuSyncTimeout = null;
+
+async function syncHafalankuToCloud(data) {
+  if (!sbClient || !currentUser) return;
+  // Debounce — wait 1s before syncing to avoid rapid writes
+  clearTimeout(_hafalankuSyncTimeout);
+  _hafalankuSyncTimeout = setTimeout(async () => {
+    try {
+      // Clean data for cloud — remove blob URLs from recordings (not transferable)
+      const cleanData = (data || []).map(entry => ({
+        ...entry,
+        recordings: (entry.recordings || []).map(r => ({
+          ...r,
+          audioUrl: r.audioUrl && r.audioUrl.startsWith('blob:') ? null : r.audioUrl
+        }))
+      }));
+      const { error } = await sbClient.from('hafalanku').upsert({
+        user_id: currentUser.id,
+        data: JSON.stringify(cleanData),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+      if (error) {
+        // Table might not exist yet — silently fail, data is still in localStorage
+        console.warn('Hafalanku sync error:', error.message);
+      }
+    } catch (e) {
+      console.warn('Hafalanku sync failed:', e);
+    }
+  }, 1000);
+}
+
+async function loadHafalankuFromCloud() {
+  if (!sbClient || !currentUser) return false;
+  try {
+    const { data, error } = await sbClient.from('hafalanku')
+      .select('data')
+      .eq('user_id', currentUser.id)
+      .single();
+    if (error) {
+      // No data found or table doesn't exist
+      console.warn('Hafalanku load error:', error.message);
+      return false;
+    }
+    if (data && data.data) {
+      const cloudData = JSON.parse(data.data);
+      if (Array.isArray(cloudData) && cloudData.length > 0) {
+        // Merge: cloud data takes priority, but keep any local entries not in cloud
+        const localData = JSON.parse(localStorage.getItem('murajaah_hafalanku') || '[]');
+        const merged = [...cloudData];
+        // Add local-only entries that don't exist in cloud
+        localData.forEach(localEntry => {
+          if (localEntry && localEntry.surahNum && !merged.find(c => c.surahNum === localEntry.surahNum)) {
+            merged.push(localEntry);
+          }
+        });
+        localStorage.setItem('murajaah_hafalanku', JSON.stringify(merged));
+        return true;
+      }
+    }
+    return false;
+  } catch (e) {
+    console.warn('Hafalanku cloud load failed:', e);
+    return false;
+  }
 }
 
 function addHafalanSurah() {
@@ -2950,7 +3080,7 @@ function toggleHkPlayback() {
   }
 }
 
-function saveHkRecording() {
+async function saveHkRecording() {
   if (!hkRecState.blob) { showToast('❌ Rekam audio dulu'); return; }
   const from = parseInt(document.getElementById('hk-rec-from').value) || hkRecState.from;
   const to = parseInt(document.getElementById('hk-rec-to').value) || hkRecState.to;
@@ -2959,6 +3089,26 @@ function saveHkRecording() {
   const data = getHafalankuData();
   const entry = data.find(d => d.surahNum === surahNum);
   if (!entry) return;
+
+  // Upload audio to Supabase Storage if logged in
+  let audioUrl = hkRecState.objectUrl || null;
+  if (sbClient && currentUser && hkRecState.blob) {
+    try {
+      const fileName = `${currentUser.id}/hk_${surahNum}_${Date.now()}.webm`;
+      const { data: uploadData, error: uploadErr } = await sbClient.storage
+        .from('setoran-audio')
+        .upload(fileName, hkRecState.blob, { contentType: 'audio/webm' });
+      if (!uploadErr && uploadData) {
+        const { data: urlData } = sbClient.storage.from('setoran-audio').getPublicUrl(fileName);
+        if (urlData?.publicUrl) {
+          audioUrl = urlData.publicUrl;
+        }
+      }
+    } catch (e) {
+      console.warn('Hafalan audio upload failed:', e);
+      // Fall back to blob URL (won't persist but at least works this session)
+    }
+  }
 
   // Check ayahs in range
   for (let i = from; i <= to; i++) {
@@ -2972,7 +3122,7 @@ function saveHkRecording() {
     from, to,
     duration: hkRecState.seconds,
     date: new Date().toISOString().split('T')[0],
-    audioUrl: hkRecState.objectUrl || null
+    audioUrl: audioUrl
   });
 
   saveHafalankuData(data);
