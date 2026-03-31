@@ -2578,7 +2578,7 @@ function setMurojaahMode(mode) {
     bacaBtn.classList.remove('active');
     controls.style.display = '';
     if (ctxText) ctxText.textContent = 'Yuk ulang hafalan kamu dengan klik tombol mic di bawah.';
-    showToast('Mode Murojaah — tap kata untuk mengintip');
+    if (currentPage === 'hafalan') showToast('Mode Murojaah — tap kata untuk mengintip');
     trackDailyActivity('murojaah');
   } else {
     mushaf.classList.remove('mode-uji');
