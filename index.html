@@ -6,6 +6,14 @@
 <title>Murajaah — Hafalan Al-Quran</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Google Analytics (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DGTDD0RQ9K"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-DGTDD0RQ9K', { send_page_view: false });
+</script>
 <style>
 @font-face {
   font-family: 'UthmanicHafs';
@@ -2107,6 +2115,14 @@ function navTo(page) {
   try {
     if (window.va) window.va('event', { name: 'pageview', data: { page: PAGE_NAMES[page] || page } });
     if (window.vaq) window.vaq.push(['event', { name: 'pageview', data: { page: PAGE_NAMES[page] || page } }]);
+  } catch(e) {}
+  // Track pageview for Google Analytics (GA4)
+  try {
+    if (window.gtag) gtag('event', 'page_view', {
+      page_title: PAGE_NAMES[page] || page,
+      page_location: location.href,
+      page_path: '/' + page
+    });
   } catch(e) {}
 }
 
