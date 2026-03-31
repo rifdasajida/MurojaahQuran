@@ -274,16 +274,20 @@ function initSupabase() {
 
     // From here: these are real user-initiated auth changes
     if (event === 'SIGNED_IN' && session) {
-      // Real new login — clear guest data, then reload so onLoggedIn loads from cloud
+      // Real new login — clear ALL guest data, then reload so onLoggedIn loads from cloud
       localStorage.removeItem('murajaah_hafalanku');
+      localStorage.removeItem('murajaah_activity_dates');
+      localStorage.removeItem('murajaah_setoran');
       window.location.reload();
       return;
     } else if (event === 'TOKEN_REFRESHED' && session) {
       currentUser = session.user;
       onLoggedIn(currentUser);
     } else if (event === 'SIGNED_OUT') {
-      // Clear account data on logout so it doesn't leak to guest
+      // Clear ALL account data on logout so it doesn't leak to guest
       localStorage.removeItem('murajaah_hafalanku');
+      localStorage.removeItem('murajaah_activity_dates');
+      localStorage.removeItem('murajaah_setoran');
       window.location.reload();
       return;
     }
@@ -333,10 +337,9 @@ async function onLoggedIn(user) {
   document.getElementById('topbar-login-btn').style.display = 'none';
   document.getElementById('greeting-name').textContent = `Assalamualaikum, ${name.split(' ')[0]} 👋`;
 
-  // Load hafalan data from cloud and merge with local
+  // Load hafalan data from cloud
   const loaded = await loadHafalankuFromCloud();
   if (loaded) {
-    // Re-render hafalan UI with cloud data
     renderHafalankuList();
     renderHafalankuBeranda();
   } else {
@@ -344,6 +347,16 @@ async function onLoggedIn(user) {
     const localData = getHafalankuData();
     if (localData.length > 0) {
       syncHafalankuToCloud(localData);
+    }
+  }
+
+  // Load activity dates from cloud
+  const actLoaded = await loadActivityFromCloud();
+  if (!actLoaded) {
+    // No cloud activity — sync local activity to cloud
+    const localAct = getActivityDates();
+    if (localAct.length > 0) {
+      syncActivityToCloud(localAct);
     }
   }
 
@@ -416,7 +429,7 @@ function renderDailyQuote() {
 }
 
 // ════════════════════════════════════════════════════════════
-//  ACTIVITY TRACKING (localStorage based)
+//  ACTIVITY TRACKING (localStorage + cloud sync)
 // ════════════════════════════════════════════════════════════
 function getActivityDates() {
   return JSON.parse(localStorage.getItem('murajaah_activity_dates') || '[]');
@@ -428,7 +441,47 @@ function trackDailyActivity(type) {
     dates.push(today);
     dates.sort();
     localStorage.setItem('murajaah_activity_dates', JSON.stringify(dates));
+    syncActivityToCloud(dates);
     if (currentPage === 'beranda') refreshBeranda();
+  }
+}
+
+let _activitySyncTimeout = null;
+async function syncActivityToCloud(dates) {
+  if (!sbClient || !currentUser) return;
+  clearTimeout(_activitySyncTimeout);
+  _activitySyncTimeout = setTimeout(async () => {
+    try {
+      await sbClient.from('hafalanku').upsert({
+        user_id: currentUser.id,
+        activity_dates: JSON.stringify(dates),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+    } catch (e) {
+      console.warn('Activity sync failed:', e);
+    }
+  }, 1000);
+}
+
+async function loadActivityFromCloud() {
+  if (!sbClient || !currentUser) return false;
+  try {
+    const { data, error } = await sbClient.from('hafalanku')
+      .select('activity_dates')
+      .eq('user_id', currentUser.id)
+      .single();
+    if (error || !data) return false;
+    if (data.activity_dates) {
+      const cloudDates = JSON.parse(data.activity_dates);
+      if (Array.isArray(cloudDates) && cloudDates.length > 0) {
+        localStorage.setItem('murajaah_activity_dates', JSON.stringify(cloudDates));
+        return true;
+      }
+    }
+    return false;
+  } catch (e) {
+    console.warn('Activity cloud load failed:', e);
+    return false;
   }
 }
 function calcActivityStreak() {
@@ -2498,7 +2551,7 @@ function setDotSambung(state, text) {
 // ════════════════════════════════════════════════════════════
 //  MODE BACA / UJI
 // ════════════════════════════════════════════════════════════
-let murojaahMode = 'baca'; // 'baca' or 'uji'
+let murojaahMode = 'uji'; // 'baca' or 'uji'
 
 function setMurojaahMode(mode) {
   murojaahMode = mode;
@@ -2513,7 +2566,7 @@ function setMurojaahMode(mode) {
     ujiBtn.classList.add('active');
     bacaBtn.classList.remove('active');
     controls.style.display = '';
-    if (ctxText) ctxText.textContent = 'Yuk mulai cek ulang hafalan kamu dengan klik tombol mic di bawah.';
+    if (ctxText) ctxText.textContent = 'Yuk ulang hafalan kamu dengan klik tombol mic di bawah.';
     showToast('Mode Murojaah — tap kata untuk mengintip');
     trackDailyActivity('murojaah');
   } else {
@@ -2521,7 +2574,7 @@ function setMurojaahMode(mode) {
     bacaBtn.classList.add('active');
     ujiBtn.classList.remove('active');
     controls.style.display = 'none';
-    if (ctxText) ctxText.textContent = 'Kamu dalam mode baca Al-Quran saat ini. Pindah ke Mode Murojaah untuk cek ulang hafalan kamu.';
+    if (ctxText) ctxText.textContent = 'Saat ini kamu dalam mode baca Al-Quran. Pindah ke Mode Murojaah untuk cek hafalanmu.';
     if (sessionActive) stopSession();
     mushaf.querySelectorAll('.w.revealed, .w.revealing').forEach(w => {
       w.classList.remove('revealed', 'revealing');
@@ -3338,6 +3391,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // Load default surah for hafalan
   await loadSurah();
+
+  // Apply default mode (murojaah/uji)
+  setMurojaahMode('uji');
 
   // Init beranda
   initBeranda();

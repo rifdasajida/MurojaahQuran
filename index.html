@@ -1497,13 +1497,13 @@ body {
         <!-- Mode Toggle — FIRST -->
         <div style="display:flex;align-items:center;gap:8px">
           <div class="mode-toggle-wrap" style="flex:1">
-            <button class="mode-toggle-btn active" id="mode-baca-btn" onclick="setMurojaahMode('baca')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              Mode Baca
-            </button>
-            <button class="mode-toggle-btn" id="mode-uji-btn" onclick="setMurojaahMode('uji')">
+            <button class="mode-toggle-btn active" id="mode-uji-btn" onclick="setMurojaahMode('uji')">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
               Mode Murojaah
+            </button>
+            <button class="mode-toggle-btn" id="mode-baca-btn" onclick="setMurojaahMode('baca')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Mode Baca
             </button>
           </div>
         </div>
@@ -1519,7 +1519,7 @@ body {
           </div>
         </div>
         <!-- Context wording -->
-        <div id="mode-context-text" style="font-size:11px;color:var(--muted);line-height:1.5;padding:2px 0">Kamu dalam mode baca Al-Quran saat ini. Pindah ke Mode Murojaah untuk cek ulang hafalan kamu.</div>
+        <div id="mode-context-text" style="font-size:11px;color:var(--muted);line-height:1.5;padding:2px 0">Yuk ulang hafalan kamu dengan klik tombol mic di bawah.</div>
       </div>
 
       <!-- Mushaf display -->
@@ -1528,7 +1528,7 @@ body {
       </div>
 
       <!-- Controls bottom — only visible in Mode Uji -->
-      <div class="hafalan-controls" id="hafalan-controls" style="display:none">
+      <div class="hafalan-controls" id="hafalan-controls">
         <div class="retry-banner" id="retryBanner">
           <div class="retry-banner-header">
             <span style="font-size:10px;font-weight:700;color:var(--err);letter-spacing:1px;text-transform:uppercase;font-family:var(--font-mono)" id="retryAyahNum">AYAT —</span>
