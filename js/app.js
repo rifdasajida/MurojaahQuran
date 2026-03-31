@@ -249,11 +249,15 @@ function initSupabase() {
   sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   let _initialAuthDone = false;
+  // Track auth state per tab to detect real transitions vs duplicate events
+  const _prevAuthUid = sessionStorage.getItem('murajaah_auth_uid') || null;
 
   sbClient.auth.onAuthStateChange((event, session) => {
+    const newUid = session?.user?.id || null;
+
     if (event === 'INITIAL_SESSION') {
-      // First load — just restore session, no reload
       _initialAuthDone = true;
+      sessionStorage.setItem('murajaah_auth_uid', newUid || '');
       if (session) {
         currentUser = session.user;
         onLoggedIn(currentUser);
@@ -262,9 +266,8 @@ function initSupabase() {
     }
 
     if (!_initialAuthDone) {
-      // SIGNED_IN can fire before INITIAL_SESSION on some Supabase versions
-      // Treat it as initial session restore, not a new login
       _initialAuthDone = true;
+      sessionStorage.setItem('murajaah_auth_uid', newUid || '');
       if (session) {
         currentUser = session.user;
         onLoggedIn(currentUser);
@@ -272,9 +275,15 @@ function initSupabase() {
       return;
     }
 
-    // From here: these are real user-initiated auth changes
+    // Only reload if auth state actually changed (different user or login/logout transition)
     if (event === 'SIGNED_IN' && session) {
-      // Real new login — clear ALL guest data, then reload so onLoggedIn loads from cloud
+      // Skip if same user already loaded in this tab (e.g. broadcast from another tab)
+      if (_prevAuthUid === newUid) {
+        currentUser = session.user;
+        return;
+      }
+      // Real new login — clear guest data and reload
+      sessionStorage.setItem('murajaah_auth_uid', newUid || '');
       localStorage.removeItem('murajaah_hafalanku');
       localStorage.removeItem('murajaah_activity_dates');
       localStorage.removeItem('murajaah_setoran');
@@ -284,7 +293,9 @@ function initSupabase() {
       currentUser = session.user;
       onLoggedIn(currentUser);
     } else if (event === 'SIGNED_OUT') {
-      // Clear ALL account data on logout so it doesn't leak to guest
+      // Skip if already logged out in this tab
+      if (!_prevAuthUid) return;
+      sessionStorage.setItem('murajaah_auth_uid', '');
       localStorage.removeItem('murajaah_hafalanku');
       localStorage.removeItem('murajaah_activity_dates');
       localStorage.removeItem('murajaah_setoran');
