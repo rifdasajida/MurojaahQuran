@@ -86,7 +86,7 @@ body {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-bottom: calc(var(--nav-h) + 8px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(var(--nav-h) + 32px + env(safe-area-inset-bottom, 0px));
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
 }
@@ -2079,6 +2079,15 @@ const DAILY_QUOTES = [
 // ════════════════════════════════════════════════════════════
 let currentPage = 'beranda';
 
+// Page name mapping for analytics
+const PAGE_NAMES = {
+  beranda: 'Beranda',
+  hafalan: 'Murojaah',
+  hafalanku: 'Hafalan Saya',
+  audio: 'Dengarkan Ayat',
+  sambung: 'Sambung Ayat'
+};
+
 function navTo(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -2087,11 +2096,18 @@ function navTo(page) {
   if (navBtn) navBtn.classList.add('active');
   document.getElementById('app').scrollTop = 0;
   currentPage = page;
-  // Update URL hash without triggering hashchange
-  history.replaceState(null, '', '#' + page);
+  // Update URL — use pushState so back/forward works
+  if (location.hash !== '#' + page) {
+    history.pushState({ page }, '', '#' + page);
+  }
   if (page === 'beranda') refreshBeranda();
   if (page === 'setoran') refreshRiwayat();
   if (page === 'hafalanku') { renderHafalankuList(); renderHafalankuBeranda(); }
+  // Track pageview for Vercel Analytics
+  try {
+    if (window.va) window.va('event', { name: 'pageview', data: { page: PAGE_NAMES[page] || page } });
+    if (window.vaq) window.vaq.push(['event', { name: 'pageview', data: { page: PAGE_NAMES[page] || page } }]);
+  } catch(e) {}
 }
 
 // Route from URL hash on load & back/forward
@@ -2102,7 +2118,10 @@ function routeFromHash() {
     navTo(hash);
   }
 }
-window.addEventListener('hashchange', routeFromHash);
+window.addEventListener('popstate', (e) => {
+  if (e.state && e.state.page) navTo(e.state.page);
+  else routeFromHash();
+});
 
 // ════════════════════════════════════════════════════════════
 //  TOAST
