@@ -2810,16 +2810,8 @@ async function loadHafalankuFromCloud() {
     if (data && data.data) {
       const cloudData = JSON.parse(data.data);
       if (Array.isArray(cloudData) && cloudData.length > 0) {
-        // Merge: cloud data takes priority, but keep any local entries not in cloud
-        const localData = JSON.parse(localStorage.getItem('murajaah_hafalanku') || '[]');
-        const merged = [...cloudData];
-        // Add local-only entries that don't exist in cloud
-        localData.forEach(localEntry => {
-          if (localEntry && localEntry.surahNum && !merged.find(c => c.surahNum === localEntry.surahNum)) {
-            merged.push(localEntry);
-          }
-        });
-        localStorage.setItem('murajaah_hafalanku', JSON.stringify(merged));
+        // Cloud data fully replaces local — no merge with guest data
+        localStorage.setItem('murajaah_hafalanku', JSON.stringify(cloudData));
         return true;
       }
     }
@@ -3138,16 +3130,62 @@ async function saveHkRecording() {
 
 // Play archived recording
 let _hkArchiveAudio = null;
+let _hkArchivePlaying = null; // track which button is currently playing: {surahNum, recIdx}
+
 function playHkArchive(surahNum, recIdx) {
   const data = getHafalankuData();
   const entry = data.find(d => d.surahNum === surahNum);
   if (!entry || !entry.recordings[recIdx]) return;
   const rec = entry.recordings[recIdx];
+  const btnId = `hk-play-${surahNum}-${recIdx}`;
+  const btn = document.getElementById(btnId);
+
+  // If same recording is playing → pause it
+  if (_hkArchiveAudio && _hkArchivePlaying &&
+      _hkArchivePlaying.surahNum === surahNum && _hkArchivePlaying.recIdx === recIdx) {
+    if (!_hkArchiveAudio.paused) {
+      _hkArchiveAudio.pause();
+      if (btn) btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+      return;
+    } else {
+      // Resume
+      _hkArchiveAudio.play().catch(() => showToast('Gagal memutar audio'));
+      if (btn) btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>';
+      return;
+    }
+  }
+
+  // Stop previous if different
+  if (_hkArchiveAudio) {
+    _hkArchiveAudio.pause();
+    _hkArchiveAudio = null;
+    // Reset previous button icon
+    if (_hkArchivePlaying) {
+      const prevBtn = document.getElementById(`hk-play-${_hkArchivePlaying.surahNum}-${_hkArchivePlaying.recIdx}`);
+      if (prevBtn) prevBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+    }
+  }
+
   if (!rec.audioUrl) { showToast('Audio tidak tersedia'); return; }
 
-  if (_hkArchiveAudio) { _hkArchiveAudio.pause(); _hkArchiveAudio = null; }
   _hkArchiveAudio = new Audio(rec.audioUrl);
-  _hkArchiveAudio.play().catch(() => showToast('Gagal memutar audio'));
+  _hkArchivePlaying = { surahNum, recIdx };
+
+  // Change icon to pause
+  if (btn) btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>';
+
+  _hkArchiveAudio.onended = () => {
+    // Reset icon back to play when finished
+    if (btn) btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+    _hkArchivePlaying = null;
+    _hkArchiveAudio = null;
+  };
+
+  _hkArchiveAudio.play().catch(() => {
+    showToast('Gagal memutar audio');
+    if (btn) btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+    _hkArchivePlaying = null;
+  });
 }
 
 // ── Render ──
@@ -3197,7 +3235,7 @@ function renderHafalankuList() {
         <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:4px">Riwayat Setoran</div>
         ${recs.map((r, idx) => `
           <div class="hk-rec-item">
-            <button class="hk-rec-item-play" onclick="event.stopPropagation();playHkArchive(${entry.surahNum},${idx})">
+            <button class="hk-rec-item-play" id="hk-play-${entry.surahNum}-${idx}" onclick="event.stopPropagation();playHkArchive(${entry.surahNum},${idx})">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             </button>
             <div class="hk-rec-item-info">
