@@ -248,18 +248,42 @@ function initSupabase() {
   }
   sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+  let _initialAuthDone = false;
+
   sbClient.auth.onAuthStateChange((event, session) => {
+    if (event === 'INITIAL_SESSION') {
+      // First load — just restore session, no reload
+      _initialAuthDone = true;
+      if (session) {
+        currentUser = session.user;
+        onLoggedIn(currentUser);
+      }
+      return;
+    }
+
+    if (!_initialAuthDone) {
+      // SIGNED_IN can fire before INITIAL_SESSION on some Supabase versions
+      // Treat it as initial session restore, not a new login
+      _initialAuthDone = true;
+      if (session) {
+        currentUser = session.user;
+        onLoggedIn(currentUser);
+      }
+      return;
+    }
+
+    // From here: these are real user-initiated auth changes
     if (event === 'SIGNED_IN' && session) {
-      // Reload page to ensure clean data state on login
+      // Real new login — clear guest data and reload
+      localStorage.removeItem('murajaah_hafalanku');
       window.location.reload();
       return;
     } else if (event === 'TOKEN_REFRESHED' && session) {
       currentUser = session.user;
       onLoggedIn(currentUser);
     } else if (event === 'SIGNED_OUT') {
-      // Clear local hafalan data on logout so account data doesn't leak to guest
+      // Clear account data on logout so it doesn't leak to guest
       localStorage.removeItem('murajaah_hafalanku');
-      // Reload page to ensure clean state
       window.location.reload();
       return;
     }
