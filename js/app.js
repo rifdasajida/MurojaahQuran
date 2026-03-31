@@ -249,12 +249,19 @@ function initSupabase() {
   sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   sbClient.auth.onAuthStateChange((event, session) => {
-    if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
+    if (event === 'SIGNED_IN' && session) {
+      // Reload page to ensure clean data state on login
+      window.location.reload();
+      return;
+    } else if (event === 'TOKEN_REFRESHED' && session) {
       currentUser = session.user;
       onLoggedIn(currentUser);
     } else if (event === 'SIGNED_OUT') {
-      currentUser = null;
-      onLoggedOut();
+      // Clear local hafalan data on logout so account data doesn't leak to guest
+      localStorage.removeItem('murajaah_hafalanku');
+      // Reload page to ensure clean state
+      window.location.reload();
+      return;
     }
   });
 
@@ -1660,12 +1667,13 @@ function onSurahComplete(){
 // ════════════════════════════════════════════════════════════
 //  AUDIO REPEAT
 // ════════════════════════════════════════════════════════════
-let audioPlaying=false,audioCurrentRepeat=0,audioCurrentAyah=0,audioTimeoutId=null,audioCurrentSurah=68;
+let audioPlaying=false,audioCurrentRepeat=0,audioCurrentAyah=0,audioTimeoutId=null,audioCurrentSurah=parseInt(localStorage.getItem('murajaah_last_audio_surah'))||1;
 let audioCurrentEl=null; // track elemen audio yg sedang diputar
 function getAudioUrl(s,a){return `https://everyayah.com/data/Alafasy_128kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`;}
 function syncAudioSurah(){audioCurrentSurah=parseInt(document.getElementById('audioSurahSel').value);localStorage.setItem('murajaah_last_audio_surah',audioCurrentSurah);}
 function toggleAudioPlayer(){if(audioPlaying)stopAudioPlayer();else startAudioPlayer();}
 function startAudioPlayer(){
+  syncAudioSurah(); // always sync surah from dropdown before playing
   const start=parseInt(document.getElementById('audioStartAyah').value);
   const end=parseInt(document.getElementById('audioEndAyah').value);
   const repeat=parseInt(document.getElementById('audioRepeatCount').value);
@@ -3130,4 +3138,76 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // Route to page from URL hash (e.g. #hafalan, #hafalanku)
   routeFromHash();
+
+  // ── Pull-to-refresh ──
+  initPullToRefresh();
 });
+
+// ════════════════════════════════════════════════════════════
+//  PULL-TO-REFRESH
+// ════════════════════════════════════════════════════════════
+function initPullToRefresh() {
+  const appEl = document.getElementById('app');
+  let startY = 0;
+  let pulling = false;
+  let pullIndicator = null;
+  const THRESHOLD = 80; // px to trigger refresh
+
+  // Create pull indicator element
+  pullIndicator = document.createElement('div');
+  pullIndicator.id = 'pull-refresh-indicator';
+  pullIndicator.innerHTML = '<div class="pull-refresh-spinner"></div><span>Tarik untuk refresh</span>';
+  pullIndicator.style.cssText = `
+    position:fixed;top:56px;left:50%;transform:translateX(-50%) translateY(-60px);
+    z-index:99;display:flex;align-items:center;gap:8px;
+    background:var(--surface);padding:8px 18px;border-radius:100px;
+    box-shadow:var(--shadow-md);font-size:12px;font-weight:600;color:var(--muted);
+    transition:transform 0.25s ease,opacity 0.25s ease;opacity:0;pointer-events:none;
+    font-family:var(--font);max-width:480px;
+  `;
+  document.body.appendChild(pullIndicator);
+
+  // Add spinner CSS
+  const style = document.createElement('style');
+  style.textContent = `
+    .pull-refresh-spinner{width:18px;height:18px;border:2.5px solid var(--border);border-top-color:var(--accent);border-radius:50%;display:inline-block;}
+    .pull-refresh-spinner.spinning{animation:ptr-spin 0.6s linear infinite;}
+    @keyframes ptr-spin{to{transform:rotate(360deg)}}
+  `;
+  document.head.appendChild(style);
+
+  appEl.addEventListener('touchstart', (e) => {
+    if (appEl.scrollTop <= 0) {
+      startY = e.touches[0].clientY;
+      pulling = true;
+    }
+  }, { passive: true });
+
+  appEl.addEventListener('touchmove', (e) => {
+    if (!pulling) return;
+    const dy = e.touches[0].clientY - startY;
+    if (dy > 10 && appEl.scrollTop <= 0) {
+      const progress = Math.min(dy / THRESHOLD, 1);
+      pullIndicator.style.transform = `translateX(-50%) translateY(${Math.min(dy * 0.4, 40)}px)`;
+      pullIndicator.style.opacity = progress;
+      pullIndicator.querySelector('span').textContent = dy >= THRESHOLD ? 'Lepas untuk refresh' : 'Tarik untuk refresh';
+    }
+  }, { passive: true });
+
+  appEl.addEventListener('touchend', () => {
+    if (!pulling) return;
+    pulling = false;
+    const currentOpacity = parseFloat(pullIndicator.style.opacity || 0);
+    if (currentOpacity >= 1) {
+      // Trigger refresh
+      pullIndicator.querySelector('span').textContent = 'Memuat ulang...';
+      pullIndicator.querySelector('.pull-refresh-spinner').classList.add('spinning');
+      pullIndicator.style.transform = 'translateX(-50%) translateY(10px)';
+      setTimeout(() => window.location.reload(), 400);
+    } else {
+      // Reset
+      pullIndicator.style.transform = 'translateX(-50%) translateY(-60px)';
+      pullIndicator.style.opacity = '0';
+    }
+  }, { passive: true });
+}
