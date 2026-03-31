@@ -178,7 +178,7 @@ let currentPage = 'beranda';
 const PAGE_NAMES = {
   beranda: 'Beranda',
   hafalan: 'Murojaah',
-  hafalanku: 'Hafalan Saya',
+  hafalanku: 'Hafalanku',
   audio: 'Dengarkan Ayat',
   sambung: 'Sambung Ayat'
 };
@@ -3398,7 +3398,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Init beranda
   initBeranda();
 
-  // Init Hafalan Saya
+  // Init Hafalanku
   initHafalankuPage();
 
   // Init Supabase
