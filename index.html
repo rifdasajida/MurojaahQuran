@@ -52,7 +52,7 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; overflow: hidden; }
+html, body { height: 100dvh; height: 100vh; overflow: hidden; }
 body {
   background: var(--bg);
   font-family: var(--font);
@@ -670,7 +670,7 @@ body {
 /* ══════════════════════════════════════════
    PAGE: CEK HAFALAN
 ══════════════════════════════════════════ */
-.hafalan-page { display: flex; flex-direction: column; height: calc(100vh - 56px - var(--nav-h) - env(safe-area-inset-bottom, 0px)); overflow: hidden; }
+.hafalan-page { display: flex; flex-direction: column; height: calc(100dvh - 56px - var(--nav-h) - env(safe-area-inset-bottom, 0px)); overflow: hidden; }
 .hafalan-top {
   padding: 12px 16px;
   border-bottom: 1px solid var(--border);
@@ -722,10 +722,11 @@ body {
 .bismillah { text-align: center; font-family: var(--font-ar); font-size: clamp(24px, 6vw, 34px); color: var(--gold); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); line-height: 2.2; }
 
 .hafalan-controls {
-  padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  padding: 10px 16px calc(16px + env(safe-area-inset-bottom, 12px));
   border-top: 1px solid var(--border);
   background: var(--surface);
   flex-shrink: 0;
+  margin-bottom: env(safe-area-inset-bottom, 0px);
 }
 .status-row {
   display: flex; align-items: center; gap: 6px;
@@ -3124,15 +3125,15 @@ function createRec(){
   if(!SR)return null;
   const r=new SR();
   r.lang='ar-SA';
-  // Safari doesn't support continuous well — use non-continuous on Safari
-  r.continuous = !_isSafari;
+  // Use non-continuous on mobile AND Safari — prevents duplicate finals
+  r.continuous = !_isMobile && !_isSafari;
   r.interimResults=true;
   r.maxAlternatives=3;
   r._lastFinalIdx=-1;
 
   r.onstart=()=>{recRunning=true;setDot('rec','Mendengarkan...');};
 
-  // Buffer akumulasi final — rolling debounce to avoid premature processing
+  // Buffer akumulasi final
   r._finalBuffer = '';
 
   r.onresult=(e)=>{
@@ -3145,7 +3146,6 @@ function createRec(){
       if(res.isFinal){
         if(i<=r._lastFinalIdx)continue;
         r._lastFinalIdx=i;
-        // Take best alternative
         let bestAlt = '';
         for(let a=0;a<Math.min(res.length,3);a++){
           const alt=res[a].transcript.trim();
@@ -3160,24 +3160,26 @@ function createRec(){
       }
     }
 
-    // === FINAL RESULT — prioritas utama ===
+    // === FINAL RESULT ===
     if(newFinal.trim()){
       clearTimeout(window._interimDisplayTimer);
       window._interimDisplayTimer=null;
       clearInterimMark();
 
-      // Accumulate into buffer
+      // Dedup: skip if identical to last processed text
+      const newNorm = normalizeArabic(newFinal.trim());
+      if(window._lastProcessedText && normalizeArabic(window._lastProcessedText) === newNorm){
+        return; // exact duplicate, skip
+      }
+
       r._finalBuffer += ' ' + newFinal.trim();
       const accumulated = r._finalBuffer.trim();
 
-      // Show captured text live
       const ctRow=document.getElementById('capturedTextRow');
       const ctAr=document.getElementById('capturedTextAr');
       if(ctRow&&ctAr){ctRow.style.display='block';ctAr.textContent=accumulated;ctAr.style.color='var(--accent-dark)';}
 
-      // Fixed deadline — set timer ONCE when first token arrives, don't reset
-      // Extra tokens accumulate in buffer but timer stays the same
-      // This gives consistent ~300ms response on mobile, ~50ms on desktop
+      // Fixed deadline — set timer ONCE, don't reset
       if(!window._hafaFeedbackTimer){
         window._hafaFeedbackTimer=setTimeout(()=>{
           window._hafaFeedbackTimer=null;
@@ -3185,6 +3187,7 @@ function createRec(){
           const finalText = r._finalBuffer.trim();
           r._finalBuffer = '';
           if(!finalText)return;
+          window._lastProcessedText = finalText; // remember for dedup
           const tokens = finalText.split(/\s+/).filter(Boolean);
           if(tokens.length > 0){
             processTokensStream(tokens);
@@ -3194,7 +3197,7 @@ function createRec(){
       return;
     }
 
-    // === INTERIM RESULT — visual only, never trigger errors ===
+    // === INTERIM RESULT — visual only ===
     if(interim && !window._hafaFeedbackTimer && !r._finalBuffer){
       clearTimeout(window._interimDisplayTimer);
       const applyInterim=()=>{
@@ -3390,6 +3393,7 @@ function processTokensStream(tokens){
       if(rec){ rec._finalBuffer=''; }
       clearTimeout(window._hafaFeedbackTimer);
       window._hafaFeedbackTimer=null;
+      window._lastProcessedText=null;
     } else {
       highlightCursor();
       setDot('ok','✓ Lanjut...');
@@ -3469,6 +3473,7 @@ function resetSession(){
   clearTimeout(window._hafaFeedbackTimer); window._hafaFeedbackTimer=null;
   clearTimeout(window._interimDisplayTimer); window._interimDisplayTimer=null;
   if(rec) { rec._finalBuffer=''; }
+  window._lastProcessedText = null;
 
   allWords.forEach(w=>w.el.className='w idle');
   document.getElementById('retryBanner').classList.remove('show');
