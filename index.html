@@ -2087,10 +2087,22 @@ function navTo(page) {
   if (navBtn) navBtn.classList.add('active');
   document.getElementById('app').scrollTop = 0;
   currentPage = page;
+  // Update URL hash without triggering hashchange
+  history.replaceState(null, '', '#' + page);
   if (page === 'beranda') refreshBeranda();
   if (page === 'setoran') refreshRiwayat();
   if (page === 'hafalanku') { renderHafalankuList(); renderHafalankuBeranda(); }
 }
+
+// Route from URL hash on load & back/forward
+function routeFromHash() {
+  const hash = (location.hash || '').replace('#', '');
+  const validPages = ['beranda', 'hafalan', 'hafalanku', 'audio', 'sambung'];
+  if (hash && validPages.includes(hash)) {
+    navTo(hash);
+  }
+}
+window.addEventListener('hashchange', routeFromHash);
 
 // ════════════════════════════════════════════════════════════
 //  TOAST
@@ -4993,6 +5005,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // Init Supabase
   initSupabase();
+
+  // Route to page from URL hash (e.g. #hafalan, #hafalanku)
+  routeFromHash();
 });
 </script>
 </body>
