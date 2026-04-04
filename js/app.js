@@ -1999,7 +1999,7 @@ function renderSambungAyatRanges() {
 
   // Label header
   const hdr = document.createElement('div');
-  hdr.style.cssText = 'font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:2px';
+  hdr.style.cssText = 'font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:2px';
   hdr.textContent = 'Range Ayat';
   container.appendChild(hdr);
 
@@ -2052,7 +2052,7 @@ function renderSambungAyatRanges() {
     };
 
     const maxLbl = document.createElement('span');
-    maxLbl.style.cssText = 'font-size:10px;color:var(--muted2);font-family:var(--font-mono);flex-shrink:0';
+    maxLbl.style.cssText = 'font-size:11px;color:var(--muted2);font-family:var(--font-mono);flex-shrink:0';
     maxLbl.textContent = '/' + maxAyah;
 
     row.appendChild(nameEl);
@@ -3023,11 +3023,11 @@ function openHkRecModal(surahNum) {
     rangeRow.className = 'hk-range-row';
     rangeRow.style.cssText = 'justify-content:center;margin-bottom:14px';
     rangeRow.innerHTML = `
-      <span class="field-label" style="margin:0;font-size:10px">AYAT</span>
+      <span class="field-label" style="margin:0;font-size:11px">AYAT</span>
       <input class="hk-range-input" type="number" id="hk-rec-from" min="1" max="${totalAyahs}" value="${suggestFrom}" onchange="updateHkRangeLabel()">
       <span class="hk-range-sep">–</span>
       <input class="hk-range-input" type="number" id="hk-rec-to" min="1" max="${totalAyahs}" value="${suggestTo}" onchange="updateHkRangeLabel()">
-      <span style="font-size:10px;color:var(--muted2);font-family:var(--font-mono)">/ ${totalAyahs}</span>
+      <span style="font-size:11px;color:var(--muted2);font-family:var(--font-mono)">/ ${totalAyahs}</span>
     `;
     content.insertBefore(rangeRow, content.children[0]);
   } else {
@@ -3296,7 +3296,7 @@ function renderHafalankuList() {
     let recsHtml = '';
     if (recs.length > 0) {
       recsHtml = `<div class="hk-rec-history">
-        <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:4px">Riwayat Setoran</div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:4px">Riwayat Setoran</div>
         ${recs.map((r, idx) => `
           <div class="hk-rec-item">
             <button class="hk-rec-item-play" id="hk-play-${entry.surahNum}-${idx}" onclick="event.stopPropagation();playHkArchive(${entry.surahNum},${idx})">
@@ -3336,7 +3336,7 @@ function renderHafalankuList() {
             Setor Tambah Hafalan
           </button>
           <!-- Ayat grid -->
-          <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:6px">Progress Ayat</div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:6px">Progress Ayat</div>
           ${ayatGridWrapped}
           ${recsHtml}
         </div>
