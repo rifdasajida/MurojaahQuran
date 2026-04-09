@@ -1282,3 +1282,44 @@ body {
 .loading-dot:nth-child(3) { animation-delay: 0.4s; }
 .loading-dots { display: flex; gap: 6px; }
 @keyframes loading-bounce { 0%,80%,100%{transform:scale(0.7);opacity:0.4} 40%{transform:scale(1);opacity:1} }
+
+/* ── Highlighted ayat range row inside Setor Hafalan modal ── */
+.hk-range-row-highlight {
+  justify-content: center;
+  margin-bottom: 16px;
+  padding: 14px 12px;
+  background: rgba(45, 155, 111, 0.08);
+  border: 1.5px dashed var(--accent);
+  border-radius: 14px;
+  animation: hk-range-pulse 1.6s ease-out 1;
+}
+@keyframes hk-range-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(45, 155, 111, 0.35); }
+  60%  { box-shadow: 0 0 0 10px rgba(45, 155, 111, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(45, 155, 111, 0); }
+}
+.hk-range-label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-dark, var(--accent));
+  letter-spacing: 1.5px;
+}
+.hk-range-input-lg {
+  width: 74px !important;
+  padding: 12px 10px !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  border-width: 2px !important;
+  border-color: var(--accent) !important;
+  background: #fff !important;
+}
+.hk-range-input-lg:focus {
+  box-shadow: 0 0 0 4px var(--accent-glow) !important;
+}
+.hk-range-total {
+  font-size: 13px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-weight: 600;
+}

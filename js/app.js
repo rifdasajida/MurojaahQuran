@@ -3009,6 +3009,8 @@ function openHkRecModal(surahNum) {
   document.getElementById('hk-rec-timer').style.display = 'none';
   document.getElementById('hk-rec-player').classList.remove('show');
   document.getElementById('hk-rec-save-btn').style.display = 'none';
+  const _retryBtn = document.getElementById('hk-rec-retry-btn');
+  if (_retryBtn) _retryBtn.style.display = 'none';
   const btn = document.getElementById('hk-rec-btn');
   btn.classList.remove('recording', 'done');
   btn.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>';
@@ -3020,14 +3022,13 @@ function openHkRecModal(surahNum) {
   if (!rangeRow) {
     rangeRow = document.createElement('div');
     rangeRow.id = 'hk-rec-range-row';
-    rangeRow.className = 'hk-range-row';
-    rangeRow.style.cssText = 'justify-content:center;margin-bottom:14px';
+    rangeRow.className = 'hk-range-row hk-range-row-highlight';
     rangeRow.innerHTML = `
-      <span class="field-label" style="margin:0;font-size:11px">AYAT</span>
-      <input class="hk-range-input" type="number" id="hk-rec-from" min="1" max="${totalAyahs}" value="${suggestFrom}" onchange="updateHkRangeLabel()">
+      <span class="field-label hk-range-label">AYAT</span>
+      <input class="hk-range-input hk-range-input-lg" type="number" id="hk-rec-from" min="1" max="${totalAyahs}" value="${suggestFrom}" onchange="updateHkRangeLabel()" onfocus="this.select()">
       <span class="hk-range-sep">–</span>
-      <input class="hk-range-input" type="number" id="hk-rec-to" min="1" max="${totalAyahs}" value="${suggestTo}" onchange="updateHkRangeLabel()">
-      <span style="font-size:11px;color:var(--muted2);font-family:var(--font-mono)">/ ${totalAyahs}</span>
+      <input class="hk-range-input hk-range-input-lg" type="number" id="hk-rec-to" min="1" max="${totalAyahs}" value="${suggestTo}" onchange="updateHkRangeLabel()" onfocus="this.select()">
+      <span class="hk-range-total">/ ${totalAyahs}</span>
     `;
     content.insertBefore(rangeRow, content.children[0]);
   } else {
@@ -3035,7 +3036,11 @@ function openHkRecModal(surahNum) {
     document.getElementById('hk-rec-from').value = suggestFrom;
     document.getElementById('hk-rec-to').max = totalAyahs;
     document.getElementById('hk-rec-to').value = suggestTo;
-    rangeRow.querySelector('span:last-child').textContent = '/ ' + totalAyahs;
+    rangeRow.querySelector('.hk-range-total').textContent = '/ ' + totalAyahs;
+    // Restart pulse animation so the ayat row catches the user's eye on every open
+    rangeRow.classList.remove('hk-range-row-highlight');
+    void rangeRow.offsetWidth;
+    rangeRow.classList.add('hk-range-row-highlight');
   }
 
   const modal = document.getElementById('hk-rec-modal');
@@ -3116,6 +3121,47 @@ function onHkRecDone() {
   document.getElementById('hk-rec-duration').textContent = hkRecState.seconds + 's';
   document.getElementById('hk-rec-player').classList.add('show');
   document.getElementById('hk-rec-save-btn').style.display = 'flex';
+
+  // Inject "Ulangi Rekaman" button if not present
+  let retryBtn = document.getElementById('hk-rec-retry-btn');
+  if (!retryBtn) {
+    retryBtn = document.createElement('button');
+    retryBtn.id = 'hk-rec-retry-btn';
+    retryBtn.type = 'button';
+    retryBtn.className = 'btn-secondary';
+    retryBtn.style.cssText = 'margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px';
+    retryBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-5"/></svg> Ulangi Rekaman';
+    retryBtn.onclick = resetHkRecording;
+    const saveBtn = document.getElementById('hk-rec-save-btn');
+    saveBtn.parentNode.insertBefore(retryBtn, saveBtn.nextSibling);
+  }
+  retryBtn.style.display = 'flex';
+}
+
+function resetHkRecording() {
+  // Stop any playback
+  if (hkRecState.playback) { try { hkRecState.playback.pause(); } catch(e){} hkRecState.playback = null; }
+  if (hkRecState.objectUrl) { URL.revokeObjectURL(hkRecState.objectUrl); }
+  hkRecState.blob = null;
+  hkRecState.objectUrl = null;
+  hkRecState.seconds = 0;
+  hkRecState.isRecording = false;
+
+  // Reset UI back to "tap to record" state
+  const btn = document.getElementById('hk-rec-btn');
+  btn.classList.remove('recording', 'done');
+  btn.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>';
+  document.getElementById('hk-rec-label').textContent = 'Tap untuk rekam';
+  const timerEl = document.getElementById('hk-rec-timer');
+  timerEl.style.display = 'none';
+  timerEl.textContent = '00:00';
+  document.getElementById('hk-rec-player').classList.remove('show');
+  document.getElementById('hk-rec-save-btn').style.display = 'none';
+  const retryBtn = document.getElementById('hk-rec-retry-btn');
+  if (retryBtn) retryBtn.style.display = 'none';
+  // Reset play button icon to play state
+  const playBtn = document.getElementById('hk-rec-play-btn');
+  if (playBtn) playBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
 }
 
 function toggleHkPlayback() {
@@ -3455,7 +3501,29 @@ function initPullToRefresh() {
   `;
   document.head.appendChild(style);
 
+  // Helper: find the nearest scrollable ancestor within #app (e.g. .hafalan-mushaf)
+  function getScrollableAncestor(el) {
+    while (el && el !== appEl && el !== document.body) {
+      const style = window.getComputedStyle(el);
+      const oy = style.overflowY;
+      if ((oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight) {
+        return el;
+      }
+      el = el.parentElement;
+    }
+    return null;
+  }
+
+  let innerScroller = null;
+
   appEl.addEventListener('touchstart', (e) => {
+    innerScroller = getScrollableAncestor(e.target);
+    // If the touch started inside an inner scroller that is NOT at the top,
+    // don't arm PTR at all — user is scrolling that section.
+    if (innerScroller && innerScroller.scrollTop > 0) {
+      pulling = false;
+      return;
+    }
     if (appEl.scrollTop <= 0) {
       startY = e.touches[0].clientY;
       pulling = true;
@@ -3464,6 +3532,13 @@ function initPullToRefresh() {
 
   appEl.addEventListener('touchmove', (e) => {
     if (!pulling) return;
+    // If the inner scroller has since scrolled away from the top, cancel PTR
+    if (innerScroller && innerScroller.scrollTop > 0) {
+      pulling = false;
+      pullIndicator.style.transform = 'translateX(-50%) translateY(-60px)';
+      pullIndicator.style.opacity = '0';
+      return;
+    }
     const dy = e.touches[0].clientY - startY;
     if (dy > 10 && appEl.scrollTop <= 0) {
       const progress = Math.min(dy / THRESHOLD, 1);
@@ -3474,8 +3549,9 @@ function initPullToRefresh() {
   }, { passive: true });
 
   appEl.addEventListener('touchend', () => {
-    if (!pulling) return;
+    if (!pulling) { innerScroller = null; return; }
     pulling = false;
+    innerScroller = null;
     const currentOpacity = parseFloat(pullIndicator.style.opacity || 0);
     if (currentOpacity >= 1) {
       // Trigger refresh
