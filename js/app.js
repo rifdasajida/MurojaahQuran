@@ -1569,25 +1569,9 @@ function processTokensStream(tokens){
     const s=wordSim(tokens[off], allWords[cursor].norm);
     if(s>bestScore){bestScore=s;bestOffset=off;}
   }
-  // More lenient threshold — don't mark wrong from just one bad token
-  if(bestScore<0.22){
-    // Tokens don't match current word — give feedback with sound
-    playWrongSound();
-    setDot('warn','⚠️ Bacaan tidak cocok — coba ulangi dari kata yang disorot');
-    // Flash the current cursor word to show user where they should be reading
-    if(cursor<allWords.length){
-      const w = allWords[cursor];
-      w.el.style.transition = 'all 0.15s';
-      w.el.style.outline = '2px solid var(--warn)';
-      w.el.style.outlineOffset = '2px';
-      setTimeout(()=>{ w.el.style.outline=''; w.el.style.outlineOffset=''; }, 2000);
-    }
-    // Flush buffer to prevent stale tokens on mobile
-    if(rec){ rec._finalBuffer=''; }
-    clearTimeout(window._hafaFeedbackTimer);
-    window._hafaFeedbackTimer=null;
-    return;
-  }
+  // Always proceed to matcher loop — jalur "Bacaan tidak cocok" dihilangkan biar konsisten.
+  // Matcher loop sendiri yang akan decide: kalau emang misalignment, masuk retry mode (Image 2).
+  // Kalau cuma noise random, token2 di-skip sebagai si++ tanpa ada side effect.
   si=bestOffset;
 
   const startCursor=cursor;
@@ -1699,26 +1683,14 @@ function processTokensStream(tokens){
     clearTimeout(window._hafaFeedbackTimer);
     window._hafaFeedbackTimer=null;
   } else if(wrongWords.length > 0 && correctInBatch === 0){
-    // All wrong with no correct — likely misalignment or user reading wrong section
-    // Revert wrong marks, but give clear feedback
-    wrongWords.forEach(idx => {
-      if(allWords[idx]) allWords[idx].el.className='w idle';
-    });
-    cursor = startCursor; // reset cursor
+    // All wrong with no correct — masuk retry mode dengan kata pertama yang salah
+    // (jalur "Bacaan tidak sesuai" lama dihapus biar feedback konsisten dengan Image 2)
     playWrongSound();
-    setDot('warn','⚠️ Bacaan tidak sesuai — coba baca ulang dari kata yang disorot');
-    // Flush buffer
+    enterRetryMode(wrongWords[0]);
+    setDot('warn','⚠️ Ada kesalahan');
     if(rec){ rec._finalBuffer=''; }
     clearTimeout(window._hafaFeedbackTimer);
     window._hafaFeedbackTimer=null;
-    // Highlight cursor word with orange outline to guide user
-    if(cursor<allWords.length){
-      const w = allWords[cursor];
-      w.el.style.outline = '2px solid var(--warn)';
-      w.el.style.outlineOffset = '2px';
-      setTimeout(()=>{ w.el.style.outline=''; w.el.style.outlineOffset=''; }, 3000);
-      w.el.scrollIntoView({behavior:'smooth',block:'center'});
-    }
   } else if(correctInBatch>0){
     if(ayahComplete){
       playCorrectSound();
