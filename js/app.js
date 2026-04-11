@@ -3141,7 +3141,7 @@ function stopHkRec() {
 function onHkRecDone() {
   const btn = document.getElementById('hk-rec-btn');
   btn.classList.add('done');
-  btn.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>';
+  btn.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;line-height:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg><span style="font-size:9px;font-weight:700;letter-spacing:0.5px">ULANGI</span></div>';
   btn.onclick = resetHkRecording;
   btn.title = 'Ulangi rekaman';
   document.getElementById('hk-rec-label').textContent = `Rekaman selesai · ${hkRecState.seconds}s`;
