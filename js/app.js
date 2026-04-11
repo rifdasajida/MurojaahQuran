@@ -3036,6 +3036,8 @@ function openHkRecModal(surahNum) {
   if (_retryBtn) _retryBtn.style.display = 'none';
   const btn = document.getElementById('hk-rec-btn');
   btn.classList.remove('recording', 'done');
+  btn.onclick = toggleHkRecording;
+  btn.title = '';
   btn.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>';
 
   // Render range inputs inside the modal content
@@ -3139,7 +3141,9 @@ function stopHkRec() {
 function onHkRecDone() {
   const btn = document.getElementById('hk-rec-btn');
   btn.classList.add('done');
-  btn.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+  btn.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>';
+  btn.onclick = resetHkRecording;
+  btn.title = 'Ulangi rekaman';
   document.getElementById('hk-rec-label').textContent = `Rekaman selesai · ${hkRecState.seconds}s`;
   document.getElementById('hk-rec-duration').textContent = hkRecState.seconds + 's';
   document.getElementById('hk-rec-player').classList.add('show');
@@ -3174,6 +3178,10 @@ function resetHkRecording() {
   const btn = document.getElementById('hk-rec-btn');
   btn.classList.remove('recording', 'done');
   btn.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>';
+  btn.onclick = toggleHkRecording;
+  btn.title = '';
+  // Auto-start recording immediately so user doesn't need extra tap
+  setTimeout(() => toggleHkRecording(), 50);
   document.getElementById('hk-rec-label').textContent = 'Tap untuk rekam';
   const timerEl = document.getElementById('hk-rec-timer');
   timerEl.style.display = 'none';
