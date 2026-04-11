@@ -1327,8 +1327,16 @@ body {
 /* Setor Hafalan modal — make sheet taller so ayat row tidak kepotong */
 #hk-rec-modal .modal-sheet { max-height: 92vh !important; overflow-y: auto; }
 
-/* Setor Tambah Hafalan button — match other btn-primary weight */
-#btn-simpan-setoran, .btn-primary, .hk-rec-start-btn { font-weight: 700 !important; }
+/* Setor Tambah Hafalan button — match btn-primary sizing & weight */
+#btn-simpan-setoran, .btn-primary { font-weight: 700 !important; }
+.hk-rec-start-btn {
+  padding: 14px 24px !important;
+  font-size: 14px !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  gap: 8px !important;
+  box-shadow: 0 4px 12px rgba(45,155,111,0.25) !important;
+}
 
 /* Progress ayat checked — pakai warna ijo lebih muda biar beda dari button */
 .ayat-check.checked, .ayah-cell.checked, .ayah-cell.checked-ayah, .progress-cell.checked {
