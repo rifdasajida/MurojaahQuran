@@ -1632,22 +1632,27 @@ function processTokensStream(tokens){
         allWords[cursor].el.scrollIntoView({behavior:'smooth',block:'center'});
       }
     } else {
-      // Tidak cocok — cek apakah token ini ada di kata-kata berikutnya
-      // Lookahead diperpanjang ke 4 kata untuk handle hard-to-pronounce words yg gagal didetect SR
+      // Tidak cocok di cursor — cek apakah token ini ada di kata-kata berikutnya
+      // Lookahead = 3 (cukup untuk handle SR skip 1-2 hard-to-pronounce words,
+      // tapi tidak terlalu jauh sampai user baca ayat lain pun lolos)
       let foundAhead=false;
-      const LOOKAHEAD=4;
+      const LOOKAHEAD=3;
       for(let look=1;look<=LOOKAHEAD && cursor+look<allWords.length;look++){
         if(allWords[cursor+look].ayahIndex!==startAyahIdx) break;
-        const aheadSim=wordSim(token, allWords[cursor+look].norm);
-        // Lenient threshold for lookahead: kata pendek (<=4 char) lebih mudah lolos
-        const lookThreshold = allWords[cursor+look].norm.length <= 4 ? MATCH_THRESHOLD - 0.1 : MATCH_THRESHOLD;
-        if(aheadSim>=lookThreshold){
-          // SR melewatkan kata-kata di antaranya — assume user baca dengan benar
-          // (kata-kata yg di-skip biasanya hard-to-pronounce: tasydid, tanwin, dll)
-          // Mark SEBAGAI CORRECT bukan wrong, biar gak masuk retry mode
+        const aheadWord = allWords[cursor+look].norm;
+        const aheadSim=wordSim(token, aheadWord);
+        // STRICT: lookahead pakai threshold lebih TINGGI dari normal (bukan lebih rendah)
+        // Kalau user baca ayat lain, kebetulan-cocok dengan kata di lookahead jauh lebih kecil
+        const lookThreshold = MATCH_THRESHOLD + 0.08;
+        // Tapi kalau gap = 1 (cuma skip 1 kata, biasanya kata sulit), tetep lenient
+        const effectiveThreshold = look === 1 ? MATCH_THRESHOLD : lookThreshold;
+        if(aheadSim>=effectiveThreshold){
+          // Verify: gap ≤ 2 supaya gak ngeklaim banyak kata sekaligus benar
+          if(look > 2) break;
+          // Mark kata yg di-skip sebagai 'passed' (warna netral) bukan correct
+          // supaya user tau kata2 itu di-skip oleh SR, bukan diklaim benar
           for(let skip=0;skip<look;skip++){
-            allWords[cursor].el.className='w correct';
-            correctInBatch++;
+            allWords[cursor].el.className='w passed';
             cursor++;
           }
           allWords[cursor].el.className='w correct';
@@ -1660,10 +1665,10 @@ function processTokensStream(tokens){
         }
       }
       if(!foundAhead){
-        // Cek juga: maybe spoken token = reference word w but with very loose threshold
-        // (handle case spt "بنميم" vs "بنميم" yg seharusnya identical tp wordSim gagal)
+        // Loose-sim fallback HANYA kalau ada minimal 1 correct di batch ini
+        // (artinya user emang lagi baca ayat yg benar, cuma 1 kata mismatch dikit)
         const looseSim = wordSim(token, w.norm);
-        if(looseSim >= MATCH_THRESHOLD - 0.15 && looseSim > 0.3){
+        if(correctInBatch > 0 && looseSim >= MATCH_THRESHOLD - 0.12 && looseSim > 0.35){
           w.el.className='w correct';
           correctInBatch++;
           cursor++;si++;
@@ -1673,7 +1678,9 @@ function processTokensStream(tokens){
           }
           continue;
         }
-        // Token doesn't match anything — treat as SR noise, skip it
+        // Token gak match apa-apa → noise / misalignment
+        // Track berapa token berturut-turut yg gagal: kalau >= 3, tandai sebagai wrong
+        wrongWords.push(cursor);
         si++;
       }
     }
