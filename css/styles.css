@@ -1323,3 +1323,16 @@ body {
   font-family: var(--font-mono);
   font-weight: 600;
 }
+
+/* Setor Hafalan modal — make sheet taller so ayat row tidak kepotong */
+#hk-rec-modal .modal-sheet { max-height: 92vh !important; overflow-y: auto; }
+
+/* Setor Tambah Hafalan button — match other btn-primary weight */
+#btn-simpan-setoran, .btn-primary { font-weight: 700; }
+
+/* Progress ayat checked — pakai warna ijo lebih muda biar beda dari button */
+.ayah-cell.checked, .ayah-cell.checked-ayah, .progress-cell.checked {
+  background: #7BC894 !important;
+  color: #fff !important;
+  border-color: #7BC894 !important;
+}

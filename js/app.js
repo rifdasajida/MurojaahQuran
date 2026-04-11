@@ -1074,9 +1074,32 @@ async function fetchSurahFromCDN(surahNum, meta) {
 // ════════════════════════════════════════════════════════════
 //  NORMALIZATION + SMART MATCHING (full engine)
 // ════════════════════════════════════════════════════════════
+// Map Indonesian/Latin number forms (from speech recognition) to Arabic transliterations
+// so e.g. "50.000" / "50,000" / "50000" → "khamsiina alfa" can match خمسين ألف
+const _NUM_TO_AR = [
+  [/\b50[.,]?000\b/g, 'خمسين الف'],
+  [/\b70[.,]?000\b/g, 'سبعين الف'],
+  [/\b1[.,]?000\b/g, 'الف'],
+  [/\b50\b/g, 'خمسين'],
+  [/\b70\b/g, 'سبعين'],
+  [/\b19\b/g, 'تسعة عشر'],
+  [/\b12\b/g, 'اثنا عشر'],
+  [/\b10\b/g, 'عشرة'],
+  [/\b7\b/g, 'سبعة'],
+  [/\b3\b/g, 'ثلاثة'],
+  [/\b2\b/g, 'اثنين'],
+  [/\b1\b/g, 'واحد'],
+];
+function _digitsToArabic(t) {
+  for (const [re, ar] of _NUM_TO_AR) t = t.replace(re, ar);
+  return t;
+}
+
 function normalizeArabic(text) {
   if (!text || typeof text !== 'string') return '';
-  return text
+  return _digitsToArabic(text)
+    // Strip any remaining digits, commas, dots between digits
+    .replace(/[0-9.,]+/g, ' ')
     // Strip all diacritics, harakat, tajweed marks
     .replace(/[\u064B-\u065F\u0610-\u061A\u06D6-\u06DC\u06DF-\u06E4\u06E7\u06E8\u06EA-\u06ED\u0670\u0640\u0617\u0618\u0619\u06D7\u06D8\u06D9\u06DA\u06DB]/g,'')
     // Normalize alef variants → plain alef
@@ -3130,12 +3153,12 @@ function onHkRecDone() {
     retryBtn.type = 'button';
     retryBtn.className = 'btn-secondary';
     retryBtn.style.cssText = 'margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px';
-    retryBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-5"/></svg> Ulangi Rekaman';
+    retryBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> Ulangi Rekaman';
     retryBtn.onclick = resetHkRecording;
     const saveBtn = document.getElementById('hk-rec-save-btn');
     saveBtn.parentNode.insertBefore(retryBtn, saveBtn.nextSibling);
   }
-  retryBtn.style.display = 'flex';
+  retryBtn.style.display = "none";
 }
 
 function resetHkRecording() {
