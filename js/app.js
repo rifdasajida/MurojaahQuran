@@ -1395,10 +1395,11 @@ function setupRec(){if(rec)return true;rec=createRec();return!!rec;}
 // Deteksi platform
 const _isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const _isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) || (navigator.userAgent.includes('AppleWebKit') && !navigator.userAgent.includes('Chrome'));
-const _SR_FINAL_DEADLINE  = _isMobile ? 300 : 50;    // ms fixed deadline — timer set once, NOT reset on new tokens
+const _SR_FINAL_DEADLINE  = _isMobile ? 300 : 20;    // ms fixed deadline — timer set once, NOT reset on new tokens
 const _SR_INTERIM_DELAY   = _isMobile ? 200 : 0;     // ms wait before applying interim visual
-const _SR_RESTART_DELAY   = _isMobile ? 350 : 150;   // ms before restarting SR after onend
-const _SR_WARMUP_MS       = _isMobile ? 700 : 350;   // ms warmup to ignore initial noise
+const _SR_RESTART_DELAY   = _isMobile ? 350 : 80;    // ms before restarting SR after onend
+const _SR_WARMUP_MS       = _isMobile ? 700 : 200;   // ms warmup to ignore initial noise
+const _SR_DEDUP_WINDOW    = _isMobile ? 500 : 200;   // ms dedup guard for same-cursor reprocess
 
 function createRec(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -1553,7 +1554,7 @@ function processTokensStream(tokens){
 
   // Dedup guard: if same cursor position processed very recently, skip
   const now = Date.now();
-  if(cursor === _lastProcessCursor && now - _lastProcessTime < 500){
+  if(cursor === _lastProcessCursor && now - _lastProcessTime < _SR_DEDUP_WINDOW){
     return;
   }
   _lastProcessCursor = cursor;
@@ -1631,27 +1632,48 @@ function processTokensStream(tokens){
         allWords[cursor].el.scrollIntoView({behavior:'smooth',block:'center'});
       }
     } else {
-      // Tidak cocok — cek apakah token ini ada di kata berikutnya (SR skip 1 kata)
+      // Tidak cocok — cek apakah token ini ada di kata-kata berikutnya
+      // Lookahead diperpanjang ke 4 kata untuk handle hard-to-pronounce words yg gagal didetect SR
       let foundAhead=false;
-      for(let look=1;look<=2 && cursor+look<allWords.length;look++){
+      const LOOKAHEAD=4;
+      for(let look=1;look<=LOOKAHEAD && cursor+look<allWords.length;look++){
         if(allWords[cursor+look].ayahIndex!==startAyahIdx) break;
         const aheadSim=wordSim(token, allWords[cursor+look].norm);
-        if(aheadSim>=MATCH_THRESHOLD){
-          // Words between cursor and cursor+look were skipped → mark wrong
+        // Lenient threshold for lookahead: kata pendek (<=4 char) lebih mudah lolos
+        const lookThreshold = allWords[cursor+look].norm.length <= 4 ? MATCH_THRESHOLD - 0.1 : MATCH_THRESHOLD;
+        if(aheadSim>=lookThreshold){
+          // SR melewatkan kata-kata di antaranya — assume user baca dengan benar
+          // (kata-kata yg di-skip biasanya hard-to-pronounce: tasydid, tanwin, dll)
+          // Mark SEBAGAI CORRECT bukan wrong, biar gak masuk retry mode
           for(let skip=0;skip<look;skip++){
-            wrongWords.push(cursor);
-            allWords[cursor].el.className='w wrong';
+            allWords[cursor].el.className='w correct';
+            correctInBatch++;
             cursor++;
           }
           allWords[cursor].el.className='w correct';
           correctInBatch++;cursor++;si++;
           updateProgress();foundAhead=true;
+          if(cursor<allWords.length){
+            allWords[cursor].el.scrollIntoView({behavior:'smooth',block:'center'});
+          }
           break;
         }
       }
       if(!foundAhead){
-        // Token doesn't match current or next words — skip the token (SR noise)
-        // Only mark wrong if we have NO correct matches at all in this batch
+        // Cek juga: maybe spoken token = reference word w but with very loose threshold
+        // (handle case spt "بنميم" vs "بنميم" yg seharusnya identical tp wordSim gagal)
+        const looseSim = wordSim(token, w.norm);
+        if(looseSim >= MATCH_THRESHOLD - 0.15 && looseSim > 0.3){
+          w.el.className='w correct';
+          correctInBatch++;
+          cursor++;si++;
+          updateProgress();
+          if(cursor<allWords.length){
+            allWords[cursor].el.scrollIntoView({behavior:'smooth',block:'center'});
+          }
+          continue;
+        }
+        // Token doesn't match anything — treat as SR noise, skip it
         si++;
       }
     }
@@ -1778,7 +1800,28 @@ function skipWrongWord(){
   exitRetryMode();highlightCursor();updateCurrentAyahHighlight();
   log('\u23ED Ayat dilewati');
 }
-function skipForward(){skipWrongWord();}
+function skipForward(){
+  // If currently in retry mode (after a wrong word), use the original behavior
+  if (retryCursor >= 0 && retryCursor < allWords.length) {
+    skipWrongWord();
+    return;
+  }
+  // Otherwise: advance cursor to the start of the NEXT ayah from current position
+  if (cursor >= allWords.length) return;
+  const curAyah = allWords[cursor] ? allWords[cursor].ayahIndex : currentAyahIndex;
+  let nextIdx = cursor;
+  // Mark remaining words of current ayah as skipped
+  while (nextIdx < allWords.length && allWords[nextIdx].ayahIndex === curAyah) {
+    if (allWords[nextIdx].el.className !== 'w correct') allWords[nextIdx].el.className = 'w skipped';
+    nextIdx++;
+  }
+  cursor = nextIdx;
+  if (cursor < allWords.length) currentAyahIndex = allWords[cursor].ayahIndex;
+  sessionRunStart = cursor;
+  highlightCursor();
+  updateCurrentAyahHighlight();
+  log('\u23ED Ayat dilewati');
+}
 function resetSession(){
   stopSession();cursor=0;correctCount=0;wrongCount=0;currentAyahIndex=0;
   clearTimeout(window._hafaFeedbackTimer); window._hafaFeedbackTimer=null;
