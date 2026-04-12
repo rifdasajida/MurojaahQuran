@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Murajaah — Hafalan Al-Quran</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./css/styles.css?v=14">
+<link rel="stylesheet" href="./css/styles.css?v=15">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Google Analytics (GA4) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DGTDD0RQ9K"></script>
@@ -613,7 +613,13 @@
       Masuk dengan Google
     </button>
     <div class="auth-err" id="auth-err"></div>
-    <div class="auth-note">Data kamu aman dan tidak dibagikan.</div>
+    <div class="auth-note">
+      Data kamu aman dan tidak dibagikan.<br>
+      Dengan login, kamu setuju dengan
+      <a href="/terms.html" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline">Syarat Layanan</a>
+      dan
+      <a href="/privacy.html" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline">Kebijakan Privasi</a>.
+    </div>
   </div>
 </div>
 
@@ -629,6 +635,15 @@
   </div>
 </div>
 
-<script src="./js/app.js?v=14"></script>
+<!-- Footer with legal links (also for Google branding verification) -->
+<footer style="text-align:center;padding:20px 16px;font-size:11px;color:#888;border-top:1px solid #eee;margin-top:0;background:#fff">
+  <a href="/privacy.html" style="color:#2d9b6f;margin:0 6px;text-decoration:none">Kebijakan Privasi</a>
+  ·
+  <a href="/terms.html" style="color:#2d9b6f;margin:0 6px;text-decoration:none">Syarat Layanan</a>
+  ·
+  <span>© 2026 Murajaah</span>
+</footer>
+
+<script src="./js/app.js?v=15"></script>
 </body>
 </html>
