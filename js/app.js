@@ -293,13 +293,15 @@ function initSupabase() {
       currentUser = session.user;
       onLoggedIn(currentUser);
     } else if (event === 'SIGNED_OUT') {
-      // Skip if already logged out in this tab
-      if (!_prevAuthUid) return;
+      // Always clear local data on SIGNED_OUT, even if this tab thinks it was already logged out.
       sessionStorage.setItem('murajaah_auth_uid', '');
       localStorage.removeItem('murajaah_hafalanku');
       localStorage.removeItem('murajaah_activity_dates');
       localStorage.removeItem('murajaah_setoran');
-      window.location.reload();
+      localStorage.removeItem('murajaah_logged_in_marker');
+      if (_prevAuthUid) {
+        window.location.reload();
+      }
       return;
     }
   });
@@ -308,6 +310,20 @@ function initSupabase() {
     if (session) {
       currentUser = session.user;
       onLoggedIn(currentUser);
+    } else {
+      // No active session on initial load — check if localStorage has stale data
+      // from a previously logged-in user. We use a marker key 'murajaah_logged_in_marker'
+      // that's set when user logs in and only cleared on explicit logout.
+      // If marker exists but no session → user closed tab without logout / session expired.
+      // → purge stale data to prevent leakage to next user of this browser.
+      try {
+        if (localStorage.getItem('murajaah_logged_in_marker')) {
+          localStorage.removeItem('murajaah_hafalanku');
+          localStorage.removeItem('murajaah_activity_dates');
+          localStorage.removeItem('murajaah_setoran');
+          localStorage.removeItem('murajaah_logged_in_marker');
+        }
+      } catch(e) {}
     }
     hideLoading();
   }).catch(() => hideLoading());
@@ -332,14 +348,27 @@ async function doGoogleLogin() {
 
 async function doLogout() {
   toggleUserDropdown(false);
-  if (sbClient) await sbClient.auth.signOut();
+  // Clear local data BEFORE signOut so SIGNED_OUT event handler can't race
+  try {
+    localStorage.removeItem('murajaah_hafalanku');
+    localStorage.removeItem('murajaah_activity_dates');
+    localStorage.removeItem('murajaah_setoran');
+    localStorage.removeItem('murajaah_logged_in_marker');
+    sessionStorage.setItem('murajaah_auth_uid', '');
+  } catch(e) {}
+  if (sbClient) {
+    try { await sbClient.auth.signOut(); } catch(e) {}
+  }
   currentUser = null;
-  onLoggedOut();
-  showToast('Berhasil keluar');
+  // Hard reload to flush all in-memory state — prevents previous user's data
+  // from leaking into the logged-out view (Hafalanku list, Beranda stats, etc)
+  window.location.reload();
 }
 
 async function onLoggedIn(user) {
   closeAuthModal();
+  // Set marker so we can detect stale data on next browser open if user closes tab without logout
+  try { localStorage.setItem('murajaah_logged_in_marker', user.id || '1'); } catch(e) {}
   const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '?';
   const initials = name.substring(0, 2).toUpperCase();
   document.getElementById('topbar-avatar').textContent = initials;
