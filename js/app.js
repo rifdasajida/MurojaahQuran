@@ -913,6 +913,12 @@ function resetRecording() {
   document.getElementById('btn-simpan-setoran').style.display = 'none';
 }
 
+// HTML escape helper — prevents XSS when injecting data into innerHTML
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 async function refreshRiwayat() {
   let list = [];
   if (sbClient && currentUser) {
@@ -927,21 +933,31 @@ async function refreshRiwayat() {
     el.innerHTML = '<div class="riwayat-empty"><div class="riwayat-empty-icon">🎙️</div><div class="riwayat-empty-text">Belum ada setoran tersimpan</div></div>';
     return;
   }
+  // Use data-setoran-id attribute instead of inline onclick to avoid injection
   el.innerHTML = list.map(s => `
-    <div class="setoran-item" onclick="openSetoranDetail('${s.id}')">
+    <div class="setoran-item" data-setoran-id="${escapeHtml(s.id)}">
       <div class="setoran-dot"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg></div>
       <div class="setoran-info">
-        <div class="setoran-surah">${s.surah_name}</div>
-        <div class="setoran-meta">Ayat ${s.ayat_dari}–${s.ayat_ke} · ${s.duration ? Math.round(s.duration)+'s' : '—'}</div>
+        <div class="setoran-surah">${escapeHtml(s.surah_name)}</div>
+        <div class="setoran-meta">Ayat ${escapeHtml(s.ayat_dari)}–${escapeHtml(s.ayat_ke)} · ${s.duration ? Math.round(s.duration)+'s' : '—'}</div>
       </div>
-      <div class="setoran-date">${formatDate(s.date)}</div>
+      <div class="setoran-date">${escapeHtml(formatDate(s.date))}</div>
     </div>`).join('');
+  // Attach click handlers via delegation (safe — no string injection)
+  el.querySelectorAll('.setoran-item').forEach(item => {
+    item.onclick = () => openSetoranDetail(item.dataset.setoranId);
+  });
 }
 
 async function openSetoranDetail(id) {
   let setoran = null;
   if (sbClient && currentUser) {
-    const { data } = await sbClient.from('setoran').select('*').eq('id', id).single();
+    // Defense-in-depth: filter user_id explicitly even though RLS already enforces this
+    const { data } = await sbClient.from('setoran')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', currentUser.id)
+      .single();
     setoran = data;
   } else {
     const list = JSON.parse(localStorage.getItem('murajaah_setoran') || '[]');
@@ -950,11 +966,22 @@ async function openSetoranDetail(id) {
   if (!setoran) return;
 
   document.getElementById('modal-setoran-title').textContent = setoran.surah_name;
+
+  // Validate audio_url scheme — only allow safe protocols (https, blob, data)
+  // Prevents javascript: URI XSS and other unsafe schemes
+  let safeAudioUrl = '';
+  if (setoran.audio_url) {
+    const url = String(setoran.audio_url).trim();
+    if (/^(https?:|blob:|data:audio\/)/i.test(url)) {
+      safeAudioUrl = url;
+    }
+  }
+
   document.getElementById('modal-setoran-content').innerHTML = `
     <div style="display:flex;flex-direction:column;gap:12px">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div class="gstat" style="background:var(--accent-soft);border-radius:12px;padding:12px">
-          <div style="font-size:18px;font-weight:800;color:var(--accent)">${setoran.ayat_dari}–${setoran.ayat_ke}</div>
+          <div style="font-size:18px;font-weight:800;color:var(--accent)">${escapeHtml(setoran.ayat_dari)}–${escapeHtml(setoran.ayat_ke)}</div>
           <div style="font-size:11px;color:var(--muted);margin-top:2px">Range Ayat</div>
         </div>
         <div class="gstat" style="background:var(--surface2);border-radius:12px;padding:12px">
@@ -962,15 +989,18 @@ async function openSetoranDetail(id) {
           <div style="font-size:11px;color:var(--muted);margin-top:2px">Durasi</div>
         </div>
       </div>
-      <div style="font-size:12px;color:var(--muted);font-family:var(--font-mono)">📅 ${new Date(setoran.date || setoran.created_at).toLocaleDateString('id-ID', {weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div>
-      ${setoran.audio_url ? `
+      <div style="font-size:12px;color:var(--muted);font-family:var(--font-mono)">📅 ${escapeHtml(new Date(setoran.date || setoran.created_at).toLocaleDateString('id-ID', {weekday:'long',year:'numeric',month:'long',day:'numeric'}))}</div>
+      ${safeAudioUrl ? `
         <div>
           <div class="field-label" style="margin-bottom:8px">Rekaman</div>
-          <audio controls style="width:100%;border-radius:10px" src="${setoran.audio_url}"></audio>
+          <audio controls style="width:100%;border-radius:10px" src="${escapeHtml(safeAudioUrl)}"></audio>
         </div>
       ` : '<div style="font-size:12px;color:var(--muted2);text-align:center;padding:8px">Rekaman tidak tersedia</div>'}
-      <button class="btn-secondary" onclick="deleteSetoran('${setoran.id}')">🗑 Hapus Setoran</button>
+      <button class="btn-secondary" id="modal-setoran-delete-btn" data-setoran-id="${escapeHtml(setoran.id)}">🗑 Hapus Setoran</button>
     </div>`;
+  // Attach delete handler via property (safe — no string injection)
+  const delBtn = document.getElementById('modal-setoran-delete-btn');
+  if (delBtn) delBtn.onclick = () => deleteSetoran(delBtn.dataset.setoranId);
   document.getElementById('setoran-modal').classList.add('open');
 }
 
@@ -983,7 +1013,10 @@ function closeSetoranModal(e) {
 async function deleteSetoran(id) {
   if (!confirm('Hapus setoran ini?')) return;
   if (sbClient && currentUser) {
-    await sbClient.from('setoran').delete().eq('id', id);
+    // Defense-in-depth: filter user_id explicitly
+    await sbClient.from('setoran').delete()
+      .eq('id', id)
+      .eq('user_id', currentUser.id);
   } else {
     const list = JSON.parse(localStorage.getItem('murajaah_setoran') || '[]');
     localStorage.setItem('murajaah_setoran', JSON.stringify(list.filter(s => s.id != id)));
