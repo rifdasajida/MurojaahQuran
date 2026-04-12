@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Murajaah — Hafalan Al-Quran</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./css/styles.css?v=18">
+<link rel="stylesheet" href="./css/styles.css?v=19">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Google Analytics (GA4) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DGTDD0RQ9K"></script>
@@ -307,28 +307,27 @@
         <div class="audio-fields-stack">
           <div class="audio-field-row">
             <label class="field-label">Pilih Surah</label>
-            <select class="select-input" id="audioSurahSel" onchange="syncAudioSurah();updateAudioStatusText()"></select>
+            <select class="select-input" id="audioSurahSel" onchange="syncAudioSurah();validateAudioAyahRange();updateAudioStatusText()"></select>
           </div>
 
           <div class="audio-field-row-double">
             <div>
               <label class="field-label">Dari Ayat</label>
-              <input class="select-input audio-num" type="number" id="audioStartAyah" value="1" min="1" oninput="updateAudioStatusText()">
+              <input class="select-input audio-num" type="number" id="audioStartAyah" value="1" min="1" oninput="updateAudioStatusText()" onchange="validateAudioAyahRange('from')" onblur="validateAudioAyahRange('from')">
             </div>
             <div>
               <label class="field-label">Sampai Ayat</label>
-              <input class="select-input audio-num" type="number" id="audioEndAyah" value="5" min="1" oninput="updateAudioStatusText()">
+              <input class="select-input audio-num" type="number" id="audioEndAyah" value="5" min="1" oninput="updateAudioStatusText()" onchange="validateAudioAyahRange('to')" onblur="validateAudioAyahRange('to')">
             </div>
           </div>
 
           <div class="audio-field-row">
-            <label class="field-label">Jumlah Pengulangan</label>
+            <label class="field-label">Jumlah Pengulangan (Kali)</label>
             <div class="audio-stepper">
               <button type="button" class="audio-stepper-btn" onclick="adjustAudioRepeat(-1)" aria-label="Kurangi">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
               </button>
               <input type="number" id="audioRepeatCount" class="audio-stepper-value" value="3" min="1" max="99" oninput="updateAudioStatusText()">
-              <span class="audio-stepper-x">x</span>
               <button type="button" class="audio-stepper-btn audio-stepper-btn-plus" onclick="adjustAudioRepeat(1)" aria-label="Tambah">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               </button>
@@ -658,6 +657,6 @@
   <span>© 2026 Murajaah</span>
 </footer>
 
-<script src="./js/app.js?v=18"></script>
+<script src="./js/app.js?v=19"></script>
 </body>
 </html>

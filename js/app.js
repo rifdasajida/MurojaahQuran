@@ -1924,7 +1924,48 @@ function onSurahComplete(){
 let audioPlaying=false,audioCurrentRepeat=0,audioCurrentAyah=0,audioTimeoutId=null,audioCurrentSurah=parseInt(localStorage.getItem('murajaah_last_audio_surah'))||1;
 let audioCurrentEl=null; // track elemen audio yg sedang diputar
 function getAudioUrl(s,a){return `https://everyayah.com/data/Alafasy_128kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`;}
-function syncAudioSurah(){audioCurrentSurah=parseInt(document.getElementById('audioSurahSel').value);localStorage.setItem('murajaah_last_audio_surah',audioCurrentSurah);}
+function syncAudioSurah(){
+  audioCurrentSurah=parseInt(document.getElementById('audioSurahSel').value);
+  localStorage.setItem('murajaah_last_audio_surah',audioCurrentSurah);
+  // Update max attribute on ayah inputs based on selected surah's ayah count
+  const meta = JUZ_SURAHS[audioCurrentSurah] || SURAHS[audioCurrentSurah];
+  const maxAyah = meta ? (meta.ayahs ? meta.ayahs.length : meta.ayahCount) : 1;
+  const startEl = document.getElementById('audioStartAyah');
+  const endEl = document.getElementById('audioEndAyah');
+  startEl.max = maxAyah;
+  endEl.max = maxAyah;
+  // Clamp current values if surah changed to a smaller surah
+  if (parseInt(startEl.value) > maxAyah) startEl.value = 1;
+  if (parseInt(endEl.value) > maxAyah) endEl.value = maxAyah;
+}
+
+// Validate ayah range: clamp to [1, surah max], and enforce to >= from
+function validateAudioAyahRange(changedField) {
+  const startEl = document.getElementById('audioStartAyah');
+  const endEl = document.getElementById('audioEndAyah');
+  const meta = JUZ_SURAHS[audioCurrentSurah] || SURAHS[audioCurrentSurah];
+  const maxAyah = meta ? (meta.ayahs ? meta.ayahs.length : meta.ayahCount) : 1;
+
+  let from = parseInt(startEl.value);
+  let to = parseInt(endEl.value);
+
+  // Clamp to valid range [1, maxAyah]
+  if (isNaN(from) || from < 1) from = 1;
+  if (from > maxAyah) from = maxAyah;
+  if (isNaN(to) || to < 1) to = 1;
+  if (to > maxAyah) to = maxAyah;
+
+  // Cross-validation: to must be >= from
+  if (changedField === 'from' && from > to) {
+    to = from;
+  } else if (changedField === 'to' && to < from) {
+    from = to;
+  }
+
+  startEl.value = from;
+  endEl.value = to;
+  updateAudioStatusText();
+}
 
 // Adjust repeat count via stepper buttons (- / +)
 function adjustAudioRepeat(delta) {
@@ -1954,8 +1995,17 @@ function updateAudioStatusText() {
 function toggleAudioPlayer(){if(audioPlaying)stopAudioPlayer();else startAudioPlayer();}
 function startAudioPlayer(){
   syncAudioSurah(); // always sync surah from dropdown before playing
+  // Run validation to clamp ayah inputs to valid range BEFORE reading values
+  validateAudioAyahRange();
   const start=parseInt(document.getElementById('audioStartAyah').value);
   const end=parseInt(document.getElementById('audioEndAyah').value);
+  const meta = JUZ_SURAHS[audioCurrentSurah] || SURAHS[audioCurrentSurah];
+  const maxAyah = meta ? (meta.ayahs ? meta.ayahs.length : meta.ayahCount) : 1;
+  // Final defense: refuse to play if range is somehow still invalid
+  if (!start || !end || start < 1 || end < 1 || start > maxAyah || end > maxAyah || end < start) {
+    showToast('❌ Range ayat tidak valid');
+    return;
+  }
   const repeat=parseInt(document.getElementById('audioRepeatCount').value);
   const pause=parseFloat(document.getElementById('audioPause').value)*1000;
   audioPlaying=true;audioCurrentRepeat=0;audioCurrentAyah=start;
