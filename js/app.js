@@ -1925,6 +1925,32 @@ let audioPlaying=false,audioCurrentRepeat=0,audioCurrentAyah=0,audioTimeoutId=nu
 let audioCurrentEl=null; // track elemen audio yg sedang diputar
 function getAudioUrl(s,a){return `https://everyayah.com/data/Alafasy_128kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`;}
 function syncAudioSurah(){audioCurrentSurah=parseInt(document.getElementById('audioSurahSel').value);localStorage.setItem('murajaah_last_audio_surah',audioCurrentSurah);}
+
+// Adjust repeat count via stepper buttons (- / +)
+function adjustAudioRepeat(delta) {
+  const input = document.getElementById('audioRepeatCount');
+  let v = parseInt(input.value) || 1;
+  v = Math.max(1, Math.min(99, v + delta));
+  input.value = v;
+  updateAudioStatusText();
+}
+
+// Update the status text under the form to reflect current selection
+function updateAudioStatusText() {
+  const statusEl = document.getElementById('audioStatus');
+  if (!statusEl) return;
+  // Don't override if currently playing (status shows playback state)
+  if (audioPlaying) return;
+  const sel = document.getElementById('audioSurahSel');
+  const surahName = sel && sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : '—';
+  // Strip leading number prefix like "70. Al-Ma'arij" → "Al-Ma'arij"
+  const cleanName = surahName.replace(/^\d+\.\s*/, '');
+  const from = parseInt(document.getElementById('audioStartAyah').value) || 1;
+  const to = parseInt(document.getElementById('audioEndAyah').value) || from;
+  const repeat = parseInt(document.getElementById('audioRepeatCount').value) || 1;
+  statusEl.textContent = `Siap memutar: ${cleanName} ayat ${from} sampai ${to} dengan ${repeat}x pengulangan.`;
+}
+
 function toggleAudioPlayer(){if(audioPlaying)stopAudioPlayer();else startAudioPlayer();}
 function startAudioPlayer(){
   syncAudioSurah(); // always sync surah from dropdown before playing
@@ -3557,6 +3583,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   populateSurahSel('hafalanSurahSel', lastMurojaahSurah);
   populateSurahSel('audioSurahSel', lastAudioSurah);
   populateSurahSel('setoran-surah-sel', 1);
+  // Initialize audio status text now that surah list is loaded
+  setTimeout(() => { try { updateAudioStatusText(); } catch(e){} }, 0);
 
   // Init sambung ayat multi-select
   initSambungPage();

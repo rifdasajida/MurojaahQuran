@@ -1344,3 +1344,72 @@ body {
   color: #fff !important;
   border-color: #7BC894 !important;
 }
+
+/* ── Dengarkan Ayat: redesigned form fields ── */
+.audio-fields-stack { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+.audio-field-row { display: flex; flex-direction: column; gap: 6px; }
+.audio-field-row-double { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.audio-field-row-double > div { display: flex; flex-direction: column; gap: 6px; }
+.audio-num {
+  font-family: var(--font-mono) !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+}
+.audio-num::-webkit-inner-spin-button,
+.audio-num::-webkit-outer-spin-button { opacity: 0.4; }
+
+/* Stepper for repeat count: − [3x] + */
+.audio-stepper {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface, #f5f5f5);
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 12px;
+  padding: 6px;
+  height: 48px;
+}
+.audio-stepper-btn {
+  width: 40px; height: 36px;
+  background: #fff;
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--accent, #2d9b6f);
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.audio-stepper-btn:hover { background: var(--accent-soft, rgba(45,155,111,0.08)); }
+.audio-stepper-btn:active { transform: scale(0.95); }
+.audio-stepper-btn-plus { background: var(--accent, #2d9b6f); color: #fff; border-color: var(--accent, #2d9b6f); }
+.audio-stepper-btn-plus:hover { background: var(--accent-h, #228056); }
+.audio-stepper-value {
+  flex: 1; text-align: center;
+  background: transparent; border: none; outline: none;
+  font-family: var(--font-mono); font-size: 18px; font-weight: 800;
+  color: var(--text, #1f1f1f);
+  -moz-appearance: textfield;
+  min-width: 0;
+}
+.audio-stepper-value::-webkit-inner-spin-button,
+.audio-stepper-value::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* Status text — italic, centered */
+#audioStatus {
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted, #888);
+  margin-bottom: 12px;
+  font-style: italic;
+  line-height: 1.5;
+  padding: 0 8px;
+}
+
+/* "x" suffix next to repeat count input */
+.audio-stepper-value { flex: 0 1 auto; width: 50px; padding: 0; }
+.audio-stepper-x {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text, #1f1f1f);
+  margin-right: 4px;
+}
