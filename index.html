@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Murajaah — Hafalan Al-Quran</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./css/styles.css?v=19">
+<link rel="stylesheet" href="./css/styles.css?v=20">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Google Analytics (GA4) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DGTDD0RQ9K"></script>
@@ -351,6 +351,25 @@
   <div class="page" id="page-sambung">
     <div class="sambung-page">
 
+      <!-- Header (matches Setoran / Audio style) -->
+      <div class="rec-header" style="margin-bottom:14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+        <div style="flex:1;min-width:0">
+          <div class="rec-title">Sambung Ayat</div>
+          <div class="rec-sub">Latih dan perkuat hafalan kamu dengan tes sambung ayat</div>
+        </div>
+        <!-- Score chips (hidden until session active) -->
+        <div id="sambung-score-chips" style="display:none;flex-shrink:0;gap:6px;align-items:center">
+          <div class="sambung-chip sambung-chip-ok">
+            <span class="sambung-chip-label">BENAR</span>
+            <span class="sambung-chip-value" id="sambung-score-ok">0</span>
+          </div>
+          <div class="sambung-chip sambung-chip-err">
+            <span class="sambung-chip-label">SALAH</span>
+            <span class="sambung-chip-value" id="sambung-score-err">0</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Config -->
       <div class="card" style="padding:16px" id="sambung-surah-row">
         <!-- Segmented control pill (like reference image) -->
@@ -449,21 +468,6 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><rect x="17" y="4" width="2.5" height="16" rx="1"/></svg>
             Lewati
           </button>
-        </div>
-      </div>
-
-      <!-- Skor — card terpisah di bawah -->
-      <div class="card" id="sambung-score-card" style="display:none;padding:14px 16px">
-        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:10px">Skor Sesi</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div style="background:var(--ok-soft);border-radius:10px;padding:12px;text-align:center">
-            <div style="font-size:24px;font-weight:800;color:var(--ok)" id="sambung-score-ok">0</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px">Benar</div>
-          </div>
-          <div style="background:var(--err-soft);border-radius:10px;padding:12px;text-align:center">
-            <div style="font-size:24px;font-weight:800;color:var(--err)" id="sambung-score-err">0</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px">Salah</div>
-          </div>
         </div>
       </div>
 
@@ -657,6 +661,6 @@
   <span>© 2026 Murajaah</span>
 </footer>
 
-<script src="./js/app.js?v=19"></script>
+<script src="./js/app.js?v=20"></script>
 </body>
 </html>

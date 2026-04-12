@@ -2330,7 +2330,7 @@ async function startSambungMode() {
 
   document.getElementById('sambung-prompt-card').style.display = 'block';
   document.getElementById('sambung-controls').style.display = 'block';
-  document.getElementById('sambung-score-card').style.display = 'block';
+  document.getElementById('sambung-score-chips').style.display = 'flex';
   btn.style.display = 'none';
   document.getElementById('sambung-surah-row').style.display = 'none';
 
@@ -2705,7 +2705,7 @@ function stopSambungMode() {
   const g = id => document.getElementById(id);
   if (g('sambung-prompt-card')) g('sambung-prompt-card').style.display = 'none';
   if (g('sambung-controls')) g('sambung-controls').style.display = 'none';
-  if (g('sambung-score-card')) g('sambung-score-card').style.display = 'none';
+  if (g('sambung-score-chips')) g('sambung-score-chips').style.display = 'none';
   if (g('sambung-start-btn')) { g('sambung-start-btn').style.display = 'flex'; g('sambung-start-btn').disabled = false; g('sambung-start-btn').textContent = 'Mulai Sambung Ayat'; }
   if (g('sambung-surah-row')) g('sambung-surah-row').style.display = 'block';
   if (g('sambung-result-ar')) { g('sambung-result-ar').style.display = 'none'; g('sambung-result-ar').textContent = '—'; g('sambung-result-ar').className = 'sambung-result-ar'; }
