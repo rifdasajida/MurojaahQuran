@@ -1445,3 +1445,29 @@ body {
   color: var(--err);
   border-color: rgba(217, 79, 79, 0.18);
 }
+
+/* Sambung prompt header: left-align text, chips on the right */
+.sambung-prompt-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  text-align: left;
+}
+.sambung-prompt-header-text {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+.sambung-prompt-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+  text-align: left;
+}
+.sambung-prompt-header .sambung-surah-info {
+  text-align: left;
+  font-weight: 400;
+}

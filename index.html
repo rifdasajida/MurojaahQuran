@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Murajaah — Hafalan Al-Quran</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./css/styles.css?v=21">
+<link rel="stylesheet" href="./css/styles.css?v=22">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Google Analytics (GA4) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DGTDD0RQ9K"></script>
@@ -392,10 +392,10 @@
       <!-- Prompt -->
       <div class="sambung-prompt-card" id="sambung-prompt-card" style="display:none">
         <!-- Header: judul + info surah + score chips -->
-        <div style="margin-bottom:10px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
-          <div style="flex:1;min-width:0">
-            <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:2px">Sambung Ayat</div>
-            <div class="sambung-surah-info" id="sambung-surah-info" style="font-weight:400">—</div>
+        <div class="sambung-prompt-header">
+          <div class="sambung-prompt-header-text">
+            <div class="sambung-prompt-title">Sambung Ayat</div>
+            <div class="sambung-surah-info" id="sambung-surah-info">—</div>
           </div>
           <!-- Score chips (shown when session active) -->
           <div id="sambung-score-chips" style="display:flex;flex-shrink:0;gap:6px;align-items:center">
@@ -660,6 +660,6 @@
   <span>© 2026 Murajaah</span>
 </footer>
 
-<script src="./js/app.js?v=21"></script>
+<script src="./js/app.js?v=22"></script>
 </body>
 </html>
