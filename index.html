@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Murajaah — Hafalan Al-Quran</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./css/styles.css?v=20">
+<link rel="stylesheet" href="./css/styles.css?v=21">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Google Analytics (GA4) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DGTDD0RQ9K"></script>
@@ -351,27 +351,13 @@
   <div class="page" id="page-sambung">
     <div class="sambung-page">
 
-      <!-- Header (matches Setoran / Audio style) -->
-      <div class="rec-header" style="margin-bottom:14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
-        <div style="flex:1;min-width:0">
+      <!-- Config -->
+      <div class="card" style="padding:16px" id="sambung-surah-row">
+        <!-- Header inside card (matches Setoran / Audio style) -->
+        <div class="rec-header" style="margin-bottom:14px">
           <div class="rec-title">Sambung Ayat</div>
           <div class="rec-sub">Latih dan perkuat hafalan kamu dengan tes sambung ayat</div>
         </div>
-        <!-- Score chips (hidden until session active) -->
-        <div id="sambung-score-chips" style="display:none;flex-shrink:0;gap:6px;align-items:center">
-          <div class="sambung-chip sambung-chip-ok">
-            <span class="sambung-chip-label">BENAR</span>
-            <span class="sambung-chip-value" id="sambung-score-ok">0</span>
-          </div>
-          <div class="sambung-chip sambung-chip-err">
-            <span class="sambung-chip-label">SALAH</span>
-            <span class="sambung-chip-value" id="sambung-score-err">0</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Config -->
-      <div class="card" style="padding:16px" id="sambung-surah-row">
         <!-- Segmented control pill (like reference image) -->
         <div style="background:var(--surface2);border-radius:12px;padding:3px;display:flex;gap:0;margin-bottom:14px;border:1px solid var(--border)">
           <button id="sambung-tab-surah" onclick="sambungSwitchTab('surah')" style="flex:1;padding:9px 8px;border-radius:9px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.08)">Per Surah</button>
@@ -405,10 +391,23 @@
 
       <!-- Prompt -->
       <div class="sambung-prompt-card" id="sambung-prompt-card" style="display:none">
-        <!-- Header: judul + info surah -->
-        <div style="margin-bottom:10px">
-          <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:2px">Sambung Ayat</div>
-          <div class="sambung-surah-info" id="sambung-surah-info" style="font-weight:400">—</div>
+        <!-- Header: judul + info surah + score chips -->
+        <div style="margin-bottom:10px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:2px">Sambung Ayat</div>
+            <div class="sambung-surah-info" id="sambung-surah-info" style="font-weight:400">—</div>
+          </div>
+          <!-- Score chips (shown when session active) -->
+          <div id="sambung-score-chips" style="display:flex;flex-shrink:0;gap:6px;align-items:center">
+            <div class="sambung-chip sambung-chip-ok">
+              <span class="sambung-chip-label">BENAR</span>
+              <span class="sambung-chip-value" id="sambung-score-ok">0</span>
+            </div>
+            <div class="sambung-chip sambung-chip-err">
+              <span class="sambung-chip-label">SALAH</span>
+              <span class="sambung-chip-value" id="sambung-score-err">0</span>
+            </div>
+          </div>
         </div>
         <!-- Ayat Arab -->
         <div class="sambung-prompt-ar" id="sambung-prompt-ar">—</div>
@@ -661,6 +660,6 @@
   <span>© 2026 Murajaah</span>
 </footer>
 
-<script src="./js/app.js?v=20"></script>
+<script src="./js/app.js?v=21"></script>
 </body>
 </html>
