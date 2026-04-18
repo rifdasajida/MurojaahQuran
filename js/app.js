@@ -185,12 +185,20 @@ const PAGE_NAMES = {
 
 function navTo(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.remove('active');
+    n.removeAttribute('aria-current');
+  });
   document.getElementById('page-' + page).classList.add('active');
   const navBtn = document.getElementById('nav-' + page);
-  if (navBtn) navBtn.classList.add('active');
+  if (navBtn) {
+    navBtn.classList.add('active');
+    navBtn.setAttribute('aria-current', 'page');
+  }
   document.getElementById('app').scrollTop = 0;
   currentPage = page;
+  // Announce page change to screen readers
+  try { _announcePageChange(page); } catch(e) {}
   // Update URL — use pushState so back/forward works
   if (location.hash !== '#' + page) {
     history.pushState({ page }, '', '#' + page);
@@ -421,28 +429,122 @@ function showProfileInfo() {
   showToast(`${name} · ${currentUser.email}`);
 }
 
+// Track the element that opened a modal so we can restore focus on close
+let _lastFocusBeforeModal = null;
+
 function openAuthModal() {
   const bd = document.getElementById('auth-backdrop');
+  _lastFocusBeforeModal = document.activeElement;
   bd.style.display = 'flex';
-  setTimeout(() => bd.classList.add('visible'), 10);
+  bd.setAttribute('aria-hidden', 'false');
+  setTimeout(() => {
+    bd.classList.add('visible');
+    // Move focus into the modal (primary action = Google login button)
+    const loginBtn = document.getElementById('auth-google-btn');
+    if (loginBtn) loginBtn.focus();
+  }, 10);
 }
 function closeAuthModal() {
   const bd = document.getElementById('auth-backdrop');
   bd.classList.remove('visible');
+  bd.setAttribute('aria-hidden', 'true');
   setTimeout(() => bd.style.display = 'none', 300);
+  // Restore focus to the element that opened the modal
+  if (_lastFocusBeforeModal && typeof _lastFocusBeforeModal.focus === 'function') {
+    try { _lastFocusBeforeModal.focus(); } catch(e) {}
+    _lastFocusBeforeModal = null;
+  }
 }
 function handleAuthBackdropClick(e) {
   if (e.target === document.getElementById('auth-backdrop')) closeAuthModal();
 }
+
+// Close modals on ESC key
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  const authBd = document.getElementById('auth-backdrop');
+  if (authBd && authBd.classList.contains('visible')) { closeAuthModal(); return; }
+  const setoranModal = document.getElementById('setoran-modal');
+  if (setoranModal && setoranModal.classList.contains('open')) {
+    setoranModal.classList.remove('open');
+    setoranModal.setAttribute('aria-hidden', 'true');
+    if (_lastFocusBeforeModal && typeof _lastFocusBeforeModal.focus === 'function') {
+      try { _lastFocusBeforeModal.focus(); } catch(err) {}
+      _lastFocusBeforeModal = null;
+    }
+  }
+});
+
+// Focus trap — keep Tab inside the active modal
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Tab') return;
+  // Determine the active modal container (if any)
+  const authBd = document.getElementById('auth-backdrop');
+  const setoranModal = document.getElementById('setoran-modal');
+  let container = null;
+  if (authBd && authBd.classList.contains('visible')) container = authBd;
+  else if (setoranModal && setoranModal.classList.contains('open')) container = setoranModal;
+  if (!container) return;
+  // Get focusable elements inside the modal
+  const focusables = container.querySelectorAll(
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  );
+  if (!focusables.length) return;
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  if (e.shiftKey) {
+    // Shift+Tab on first → loop to last
+    if (document.activeElement === first || !container.contains(document.activeElement)) {
+      e.preventDefault();
+      last.focus();
+    }
+  } else {
+    // Tab on last → loop to first
+    if (document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+});
+
+// Page navigation announcer — announce page changes to screen readers
+function _announcePageChange(page) {
+  const names = {
+    beranda: 'Halaman Beranda',
+    hafalan: 'Halaman Mode Murojaah',
+    hafalanku: 'Halaman Hafalanku',
+    audio: 'Halaman Dengarkan Ayat',
+    sambung: 'Halaman Sambung Ayat',
+    setoran: 'Halaman Setor Hafalan',
+  };
+  let announcer = document.getElementById('a11y-page-announcer');
+  if (!announcer) {
+    announcer = document.createElement('div');
+    announcer.id = 'a11y-page-announcer';
+    announcer.setAttribute('role', 'status');
+    announcer.setAttribute('aria-live', 'polite');
+    announcer.setAttribute('aria-atomic', 'true');
+    announcer.className = 'sr-only';
+    document.body.appendChild(announcer);
+  }
+  // Clear then set to force screen reader to re-announce
+  announcer.textContent = '';
+  setTimeout(() => { announcer.textContent = names[page] || page; }, 50);
+}
 function toggleUserDropdown(force) {
   const dd = document.getElementById('user-dropdown');
+  const btn = document.getElementById('topbar-user');
   if (force === false) dd.classList.remove('open');
   else dd.classList.toggle('open');
+  // Sync ARIA state
+  if (btn) btn.setAttribute('aria-expanded', dd.classList.contains('open') ? 'true' : 'false');
 }
 document.addEventListener('click', e => {
   if (!e.target.closest('#topbar-user')) {
     const dd = document.getElementById('user-dropdown');
+    const btn = document.getElementById('topbar-user');
     if (dd) dd.classList.remove('open');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
   }
 });
 
@@ -688,16 +790,16 @@ function _renderOneMilestone(el) {
        </div>`
     : '';
   el.innerHTML = `
-    <div class="milestone-card ${m.state}" data-ar="${m.arabic}" onclick="_milestoneNext()" style="cursor:pointer">
-      <div class="milestone-icon">${m.icon}</div>
+    <div class="milestone-card ${m.state}" data-ar="${m.arabic}" onclick="_milestoneNext()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();_milestoneNext()}" role="button" tabindex="0" aria-label="Milestone: ${escapeHtml(m.label)}, ${m.pct} persen selesai" style="cursor:pointer">
+      <div class="milestone-icon" aria-hidden="true">${m.icon}</div>
       <div class="milestone-body">
         <div class="milestone-title">${m.label}</div>
         <div class="milestone-sub">${m.sub}</div>
-        <div class="milestone-progress-wrap">
+        <div class="milestone-progress-wrap" role="progressbar" aria-valuenow="${m.pct}" aria-valuemin="0" aria-valuemax="100" aria-label="Progress ${escapeHtml(m.label)}">
           <div class="milestone-progress-fill" style="width:${m.pct}%"></div>
         </div>
       </div>
-      <div class="milestone-badge">${m.badge}</div>
+      <div class="milestone-badge" aria-hidden="true">${m.badge}</div>
     </div>
     ${dots}`;
 }
@@ -959,22 +1061,38 @@ async function refreshRiwayat() {
 
   const el = document.getElementById('riwayat-setoran-list');
   if (!list.length) {
-    el.innerHTML = '<div class="riwayat-empty"><div class="riwayat-empty-icon">🎙️</div><div class="riwayat-empty-text">Belum ada setoran tersimpan</div></div>';
+    el.innerHTML = '<div class="riwayat-empty"><div class="riwayat-empty-icon" aria-hidden="true">🎙️</div><div class="riwayat-empty-text">Belum ada setoran tersimpan</div></div>';
+    el.setAttribute('role', 'status');
     return;
   }
-  // Use data-setoran-id attribute instead of inline onclick to avoid injection
-  el.innerHTML = list.map(s => `
-    <div class="setoran-item" data-setoran-id="${escapeHtml(s.id)}">
-      <div class="setoran-dot"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg></div>
-      <div class="setoran-info">
-        <div class="setoran-surah">${escapeHtml(s.surah_name)}</div>
-        <div class="setoran-meta">Ayat ${escapeHtml(s.ayat_dari)}–${escapeHtml(s.ayat_ke)} · ${s.duration ? Math.round(s.duration)+'s' : '—'}</div>
+  // Semantic list of clickable setoran items with button role + keyboard support
+  el.setAttribute('role', 'list');
+  el.setAttribute('aria-label', `${list.length} setoran tersimpan`);
+  el.innerHTML = list.map(s => {
+    const duration = s.duration ? Math.round(s.duration)+' detik' : 'durasi tidak tersedia';
+    const ariaLabel = `${escapeHtml(s.surah_name)}, ayat ${escapeHtml(s.ayat_dari)} sampai ${escapeHtml(s.ayat_ke)}, ${duration}, ${escapeHtml(formatDate(s.date))}. Tekan untuk melihat detail.`;
+    return `
+    <div class="setoran-item" data-setoran-id="${escapeHtml(s.id)}" role="listitem">
+      <div role="button" tabindex="0" aria-label="${ariaLabel}" style="display:contents">
+        <div class="setoran-dot" aria-hidden="true"><svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg></div>
+        <div class="setoran-info">
+          <div class="setoran-surah">${escapeHtml(s.surah_name)}</div>
+          <div class="setoran-meta">Ayat ${escapeHtml(s.ayat_dari)}–${escapeHtml(s.ayat_ke)} · ${s.duration ? Math.round(s.duration)+'s' : '—'}</div>
+        </div>
+        <div class="setoran-date">${escapeHtml(formatDate(s.date))}</div>
       </div>
-      <div class="setoran-date">${escapeHtml(formatDate(s.date))}</div>
-    </div>`).join('');
-  // Attach click handlers via delegation (safe — no string injection)
+    </div>`;
+  }).join('');
+  // Attach click + keyboard handlers via delegation
   el.querySelectorAll('.setoran-item').forEach(item => {
-    item.onclick = () => openSetoranDetail(item.dataset.setoranId);
+    const open = () => openSetoranDetail(item.dataset.setoranId);
+    item.onclick = open;
+    const btn = item.querySelector('[role="button"]');
+    if (btn) {
+      btn.onkeydown = (ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); open(); }
+      };
+    }
   });
 }
 
@@ -1030,12 +1148,28 @@ async function openSetoranDetail(id) {
   // Attach delete handler via property (safe — no string injection)
   const delBtn = document.getElementById('modal-setoran-delete-btn');
   if (delBtn) delBtn.onclick = () => deleteSetoran(delBtn.dataset.setoranId);
-  document.getElementById('setoran-modal').classList.add('open');
+  // Save trigger element so we can restore focus on close
+  _lastFocusBeforeModal = document.activeElement;
+  const modalEl = document.getElementById('setoran-modal');
+  modalEl.classList.add('open');
+  modalEl.setAttribute('aria-hidden', 'false');
+  // Move focus to modal title for screen reader announcement
+  setTimeout(() => {
+    const title = document.getElementById('modal-setoran-title');
+    if (title) { title.setAttribute('tabindex', '-1'); title.focus(); }
+  }, 30);
 }
 
 function closeSetoranModal(e) {
   if (e.target === document.getElementById('setoran-modal') || e.target.closest('.modal-sheet') === null) {
-    document.getElementById('setoran-modal').classList.remove('open');
+    const modalEl = document.getElementById('setoran-modal');
+    modalEl.classList.remove('open');
+    modalEl.setAttribute('aria-hidden', 'true');
+    // Restore focus to the element that opened the modal
+    if (_lastFocusBeforeModal && typeof _lastFocusBeforeModal.focus === 'function') {
+      try { _lastFocusBeforeModal.focus(); } catch(err) {}
+      _lastFocusBeforeModal = null;
+    }
   }
 }
 
@@ -1444,7 +1578,10 @@ function startSession(){
   window._interimDisplayTimer=null;
   setTimeout(()=>{window.srWarmingUp=false;log('✅ Siap — mulai membaca');},_SR_WARMUP_MS);
   try{rec.start();}catch(e){}
-  document.getElementById('btnMic').classList.add('live');
+  const micBtn = document.getElementById('btnMic');
+  micBtn.classList.add('live');
+  micBtn.setAttribute('aria-pressed', 'true');
+  micBtn.setAttribute('aria-label', 'Hentikan sesi murojaah');
 }
 function stopSession(){
   sessionActive=false;
@@ -1452,6 +1589,11 @@ function stopSession(){
   clearTimeout(window._interimDisplayTimer); window._interimDisplayTimer=null;
   if(rec){ rec._finalBuffer=''; try{rec.stop();}catch(e){} }
   recRunning=false;setMicOff();
+  const micBtn = document.getElementById('btnMic');
+  if (micBtn) {
+    micBtn.setAttribute('aria-pressed', 'false');
+    micBtn.setAttribute('aria-label', 'Mulai sesi murojaah');
+  }
 }
 function setupRec(){if(rec)return true;rec=createRec();return!!rec;}
 // Deteksi platform
@@ -2011,6 +2153,8 @@ function startAudioPlayer(){
   audioPlaying=true;audioCurrentRepeat=0;audioCurrentAyah=start;
   const btn=document.getElementById('audioPlayBtn');
   btn.style.background='var(--err)';btn.style.boxShadow='0 4px 12px rgba(217,79,79,0.3)';
+  btn.setAttribute('aria-pressed', 'true');
+  btn.setAttribute('aria-label', 'Hentikan audio');
   document.getElementById('audioPlayIcon').innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
   document.getElementById('audioPlayLabel').textContent='Stop';
   playNextAudio(start,end,repeat,pause);
@@ -2032,6 +2176,8 @@ function stopAudioPlayer(){
   if(audioCurrentEl){audioCurrentEl.pause();audioCurrentEl.src='';audioCurrentEl=null;}
   const btn=document.getElementById('audioPlayBtn');
   btn.style.background='';btn.style.boxShadow='';
+  btn.setAttribute('aria-pressed', 'false');
+  btn.setAttribute('aria-label', 'Putar audio pengulangan');
   document.getElementById('audioPlayIcon').innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';
   document.getElementById('audioPlayLabel').textContent='Putar Audio';
   document.getElementById('audioStatus').textContent='Dihentikan';
@@ -2109,6 +2255,8 @@ function sambungSwitchTab(tab) {
     tabSurah.style.boxShadow   = '0 1px 4px rgba(0,0,0,0.08)';
     tabJuz.style.background    = 'transparent'; tabJuz.style.color = 'var(--muted)';
     tabJuz.style.boxShadow     = 'none';
+    tabSurah.setAttribute('aria-selected', 'true');
+    tabJuz.setAttribute('aria-selected', 'false');
     renderSambungSurahChips();
   } else {
     juzPanel.style.display = 'block'; surahPanel.style.display = 'none';
@@ -2116,6 +2264,8 @@ function sambungSwitchTab(tab) {
     tabJuz.style.boxShadow     = '0 1px 4px rgba(0,0,0,0.08)';
     tabSurah.style.background  = 'transparent'; tabSurah.style.color = 'var(--muted)';
     tabSurah.style.boxShadow   = 'none';
+    tabJuz.setAttribute('aria-selected', 'true');
+    tabSurah.setAttribute('aria-selected', 'false');
   }
   updateSambungSummary();
 }
@@ -2128,14 +2278,24 @@ function renderSambungJuzChips() {
   if (!container) return;
   container.innerHTML = '';
   for (let j = 1; j <= 30; j++) {
+    const isSelected = sambungSelectedJuz.has(j);
     const chip = document.createElement('div');
-    chip.className = 'sambung-chip' + (sambungSelectedJuz.has(j) ? ' selected' : '');
+    chip.className = 'sambung-chip' + (isSelected ? ' selected' : '');
     chip.textContent = 'Juz ' + j;
-    chip.onclick = () => {
+    // ARIA: toggle-able checkbox
+    chip.setAttribute('role', 'checkbox');
+    chip.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+    chip.setAttribute('tabindex', '0');
+    chip.setAttribute('aria-label', 'Juz ' + j);
+    const toggle = () => {
       if (sambungSelectedJuz.has(j)) { if (sambungSelectedJuz.size > 1) sambungSelectedJuz.delete(j); }
       else sambungSelectedJuz.add(j);
       renderSambungJuzChips();
       updateSambungSummary();
+    };
+    chip.onclick = toggle;
+    chip.onkeydown = (ev) => {
+      if (ev.key === ' ' || ev.key === 'Enter') { ev.preventDefault(); toggle(); }
     };
     container.appendChild(chip);
   }
@@ -2149,10 +2309,16 @@ function renderSambungSurahChips() {
   const list = getAllSurahList();
   list.filter(s => !searchVal || s.name.toLowerCase().includes(searchVal) || String(s.num).includes(searchVal))
     .forEach(s => {
+      const isSelected = sambungSelectedSurahs.has(s.num);
       const chip = document.createElement('div');
-      chip.className = 'sambung-chip' + (sambungSelectedSurahs.has(s.num) ? ' selected' : '');
+      chip.className = 'sambung-chip' + (isSelected ? ' selected' : '');
       chip.textContent = s.num + '. ' + s.name;
-      chip.onclick = () => {
+      // ARIA: treat as a toggle-able checkbox
+      chip.setAttribute('role', 'checkbox');
+      chip.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+      chip.setAttribute('tabindex', '0');
+      chip.setAttribute('aria-label', `${s.num}. ${s.name}`);
+      const toggle = () => {
         if (sambungSelectedSurahs.has(s.num)) {
           sambungSelectedSurahs.delete(s.num);
           delete sambungSurahRangeOverrides[s.num];
@@ -2166,6 +2332,14 @@ function renderSambungSurahChips() {
         renderSambungSurahChips();
         renderSambungAyatRanges();
         updateSambungSummary();
+      };
+      chip.onclick = toggle;
+      // Keyboard support: Space or Enter toggles the chip
+      chip.onkeydown = (ev) => {
+        if (ev.key === ' ' || ev.key === 'Enter') {
+          ev.preventDefault();
+          toggle();
+        }
       };
       container.appendChild(chip);
     });
@@ -2560,7 +2734,7 @@ function startSambungRec() {
 
   sambungRec.onend = () => {
     sambungRecRunning = false;
-    document.getElementById('sambungMicBtn').classList.remove('live');
+    const _mic=document.getElementById('sambungMicBtn');_mic.classList.remove('live');_mic.setAttribute('aria-pressed','false');_mic.setAttribute('aria-label','Mulai rekam jawaban');
     // Hanya restart jika masih menunggu final (belum dapat hasil sama sekali)
     // Tapi TIDAK restart setelah dapat final — user harus klik manual untuk soal berikutnya
     if (sambungActive && sambungWaitingForUser && !sessionHasFinal && !sambungSilenceTimeout) {
@@ -2571,7 +2745,7 @@ function startSambungRec() {
 
   sambungRec.onerror = (e) => {
     sambungRecRunning = false;
-    document.getElementById('sambungMicBtn').classList.remove('live');
+    const _mic=document.getElementById('sambungMicBtn');_mic.classList.remove('live');_mic.setAttribute('aria-pressed','false');_mic.setAttribute('aria-label','Mulai rekam jawaban');
     if (e.error === 'not-allowed') { showToast('❌ Izinkan mikrofon'); stopSambungMode(); }
     else if (e.error === 'no-speech') {
       setDotSambung('rec', '🎙 Tidak terdengar — tap mic untuk coba lagi');
@@ -2583,7 +2757,10 @@ function startSambungRec() {
   try {
     sambungRec.start();
     sambungRecRunning = true;
-    document.getElementById('sambungMicBtn').classList.add('live');
+    const micBtn = document.getElementById('sambungMicBtn');
+    micBtn.classList.add('live');
+    micBtn.setAttribute('aria-pressed', 'true');
+    micBtn.setAttribute('aria-label', 'Hentikan rekam jawaban');
   } catch(e) { setDotSambung('warn', '❌ Gagal mulai mic'); }
 }
 
@@ -2592,7 +2769,10 @@ function stopSambungRec() {
   sambungRecRunning = false;
   clearTimeout(sambungSilenceTimeout);
   sambungSilenceTimeout = null;
-  document.getElementById('sambungMicBtn').classList.remove('live');
+  const micBtn = document.getElementById('sambungMicBtn');
+  micBtn.classList.remove('live');
+  micBtn.setAttribute('aria-pressed', 'false');
+  micBtn.setAttribute('aria-label', 'Mulai rekam jawaban');
 }
 
 function processSambungBuffer() {
@@ -3513,7 +3693,8 @@ function renderHafalankuList() {
     let ayatHtml = '';
     for (let i = 1; i <= totalAyahs; i++) {
       const isChecked = entry.checkedAyahs && entry.checkedAyahs.includes(i);
-      ayatHtml += `<div class="ayat-check${isChecked ? ' checked' : ''}" style="cursor:default;font-size:11px">${i}</div>`;
+      const stateLabel = isChecked ? 'sudah dihafal' : 'belum dihafal';
+      ayatHtml += `<div class="ayat-check${isChecked ? ' checked' : ''}" style="cursor:default;font-size:11px" role="img" aria-label="Ayat ${i}, ${stateLabel}">${i}</div>`;
     }
     const needsScroll = totalAyahs > 50;
     const gridId = 'hk-ayat-scroll-' + entry.surahNum;
@@ -3615,6 +3796,12 @@ function renderHafalankuBeranda() {
   document.getElementById('hk-beranda-fill').style.width = pct + '%';
   document.getElementById('hk-beranda-ayat').textContent = totalChecked;
   document.getElementById('hk-beranda-total').textContent = totalAyahs;
+  // Sync ARIA progress values for screen readers
+  const progressWrap = document.getElementById('hk-beranda-progress');
+  if (progressWrap) {
+    progressWrap.setAttribute('aria-valuenow', pct);
+    progressWrap.setAttribute('aria-label', `Progress hafalan keseluruhan ${pct} persen, ${totalChecked} dari ${totalAyahs} ayat`);
+  }
 }
 
 function initHafalankuPage() {
