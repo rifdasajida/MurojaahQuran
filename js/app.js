@@ -689,8 +689,8 @@ function checkPsychTrigger(list) {
     sub = 'Jangan putus streakmu! Luangkan 5 menit untuk murajaah.';
   } else {
     icon = '🌙';
-    title = 'Masih belum murajaah nih!';
-    sub = 'Hari hampir berakhir. Jaga streak istiqomahmu!';
+    title = 'Hari hampir berakhir!';
+    sub = 'Yuk segera murojaah. Luangkan waktu 5 menit saja untuk jaga keistiqomahanmu. Semangat!';
   }
   document.getElementById('psych-icon').textContent = icon;
   document.getElementById('psych-title').textContent = title;
