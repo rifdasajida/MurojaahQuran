@@ -678,17 +678,21 @@ function checkPsychTrigger(list) {
   if (hasToday) { banner.classList.add('hidden'); return; }
   
   const hour = new Date().getHours();
-  let title, sub;
+  let title, sub, icon;
   if (hour < 12) {
-    title = '🌅 Mulai hari dengan murajaah!';
+    icon = '🌅';
+    title = 'Mulai hari dengan murajaah!';
     sub = 'Pagi adalah waktu terbaik. Tap untuk mulai sekarang.';
   } else if (hour < 17) {
-    title = '⏰ Belum aktif hari ini';
+    icon = '⏰';
+    title = 'Belum aktif hari ini';
     sub = 'Jangan putus streakmu! Luangkan 5 menit untuk murajaah.';
   } else {
-    title = '🌙 Masih belum murajaah nih!';
+    icon = '🌙';
+    title = 'Masih belum murajaah nih!';
     sub = 'Hari hampir berakhir. Jaga streak istiqomahmu!';
   }
+  document.getElementById('psych-icon').textContent = icon;
   document.getElementById('psych-title').textContent = title;
   document.getElementById('psych-sub').textContent = sub;
   banner.classList.remove('hidden');
