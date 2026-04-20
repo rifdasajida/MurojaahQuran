@@ -1549,3 +1549,26 @@ a:focus:not(:focus-visible) {
     scroll-behavior: auto !important;
   }
 }
+
+/* Mode Baca: disable cursor + passed + skipped visual states.
+   These states are only meaningful in Mode Murojaah (uji) where the app
+   tracks reading position and recitation progress.
+   In Mode Baca, the user is just reading — no active position tracking needed. */
+.hafalan-mushaf:not(.mode-uji) .w.cursor,
+.hafalan-mushaf:not(.mode-uji) .w.retry-cursor {
+  color: var(--text) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-weight: inherit !important;
+  animation: none !important;
+  border-radius: 0 !important;
+}
+.hafalan-mushaf:not(.mode-uji) .w.passed,
+.hafalan-mushaf:not(.mode-uji) .w.skipped,
+.hafalan-mushaf:not(.mode-uji) .w.correct,
+.hafalan-mushaf:not(.mode-uji) .w.wrong {
+  color: var(--text) !important;
+  background: transparent !important;
+  text-decoration: none !important;
+  border-radius: 0 !important;
+}

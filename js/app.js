@@ -2951,7 +2951,8 @@ function setMurojaahMode(mode) {
     controls.style.display = '';
     if (ctxText) ctxText.textContent = 'Yuk ulang hafalan kamu dengan klik tombol mic di bawah.';
     if (currentPage === 'hafalan') showToast('Mode Murojaah — tap kata untuk mengintip');
-    trackDailyActivity('murojaah');
+    // NOTE: Do NOT trackDailyActivity here — switching to Mode Murojaah is not user activity.
+    // Activity is tracked in startSession() when user actually presses mic to start reciting.
   } else {
     mushaf.classList.remove('mode-uji');
     bacaBtn.classList.add('active');
