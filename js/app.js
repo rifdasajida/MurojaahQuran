@@ -1841,10 +1841,15 @@ function processTokensStream(tokens){
         if(aheadSim>=effectiveThreshold){
           // Verify: gap ≤ 2 supaya gak ngeklaim banyak kata sekaligus benar
           if(look > 2) break;
-          // Mark kata yg di-skip sebagai 'passed' (warna netral) bukan correct
-          // supaya user tau kata2 itu di-skip oleh SR, bukan diklaim benar
+          // Kalibrasi skip detection:
+          //   gap = 1 → 'passed' (netral) — toleran kalau SR drop 1 kata pendek
+          //   gap = 2 → 'wrong' (merah + masuk wrongWords) — user beneran skip,
+          //             karena 2 kata sekaligus jarang terjadi karena SR glitch
+          const skipClass = (look >= 2) ? 'w wrong' : 'w passed';
+          const shouldFlag = (look >= 2);
           for(let skip=0;skip<look;skip++){
-            allWords[cursor].el.className='w passed';
+            allWords[cursor].el.className = skipClass;
+            if (shouldFlag) wrongWords.push(cursor);
             cursor++;
           }
           allWords[cursor].el.className='w correct';
