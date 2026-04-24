@@ -1682,3 +1682,76 @@ a:focus:not(:focus-visible) {
   font-size: 13px;
   font-style: italic;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   CONFIRM MODAL — replaces native browser confirm()
+   Same visual language as other modals (bottom sheet on mobile)
+   ══════════════════════════════════════════════════════════════ */
+
+.confirm-backdrop {
+  /* inherits .modal-backdrop base positioning */
+  z-index: 9500; /* above regular modals so it stacks on top */
+}
+.confirm-sheet {
+  max-width: 420px;
+  padding: 28px 24px 20px;
+  text-align: center;
+}
+.confirm-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+.confirm-icon-danger {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: rgba(217, 79, 79, 0.12);
+  color: var(--err);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.confirm-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+.confirm-message {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--muted);
+  margin-bottom: 22px;
+  padding: 0 4px;
+}
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+}
+.confirm-actions > button { flex: 1; }
+
+/* Danger button variant — used for destructive actions */
+.btn-danger {
+  background: var(--err) !important;
+  border: 1px solid var(--err) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(217, 79, 79, 0.25) !important;
+}
+.btn-danger:hover {
+  background: #b33a3a !important;
+  border-color: #b33a3a !important;
+}
+.btn-danger:active { transform: scale(0.98); }
+
+/* Desktop: center the sheet instead of bottom-sheet style */
+@media (min-width: 640px) {
+  .confirm-backdrop.open {
+    align-items: center;
+  }
+  .confirm-sheet {
+    border-radius: 16px;
+    margin: 0 20px;
+  }
+}

@@ -244,6 +244,118 @@ function showToast(msg, duration = 2500) {
   setTimeout(() => t.classList.remove('show'), duration);
 }
 
+// ═══════════════════════════════════════════════════════════════
+//  CONFIRM MODAL (replaces native browser confirm())
+//  Returns a Promise<boolean> — true if user confirmed, false if cancelled.
+//
+//  Usage:
+//    const ok = await showConfirm({ title: '...', message: '...', confirmText: 'Hapus', danger: true });
+//    if (!ok) return;
+// ═══════════════════════════════════════════════════════════════
+function showConfirm(opts = {}) {
+  return new Promise(resolve => {
+    const {
+      title = 'Konfirmasi',
+      message = 'Lanjutkan?',
+      confirmText = 'Ya, Lanjutkan',
+      cancelText = 'Batal',
+      danger = false,
+      icon = null, // optional emoji/SVG string for header
+    } = opts;
+
+    // Lazy-create modal on first use
+    let modal = document.getElementById('confirm-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'confirm-modal';
+      modal.className = 'modal-backdrop confirm-backdrop';
+      modal.setAttribute('role', 'alertdialog');
+      modal.setAttribute('aria-modal', 'true');
+      modal.setAttribute('aria-labelledby', 'confirm-modal-title');
+      modal.setAttribute('aria-describedby', 'confirm-modal-msg');
+      modal.setAttribute('aria-hidden', 'true');
+      modal.innerHTML = `
+        <div class="modal-sheet confirm-sheet" role="document">
+          <div class="modal-handle" aria-hidden="true"></div>
+          <div class="confirm-icon" id="confirm-modal-icon" aria-hidden="true"></div>
+          <div class="confirm-title" id="confirm-modal-title">—</div>
+          <div class="confirm-message" id="confirm-modal-msg">—</div>
+          <div class="confirm-actions">
+            <button type="button" class="btn-secondary" id="confirm-modal-cancel">Batal</button>
+            <button type="button" class="btn-primary" id="confirm-modal-ok">Ya</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    const iconEl = modal.querySelector('#confirm-modal-icon');
+    const titleEl = modal.querySelector('#confirm-modal-title');
+    const msgEl = modal.querySelector('#confirm-modal-msg');
+    const okBtn = modal.querySelector('#confirm-modal-ok');
+    const cancelBtn = modal.querySelector('#confirm-modal-cancel');
+
+    // Icon
+    if (icon) {
+      iconEl.innerHTML = icon;
+      iconEl.style.display = '';
+    } else if (danger) {
+      iconEl.innerHTML = '<div class="confirm-icon-danger"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>';
+      iconEl.style.display = '';
+    } else {
+      iconEl.innerHTML = '';
+      iconEl.style.display = 'none';
+    }
+
+    titleEl.textContent = title;
+    // Support simple newlines in message
+    msgEl.innerHTML = escapeHtml(message).replace(/\n/g, '<br>');
+    okBtn.textContent = confirmText;
+    cancelBtn.textContent = cancelText;
+
+    // Style OK button based on severity
+    okBtn.classList.toggle('btn-danger', !!danger);
+
+    // Store focus restore target
+    const prevFocus = document.activeElement;
+
+    let settled = false;
+    function cleanup() {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      okBtn.onclick = null;
+      cancelBtn.onclick = null;
+      modal.onclick = null;
+      document.removeEventListener('keydown', onKey);
+      // Restore focus
+      if (prevFocus && typeof prevFocus.focus === 'function') {
+        try { prevFocus.focus(); } catch(e) {}
+      }
+    }
+    function settle(val) {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve(val);
+    }
+    function onKey(e) {
+      if (e.key === 'Escape') { e.preventDefault(); settle(false); }
+      else if (e.key === 'Enter' && document.activeElement === okBtn) { e.preventDefault(); settle(true); }
+    }
+
+    okBtn.onclick = () => settle(true);
+    cancelBtn.onclick = () => settle(false);
+    modal.onclick = (e) => { if (e.target === modal) settle(false); };
+    document.addEventListener('keydown', onKey);
+
+    // Show
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    // Focus the CANCEL button by default (safer default — requires active intent to confirm)
+    setTimeout(() => cancelBtn.focus(), 50);
+  });
+}
+
 // ════════════════════════════════════════════════════════════
 //  SUPABASE AUTH
 // ════════════════════════════════════════════════════════════
@@ -1178,7 +1290,14 @@ function closeSetoranModal(e) {
 }
 
 async function deleteSetoran(id) {
-  if (!confirm('Hapus setoran ini?')) return;
+  const ok = await showConfirm({
+    title: 'Hapus Setoran?',
+    message: 'Setoran ini akan dihapus permanen. Rekaman audio tidak bisa dikembalikan.',
+    confirmText: 'Hapus',
+    cancelText: 'Batal',
+    danger: true,
+  });
+  if (!ok) return;
   if (sbClient && currentUser) {
     // Defense-in-depth: filter user_id explicitly
     await sbClient.from('setoran').delete()
@@ -3311,8 +3430,17 @@ function proceedAddHafalanWithoutLogin() {
   }
 }
 
-function removeHafalanSurah(surahNum) {
-  if (!confirm('Hapus surah ini dari daftar hafalan?')) return;
+async function removeHafalanSurah(surahNum) {
+  const meta = JUZ_SURAHS[surahNum] || SURAHS[surahNum];
+  const name = meta ? meta.name : `Surah ${surahNum}`;
+  const ok = await showConfirm({
+    title: 'Hapus dari Hafalanku?',
+    message: `${surahNum}. ${name} akan dihapus dari daftar hafalan. Semua progress dan rekaman setoran surah ini juga akan terhapus.`,
+    confirmText: 'Hapus',
+    cancelText: 'Batal',
+    danger: true,
+  });
+  if (!ok) return;
   let data = getHafalankuData();
   data = data.filter(d => d.surahNum !== surahNum);
   saveHafalankuData(data);
@@ -3786,13 +3914,19 @@ function saveEditSetoran() {
 }
 
 // ── Delete a recording ──
-function confirmDeleteSetoran(surahNum, recIdx) {
+async function confirmDeleteSetoran(surahNum, recIdx) {
   const data = getHafalankuData();
   const entry = data.find(d => d.surahNum === surahNum);
   if (!entry || !entry.recordings || !entry.recordings[recIdx]) return;
   const rec = entry.recordings[recIdx];
 
-  const ok = confirm(`Hapus setoran ayat ${rec.from}–${rec.to} (${rec.date || '—'})?\n\nRekaman akan dihapus permanen.`);
+  const ok = await showConfirm({
+    title: 'Hapus Setoran?',
+    message: `Setoran ayat ${rec.from}–${rec.to} tanggal ${rec.date || '—'} akan dihapus permanen. Rekaman audio tidak bisa dikembalikan.`,
+    confirmText: 'Hapus',
+    cancelText: 'Batal',
+    danger: true,
+  });
   if (!ok) return;
 
   entry.recordings.splice(recIdx, 1);
