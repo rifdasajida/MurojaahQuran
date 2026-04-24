@@ -3686,6 +3686,19 @@ function playHkArchive(surahNum, recIdx) {
 
 const esc = escapeHtml; // alias
 
+// ── Recompute checkedAyahs from all recordings of a surah ──
+// Called after edit/delete to keep ayah grid in sync with recordings
+function recomputeCheckedAyahs(entry) {
+  if (!entry) return;
+  const covered = new Set();
+  (entry.recordings || []).forEach(r => {
+    const from = Math.max(1, parseInt(r.from) || 1);
+    const to = Math.max(from, parseInt(r.to) || from);
+    for (let i = from; i <= to; i++) covered.add(i);
+  });
+  entry.checkedAyahs = Array.from(covered).sort((a, b) => a - b);
+}
+
 // ── Edit ayat range of a specific recording ──
 function openEditSetoranModal(surahNum, recIdx) {
   const data = getHafalankuData();
@@ -3757,6 +3770,8 @@ function saveEditSetoran() {
   // Update
   entry.recordings[recIdx].from = from;
   entry.recordings[recIdx].to = to;
+  // Recompute checkedAyahs so ayah grid reflects current recordings
+  recomputeCheckedAyahs(entry);
   saveHafalankuData(data);
 
   closeEditSetoranModal();
@@ -3781,6 +3796,8 @@ function confirmDeleteSetoran(surahNum, recIdx) {
   if (!ok) return;
 
   entry.recordings.splice(recIdx, 1);
+  // Recompute checkedAyahs so ayah grid reflects current recordings
+  recomputeCheckedAyahs(entry);
   saveHafalankuData(data);
   renderHafalankuList();
   renderHafalankuBeranda();
@@ -3891,23 +3908,23 @@ function renderHafalankuList() {
          </button>`
       : `<div class="ayat-checks">${ayatHtml}</div>`;
 
-    // Recording history — show max 5 latest + "Lihat Semua" button for the rest
+    // Recording history — show max 3 latest (newest first) + "Lihat Semua" button for the rest
     const recs = entry.recordings || [];
-    const RECENT_LIMIT = 5;
+    const RECENT_LIMIT = 3;
     let recsHtml = '';
     if (recs.length > 0) {
-      // Recordings kept in original order (oldest first), show latest 5 at bottom
-      const visibleRecs = recs.slice(-RECENT_LIMIT);
+      // Newest first: reverse a copy of the array, then take top N
+      // Use `.map` to remember original index so edit/delete target right one
+      const indexed = recs.map((r, i) => ({ r, idx: i }));
+      indexed.reverse(); // newest at top
+      const visibleRecs = indexed.slice(0, RECENT_LIMIT);
       const hiddenCount = Math.max(0, recs.length - RECENT_LIMIT);
-      // Compute the global index of each visible recording so edit/delete/play target right one
-      const startIdx = Math.max(0, recs.length - RECENT_LIMIT);
       recsHtml = `<div class="hk-rec-history">
         <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between">
           <span>Riwayat Setoran${recs.length > 0 ? ` (${recs.length})` : ''}</span>
           ${hiddenCount > 0 ? `<button class="hk-rec-view-all" onclick="event.stopPropagation();openAllRecordingsModal(${entry.surahNum})">Lihat Semua <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle"><polyline points="9 18 15 12 9 6"/></svg></button>` : ''}
         </div>
-        ${visibleRecs.map((r, i) => {
-          const idx = startIdx + i;
+        ${visibleRecs.map(({ r, idx }) => {
           return `
           <div class="hk-rec-item-v2" data-rec-idx="${idx}">
             <div class="hk-rec-item-row">
