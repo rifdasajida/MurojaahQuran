@@ -3679,6 +3679,178 @@ function playHkArchive(surahNum, recIdx) {
   });
 }
 
+// ══════════════════════════════════════════════════════════════════
+// EDIT / DELETE / VIEW-ALL RECORDING FUNCTIONS
+// Added for enhancement: edit ayat range, delete recording, show all recordings modal
+// ══════════════════════════════════════════════════════════════════
+
+const esc = escapeHtml; // alias
+
+// ── Edit ayat range of a specific recording ──
+function openEditSetoranModal(surahNum, recIdx) {
+  const data = getHafalankuData();
+  const entry = data.find(d => d.surahNum === surahNum);
+  if (!entry || !entry.recordings || !entry.recordings[recIdx]) {
+    showToast('Rekaman tidak ditemukan');
+    return;
+  }
+  const rec = entry.recordings[recIdx];
+  const meta = JUZ_SURAHS[surahNum] || SURAHS[surahNum];
+  const surahName = meta ? meta.name : 'Surah ' + surahNum;
+  const maxAyah = meta ? (meta.ayahs ? meta.ayahs.length : meta.ayahCount) : 999;
+
+  // Fill modal
+  document.getElementById('edit-setoran-surah').textContent = surahNum + '. ' + surahName;
+  const fromEl = document.getElementById('edit-setoran-from');
+  const toEl = document.getElementById('edit-setoran-to');
+  fromEl.value = rec.from;
+  toEl.value = rec.to;
+  fromEl.min = 1; fromEl.max = maxAyah;
+  toEl.min = 1; toEl.max = maxAyah;
+  document.getElementById('edit-setoran-max').textContent = `Maksimal: ${maxAyah} ayat`;
+
+  // Store target on modal for save handler
+  const modal = document.getElementById('edit-setoran-modal');
+  modal.dataset.surahNum = surahNum;
+  modal.dataset.recIdx = recIdx;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  // Focus first input
+  setTimeout(() => fromEl.focus(), 50);
+}
+
+function closeEditSetoranModal(e) {
+  if (e && e.target !== e.currentTarget && !e.target.classList.contains('modal-close-btn')) return;
+  const modal = document.getElementById('edit-setoran-modal');
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+}
+
+function saveEditSetoran() {
+  const modal = document.getElementById('edit-setoran-modal');
+  const surahNum = parseInt(modal.dataset.surahNum);
+  const recIdx = parseInt(modal.dataset.recIdx);
+
+  const data = getHafalankuData();
+  const entry = data.find(d => d.surahNum === surahNum);
+  if (!entry || !entry.recordings || !entry.recordings[recIdx]) {
+    showToast('Rekaman tidak ditemukan');
+    return;
+  }
+
+  const meta = JUZ_SURAHS[surahNum] || SURAHS[surahNum];
+  const maxAyah = meta ? (meta.ayahs ? meta.ayahs.length : meta.ayahCount) : 999;
+
+  let from = parseInt(document.getElementById('edit-setoran-from').value);
+  let to = parseInt(document.getElementById('edit-setoran-to').value);
+
+  // Validate
+  if (isNaN(from) || from < 1) from = 1;
+  if (isNaN(to) || to < 1) to = 1;
+  if (from > maxAyah) from = maxAyah;
+  if (to > maxAyah) to = maxAyah;
+  if (to < from) {
+    showToast('❌ Ayat "sampai" tidak boleh kurang dari "dari"');
+    return;
+  }
+
+  // Update
+  entry.recordings[recIdx].from = from;
+  entry.recordings[recIdx].to = to;
+  saveHafalankuData(data);
+
+  closeEditSetoranModal();
+  renderHafalankuList();
+  // Re-render full-list modal if open
+  const allModal = document.getElementById('all-recordings-modal');
+  if (allModal && allModal.classList.contains('open')) {
+    const openSurahNum = parseInt(allModal.dataset.surahNum);
+    if (openSurahNum === surahNum) renderAllRecordingsList(surahNum);
+  }
+  showToast('✅ Rentang ayat diperbarui');
+}
+
+// ── Delete a recording ──
+function confirmDeleteSetoran(surahNum, recIdx) {
+  const data = getHafalankuData();
+  const entry = data.find(d => d.surahNum === surahNum);
+  if (!entry || !entry.recordings || !entry.recordings[recIdx]) return;
+  const rec = entry.recordings[recIdx];
+
+  const ok = confirm(`Hapus setoran ayat ${rec.from}–${rec.to} (${rec.date || '—'})?\n\nRekaman akan dihapus permanen.`);
+  if (!ok) return;
+
+  entry.recordings.splice(recIdx, 1);
+  saveHafalankuData(data);
+  renderHafalankuList();
+  renderHafalankuBeranda();
+  // Re-render full-list modal if open
+  const allModal = document.getElementById('all-recordings-modal');
+  if (allModal && allModal.classList.contains('open')) {
+    const openSurahNum = parseInt(allModal.dataset.surahNum);
+    if (openSurahNum === surahNum) renderAllRecordingsList(surahNum);
+  }
+  showToast('Setoran dihapus');
+}
+
+// ── "Lihat Semua" modal showing all recordings ──
+function openAllRecordingsModal(surahNum) {
+  const modal = document.getElementById('all-recordings-modal');
+  modal.dataset.surahNum = surahNum;
+  const data = getHafalankuData();
+  const entry = data.find(d => d.surahNum === surahNum);
+  if (!entry) return;
+  const meta = JUZ_SURAHS[surahNum] || SURAHS[surahNum];
+  const surahName = meta ? meta.name : 'Surah ' + surahNum;
+  document.getElementById('all-recordings-title').textContent = `${surahNum}. ${surahName}`;
+  renderAllRecordingsList(surahNum);
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+function renderAllRecordingsList(surahNum) {
+  const data = getHafalankuData();
+  const entry = data.find(d => d.surahNum === surahNum);
+  const listEl = document.getElementById('all-recordings-list');
+  if (!entry || !entry.recordings || entry.recordings.length === 0) {
+    listEl.innerHTML = '<div class="hk-rec-empty">Belum ada setoran</div>';
+    document.getElementById('all-recordings-count').textContent = '0';
+    return;
+  }
+  // Show newest first (reverse order from storage)
+  const recs = entry.recordings;
+  document.getElementById('all-recordings-count').textContent = recs.length;
+
+  listEl.innerHTML = recs.map((r, idx) => {
+    // idx here is the real index in storage array
+    return `
+      <div class="hk-rec-item-v2">
+        <div class="hk-rec-item-row">
+          <div class="hk-rec-item-info">
+            <div class="hk-rec-item-range">Ayat ${r.from}–${r.to}</div>
+            <div class="hk-rec-item-date">${r.date || '—'} · ${r.duration || 0}s</div>
+          </div>
+          <div class="hk-rec-item-actions">
+            <button class="hk-rec-action-btn" onclick="openEditSetoranModal(${surahNum},${idx})" aria-label="Edit rentang ayat" title="Edit ayat">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="hk-rec-action-btn hk-rec-action-danger" onclick="confirmDeleteSetoran(${surahNum},${idx})" aria-label="Hapus setoran" title="Hapus">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+        ${r.audioUrl ? `<audio controls preload="none" class="hk-rec-audio" src="${esc(r.audioUrl)}"></audio>` : '<div class="hk-rec-no-audio">Rekaman tidak tersedia</div>'}
+      </div>`;
+  }).reverse().join(''); // newest first
+}
+
+function closeAllRecordingsModal(e) {
+  if (e && e.target !== e.currentTarget && !e.target.classList.contains('modal-close-btn')) return;
+  const modal = document.getElementById('all-recordings-modal');
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+}
+
 // ── Render ──
 
 function renderHafalankuList() {
@@ -3719,24 +3891,42 @@ function renderHafalankuList() {
          </button>`
       : `<div class="ayat-checks">${ayatHtml}</div>`;
 
-    // Recording history
+    // Recording history — show max 5 latest + "Lihat Semua" button for the rest
     const recs = entry.recordings || [];
+    const RECENT_LIMIT = 5;
     let recsHtml = '';
     if (recs.length > 0) {
+      // Recordings kept in original order (oldest first), show latest 5 at bottom
+      const visibleRecs = recs.slice(-RECENT_LIMIT);
+      const hiddenCount = Math.max(0, recs.length - RECENT_LIMIT);
+      // Compute the global index of each visible recording so edit/delete/play target right one
+      const startIdx = Math.max(0, recs.length - RECENT_LIMIT);
       recsHtml = `<div class="hk-rec-history">
-        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:4px">Riwayat Setoran</div>
-        ${recs.map((r, idx) => `
-          <div class="hk-rec-item">
-            <button class="hk-rec-item-play" id="hk-play-${entry.surahNum}-${idx}" onclick="event.stopPropagation();playHkArchive(${entry.surahNum},${idx})">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            </button>
-            <div class="hk-rec-item-info">
-              <div class="hk-rec-item-range">Ayat ${r.from}–${r.to}</div>
-              <div class="hk-rec-item-date">${r.date || '—'}</div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between">
+          <span>Riwayat Setoran${recs.length > 0 ? ` (${recs.length})` : ''}</span>
+          ${hiddenCount > 0 ? `<button class="hk-rec-view-all" onclick="event.stopPropagation();openAllRecordingsModal(${entry.surahNum})">Lihat Semua <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle"><polyline points="9 18 15 12 9 6"/></svg></button>` : ''}
+        </div>
+        ${visibleRecs.map((r, i) => {
+          const idx = startIdx + i;
+          return `
+          <div class="hk-rec-item-v2" data-rec-idx="${idx}">
+            <div class="hk-rec-item-row">
+              <div class="hk-rec-item-info">
+                <div class="hk-rec-item-range">Ayat ${r.from}–${r.to}</div>
+                <div class="hk-rec-item-date">${r.date || '—'} · ${r.duration || 0}s</div>
+              </div>
+              <div class="hk-rec-item-actions">
+                <button class="hk-rec-action-btn" onclick="event.stopPropagation();openEditSetoranModal(${entry.surahNum},${idx})" aria-label="Edit rentang ayat" title="Edit ayat">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="hk-rec-action-btn hk-rec-action-danger" onclick="event.stopPropagation();confirmDeleteSetoran(${entry.surahNum},${idx})" aria-label="Hapus setoran" title="Hapus">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </div>
             </div>
-            <div class="hk-rec-item-dur">${r.duration || 0}s</div>
-          </div>
-        `).join('')}
+            ${r.audioUrl ? `<audio controls preload="none" class="hk-rec-audio" src="${esc(r.audioUrl)}"></audio>` : '<div class="hk-rec-no-audio">Rekaman tidak tersedia</div>'}
+          </div>`;
+        }).join('')}
       </div>`;
     }
 

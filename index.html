@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Murajaah — Hafalan Al-Quran</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./css/styles.css?v=25">
+<link rel="stylesheet" href="./css/styles.css?v=26">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Google Analytics (GA4) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DGTDD0RQ9K"></script>
@@ -656,6 +656,43 @@
   </div>
 </div>
 
+<!-- Edit Setoran modal (ayat range) -->
+<div class="modal-backdrop" id="edit-setoran-modal" onclick="closeEditSetoranModal(event)" role="dialog" aria-modal="true" aria-labelledby="edit-setoran-title" aria-hidden="true">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="edit-setoran-title">Edit Rentang Ayat</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:4px">Surah:</div>
+    <div id="edit-setoran-surah" style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px">—</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
+      <div>
+        <label class="field-label" for="edit-setoran-from">Dari Ayat</label>
+        <input type="number" id="edit-setoran-from" class="select-input audio-num" min="1" style="background-image:none;padding-right:14px">
+      </div>
+      <div>
+        <label class="field-label" for="edit-setoran-to">Sampai Ayat</label>
+        <input type="number" id="edit-setoran-to" class="select-input audio-num" min="1" style="background-image:none;padding-right:14px">
+      </div>
+    </div>
+    <div id="edit-setoran-max" style="font-size:11px;color:var(--muted);margin-bottom:18px">Maksimal: — ayat</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-secondary" onclick="closeEditSetoranModal()" style="flex:1">Batal</button>
+      <button class="btn-primary" onclick="saveEditSetoran()" style="flex:1">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- All Recordings modal (full list of recordings for a surah) -->
+<div class="modal-backdrop" id="all-recordings-modal" onclick="closeAllRecordingsModal(event)" role="dialog" aria-modal="true" aria-labelledby="all-recordings-title-lbl" aria-hidden="true">
+  <div class="modal-sheet" style="max-height:92vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <div id="all-recordings-title-lbl" style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:4px">Semua Setoran</div>
+    <div class="modal-title" id="all-recordings-title">—</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px"><span id="all-recordings-count">0</span> setoran tersimpan</div>
+    <div id="all-recordings-list"></div>
+    <button class="btn-secondary modal-close-btn" onclick="closeAllRecordingsModal()" style="width:100%;margin-top:14px">Tutup</button>
+  </div>
+</div>
+
 <!-- Footer with legal links (also for Google branding verification) -->
 <footer style="text-align:center;padding:20px 16px;font-size:11px;color:#888;border-top:1px solid #eee;margin-top:0;background:#fff">
   <a href="/privacy.html" style="color:#2d9b6f;margin:0 6px;text-decoration:none">Kebijakan Privasi</a>
@@ -665,6 +702,6 @@
   <span>© 2026 Murajaah</span>
 </footer>
 
-<script src="./js/app.js?v=25"></script>
+<script src="./js/app.js?v=26"></script>
 </body>
 </html>
