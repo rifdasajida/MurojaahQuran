@@ -1538,23 +1538,44 @@ let retryMode=false, retryCursor=-1, retryAyahStart=-1;
 // ════════════════════════════════════════════════════════════
 //  SOUND FEEDBACK (with debounce to prevent duplicate sounds on mobile)
 // ════════════════════════════════════════════════════════════
+// Shared AudioContext for feedback sounds — created once, reused.
+// Creating a new context per beep causes audible glitches on mobile Chrome
+// and accumulates resources over a session.
+let _audioCtx = null;
+function _getAudioCtx() {
+  if (_audioCtx && _audioCtx.state !== 'closed') return _audioCtx;
+  try {
+    _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  } catch(e) { return null; }
+  return _audioCtx;
+}
+// Resume context on first user gesture (some browsers suspend until interaction)
+document.addEventListener('click', () => {
+  const ctx = _getAudioCtx();
+  if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {});
+}, { once: true, passive: true });
+
 let _lastSoundTime = 0;
-const _SOUND_DEBOUNCE = 400; // ms — prevent same sound firing multiple times
+// Debounce keeps two beeps from physically overlapping in audio output.
+// Beep durations after this rewrite: correct ~170ms (two tones), wrong ~200ms.
+// Mobile slightly longer to avoid audio glitches on slower processors.
+const _SOUND_DEBOUNCE = _isMobileEarly ? 220 : 180;
 
 function playCorrectSound(){
   const now = Date.now();
   if (now - _lastSoundTime < _SOUND_DEBOUNCE) return;
   _lastSoundTime = now;
+  const ctx = _getAudioCtx();
+  if (!ctx) return;
   try{
-    const ctx=new(window.AudioContext||window.webkitAudioContext)();
     [800,1000].forEach((freq,i)=>{
       const osc=ctx.createOscillator(),gain=ctx.createGain();
       osc.connect(gain);gain.connect(ctx.destination);
       osc.frequency.value=freq;osc.type='sine';
       const t=ctx.currentTime+i*0.05;
       gain.gain.setValueAtTime(0.1,t);
-      gain.gain.exponentialRampToValueAtTime(0.01,t+0.15);
-      osc.start(t);osc.stop(t+0.15);
+      gain.gain.exponentialRampToValueAtTime(0.01,t+0.12);
+      osc.start(t);osc.stop(t+0.12);
     });
   }catch(e){}
 }
@@ -1562,14 +1583,15 @@ function playWrongSound(){
   const now = Date.now();
   if (now - _lastSoundTime < _SOUND_DEBOUNCE) return;
   _lastSoundTime = now;
+  const ctx = _getAudioCtx();
+  if (!ctx) return;
   try{
-    const ctx=new(window.AudioContext||window.webkitAudioContext)();
     const osc=ctx.createOscillator(),gain=ctx.createGain();
     osc.connect(gain);gain.connect(ctx.destination);
     osc.frequency.value=200;osc.type='sawtooth';
     gain.gain.setValueAtTime(0.15,ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.25);
-    osc.start();osc.stop(ctx.currentTime+0.25);
+    gain.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.20);
+    osc.start();osc.stop(ctx.currentTime+0.20);
   }catch(e){}
 }
 
@@ -1722,7 +1744,7 @@ function setupRec(){if(rec)return true;rec=createRec();return!!rec;}
 // Deteksi platform
 const _isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const _isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) || (navigator.userAgent.includes('AppleWebKit') && !navigator.userAgent.includes('Chrome'));
-const _SR_FINAL_DEADLINE  = _isMobile ? 300 : 20;    // ms fixed deadline — timer set once, NOT reset on new tokens
+const _SR_FINAL_DEADLINE  = _isMobile ? 200 : 15;    // ms fixed deadline — feedback muncul lebih cepat setelah ucapan selesai
 const _SR_INTERIM_DELAY   = _isMobile ? 200 : 0;     // ms wait before applying interim visual
 const _SR_RESTART_DELAY   = _isMobile ? 350 : 80;    // ms before restarting SR after onend
 const _SR_WARMUP_MS       = _isMobile ? 700 : 200;   // ms warmup to ignore initial noise
