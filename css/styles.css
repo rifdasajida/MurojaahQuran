@@ -777,7 +777,8 @@ body {
 }
 .retry-word {
   font-family: var(--font-ar); font-size: 18px; direction: rtl;
-  color: var(--err); flex: 1; min-width: 0;
+  color: var(--err);
+  flex-shrink: 1; min-width: 0;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .retry-skip {
