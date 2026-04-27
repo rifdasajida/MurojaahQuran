@@ -1928,8 +1928,11 @@ function processTokensStream(tokens){
   let correctInBatch=0, wrongWords=[];
 
   while(si<tokens.length && cursor<allWords.length){
-    // Jangan lewat batas ayat — validasi per ayat
-    if(allWords[cursor].ayahIndex !== startAyahIdx) break;
+    // NOTE: We allow the cursor to advance past the original ayah boundary
+    // when the user reads naturally into the next ayah (common during murajaah).
+    // The `startAyahIdx` is still used below to constrain LOOKAHEAD jumps —
+    // we don't want lookahead to scan into a different ayah blindly.
+    const currentAyahIdx = allWords[cursor].ayahIndex;
 
     const token=tokens[si];
     const w=allWords[cursor];
@@ -1942,8 +1945,8 @@ function processTokensStream(tokens){
       if(ngSim>=MATCH_THRESHOLD){sim=ngSim; si++;} // consume extra token
     }
 
-    // Coba reverse ngram: 1 spoken token = 2 ref words
-    if(sim<MATCH_THRESHOLD && cursor+1<allWords.length && allWords[cursor+1].ayahIndex===startAyahIdx){
+    // Coba reverse ngram: 1 spoken token = 2 ref words (constrain to current ayah)
+    if(sim<MATCH_THRESHOLD && cursor+1<allWords.length && allWords[cursor+1].ayahIndex===currentAyahIdx){
       const mergedRef = w.norm + allWords[cursor+1].norm;
       const rngSim = simNorm(normalizeArabic(token), mergedRef);
       if(rngSim >= MATCH_THRESHOLD){
@@ -1971,7 +1974,7 @@ function processTokensStream(tokens){
       let foundAhead=false;
       const LOOKAHEAD=3;
       for(let look=1;look<=LOOKAHEAD && cursor+look<allWords.length;look++){
-        if(allWords[cursor+look].ayahIndex!==startAyahIdx) break;
+        if(allWords[cursor+look].ayahIndex!==currentAyahIdx) break;
         const aheadWord = allWords[cursor+look].norm;
         const aheadSim=wordSim(token, aheadWord);
         // STRICT: lookahead pakai threshold lebih TINGGI dari normal (bukan lebih rendah)
@@ -2024,8 +2027,11 @@ function processTokensStream(tokens){
     }
   }
 
-  // Only enter retry mode if we have wrong words AND at least some correct ones
-  // (this means the user is reading but made mistakes, not just noise)
+  // Check completion of the ayah we STARTED in. If cursor advanced past it,
+  // the start ayah is complete (all its words are non-idle now).
+  // checkAyahComplete() works by scanning words in that ayah, scope-agnostic of
+  // where cursor sits now — so this gives correct result even when user reads
+  // continuously into the next ayah.
   const ayahComplete=checkAyahComplete(startAyahIdx);
 
   if(wrongWords.length > 0 && correctInBatch > 0){
