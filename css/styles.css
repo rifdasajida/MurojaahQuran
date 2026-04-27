@@ -759,17 +759,35 @@ body {
 .controls-row .btn-icon:hover,
 .btn-icon:hover { background: var(--accent-soft); color: var(--accent); border-color: rgba(45,155,111,0.2); }
 
-/* Retry banner */
+/* Retry banner — compact single-line layout */
 .retry-banner {
   background: rgba(217,79,79,0.06); border: 1px solid rgba(217,79,79,0.2);
-  border-radius: 12px; padding: 10px 14px;
+  border-radius: 10px; padding: 8px 12px;
   display: none; margin-bottom: 8px;
-  flex-direction: column; gap: 8px;
+  flex-direction: column; gap: 6px;
 }
 .retry-banner.show { display: flex; }
-.retry-banner-header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.retry-word { font-family: var(--font-ar); font-size: 20px; direction: rtl; color: var(--err); }
-.retry-skip { padding: 4px 10px; background: rgba(217,79,79,0.1); border: 1px solid rgba(217,79,79,0.25); border-radius: 6px; color: var(--err); font-size: 11px; font-weight: 700; cursor: pointer; border: none; font-family: var(--font); }
+.retry-banner-header {
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: nowrap; /* keep on one line */
+}
+.retry-banner-msg {
+  font-size: 12px; font-weight: 600; color: var(--err);
+  flex-shrink: 0; white-space: nowrap;
+}
+.retry-word {
+  font-family: var(--font-ar); font-size: 18px; direction: rtl;
+  color: var(--err); flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.retry-skip {
+  padding: 5px 12px; background: rgba(217,79,79,0.12);
+  border: 1px solid rgba(217,79,79,0.25); border-radius: 6px;
+  color: var(--err); font-size: 11px; font-weight: 700;
+  cursor: pointer; font-family: var(--font);
+  flex-shrink: 0; margin-left: auto; white-space: nowrap;
+}
+.retry-skip:hover { background: rgba(217,79,79,0.18); }
 .retry-suggestion {
   background: rgba(45,155,111,0.07); border: 1px solid rgba(45,155,111,0.2);
   border-radius: 8px; padding: 8px 12px;

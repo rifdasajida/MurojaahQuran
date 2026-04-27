@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Murajaah — Hafalan Al-Quran</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./css/styles.css?v=30">
+<link rel="stylesheet" href="./css/styles.css?v=31">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Google Analytics (GA4) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DGTDD0RQ9K"></script>
@@ -255,8 +255,7 @@
       <div class="hafalan-controls" id="hafalan-controls">
         <div class="retry-banner" id="retryBanner">
           <div class="retry-banner-header">
-            <span style="font-size:11px;font-weight:700;color:var(--err);letter-spacing:1px;text-transform:uppercase;font-family:var(--font-mono)" id="retryAyahNum">AYAT —</span>
-            <span style="font-size:11px;color:var(--muted)">Ada kesalahan di kata ini:</span>
+            <span class="retry-banner-msg">Ada kesalahan:</span>
             <span class="retry-word" id="retryWord">—</span>
             <button class="retry-skip" onclick="skipWrongWord()">Lewati →</button>
           </div>
@@ -702,6 +701,6 @@
   <span>© 2026 Murajaah</span>
 </footer>
 
-<script src="./js/app.js?v=30"></script>
+<script src="./js/app.js?v=31"></script>
 </body>
 </html>

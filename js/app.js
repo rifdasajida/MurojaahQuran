@@ -2110,7 +2110,6 @@ function enterRetryMode(wrongWordIdx){
   if(allWords[returnIdx]?.el)allWords[returnIdx].el.className='w retry-cursor';
   currentAyahIndex=wrongAyah;updateCurrentAyahHighlight();
   sessionRunStart=returnIdx;
-  document.getElementById('retryAyahNum').textContent=`AYAT ${wrongWord.ayahN||wrongAyah+1}`;
   document.getElementById('retryWord').textContent=wrongWord.original||wrongWord.norm;
   document.getElementById('retryBanner').classList.add('show');
   wrongWord.el.closest('.ayah-row')?.scrollIntoView({behavior:'smooth',block:'center'});
