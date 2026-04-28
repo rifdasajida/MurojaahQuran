@@ -197,6 +197,9 @@ function navTo(page) {
   }
   document.getElementById('app').scrollTop = 0;
   currentPage = page;
+  // Toggle body class so CSS can lock #app scrolling for the Mode Murajaah page
+  // (which uses its own internal scroll for the mushaf, no outer #app scroll needed)
+  document.body.classList.toggle('page-hafalan-active', page === 'hafalan');
   // Announce page change to screen readers
   try { _announcePageChange(page); } catch(e) {}
   // Update URL — use pushState so back/forward works
