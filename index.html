@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Murajaah — Hafalan Al-Quran</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./css/styles.css?v=33">
+<link rel="stylesheet" href="./css/styles.css?v=34">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Google Analytics (GA4) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DGTDD0RQ9K"></script>
@@ -496,34 +496,51 @@
         </button>
       </div>
 
-      <!-- Tambah hafalan card -->
-      <div class="hafalanku-add-card">
-        <div class="hafalanku-add-title">Tambah Hafalan</div>
-        <div class="hafalanku-add-sub">Pilih surah yang sedang kamu hafal</div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <div>
-            <label class="field-label">Pilih Surah</label>
-            <select class="select-input" id="hk-add-surah-sel"></select>
-          </div>
-          <button class="btn-primary" onclick="addHafalanSurah()">
+      <!-- Header: title + compact add button -->
+      <div class="hafalanku-header">
+        <div class="hafalanku-header-title">Hafalanku</div>
+        <button class="hafalanku-add-btn" id="hafalanku-add-btn" onclick="openAddSurahModal()" aria-label="Tambah surah hafalan baru">
+          <svg aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Tambah
+        </button>
+      </div>
+
+      <!-- Daftar hafalan -->
+      <div class="hafalanku-list" id="hafalanku-list">
+        <!-- Empty state shown when user has no hafalan yet -->
+        <div class="hafalanku-empty-hero" id="hafalanku-empty">
+          <div class="hafalanku-empty-icon" aria-hidden="true">📖</div>
+          <div class="hafalanku-empty-title">Belum ada hafalan</div>
+          <div class="hafalanku-empty-sub">Mulai murajaah perjalananmu dengan menambahkan surah pertama yang sedang kamu hafal.</div>
+          <button class="btn-primary hafalanku-empty-cta" onclick="openAddSurahModal()">
             <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Tambahkan Surah
+            Tambah Surah Pertama
           </button>
         </div>
       </div>
 
-      <!-- Daftar hafalan -->
-      <div>
-        <div class="section-label" style="margin-bottom:10px">Hafalanku</div>
-        <div class="hafalanku-list" id="hafalanku-list">
-          <div class="hafalanku-empty" id="hafalanku-empty">
-            <div class="hafalanku-empty-icon">📚</div>
-            <div class="hafalanku-empty-text">Belum ada hafalan</div>
-            <div class="hafalanku-empty-sub">Tambahkan surah yang sedang kamu hafal di atas</div>
-          </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: Tambah Surah ke Hafalanku ══ -->
+  <div class="modal-backdrop" id="hk-add-modal" onclick="closeAddSurahModal(event)" role="dialog" aria-modal="true" aria-labelledby="hk-add-modal-title" aria-hidden="true">
+    <div class="modal-sheet">
+      <div class="modal-handle" aria-hidden="true"></div>
+      <div class="modal-title" id="hk-add-modal-title">Tambah Hafalan</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:14px">Pilih surah yang sedang kamu hafal</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div>
+          <label class="field-label" for="hk-add-surah-sel">Pilih Surah</label>
+          <select class="select-input" id="hk-add-surah-sel"></select>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:6px">
+          <button class="btn-secondary" onclick="closeAddSurahModal()" style="flex:1">Batal</button>
+          <button class="btn-primary" onclick="addHafalanSurahFromModal()" style="flex:2">
+            <svg aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Tambahkan
+          </button>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -701,6 +718,6 @@
   <span>© 2026 Murajaah</span>
 </footer>
 
-<script src="./js/app.js?v=33"></script>
+<script src="./js/app.js?v=34"></script>
 </body>
 </html>

@@ -587,6 +587,12 @@ document.addEventListener('keydown', (e) => {
       try { _lastFocusBeforeModal.focus(); } catch(err) {}
       _lastFocusBeforeModal = null;
     }
+    return;
+  }
+  const addModal = document.getElementById('hk-add-modal');
+  if (addModal && addModal.classList.contains('open')) {
+    closeAddSurahModal();
+    return;
   }
 });
 
@@ -3408,6 +3414,48 @@ async function loadHafalankuFromCloud() {
   }
 }
 
+// ── Modal: Tambah Surah ke Hafalanku ──
+function openAddSurahModal() {
+  const modal = document.getElementById('hk-add-modal');
+  if (!modal) return;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  // Focus the select for keyboard users
+  setTimeout(() => {
+    const sel = document.getElementById('hk-add-surah-sel');
+    if (sel) sel.focus();
+  }, 50);
+}
+function closeAddSurahModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  const modal = document.getElementById('hk-add-modal');
+  if (!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+}
+// Wrapper that closes the modal on success — keeps original addHafalanSurah() flow intact
+function addHafalanSurahFromModal() {
+  const sel = document.getElementById('hk-add-surah-sel');
+  const surahNum = parseInt(sel.value);
+  if (!surahNum) return;
+  const data = getHafalankuData();
+  // Surah already exists → toast + close modal (no point keeping it open)
+  if (data.find(d => d.surahNum === surahNum)) {
+    showToast('Surah ini sudah ada di daftar hafalan');
+    closeAddSurahModal();
+    return;
+  }
+  // Not logged in → close add modal first, then show login prompt (avoids modal stacking)
+  if (!currentUser) {
+    closeAddSurahModal();
+    window._pendingHafalanSurah = surahNum;
+    document.getElementById('hk-login-modal').classList.add('open');
+    return;
+  }
+  doAddHafalanSurah(surahNum);
+  closeAddSurahModal();
+}
+
 function addHafalanSurah() {
   const sel = document.getElementById('hk-add-surah-sel');
   const surahNum = parseInt(sel.value);
@@ -4037,6 +4085,9 @@ function closeAllRecordingsModal(e) {
 function renderHafalankuList() {
   const data = getHafalankuData();
   const container = document.getElementById('hafalanku-list');
+  // Hide compact "+ Tambah" header button when empty (hero CTA replaces it)
+  const headerAddBtn = document.getElementById('hafalanku-add-btn');
+  if (headerAddBtn) headerAddBtn.style.display = data.length === 0 ? 'none' : '';
 
   if (data.length === 0) {
     container.innerHTML = '';
@@ -4145,12 +4196,16 @@ function renderHafalankuList() {
 
 function createHafalankuEmpty() {
   const div = document.createElement('div');
-  div.className = 'hafalanku-empty';
+  div.className = 'hafalanku-empty-hero';
   div.id = 'hafalanku-empty';
   div.innerHTML = `
-    <div class="hafalanku-empty-icon">📚</div>
-    <div class="hafalanku-empty-text">Belum ada hafalan</div>
-    <div class="hafalanku-empty-sub">Tambahkan surah yang sedang kamu hafal di atas</div>`;
+    <div class="hafalanku-empty-icon" aria-hidden="true">📖</div>
+    <div class="hafalanku-empty-title">Belum ada hafalan</div>
+    <div class="hafalanku-empty-sub">Mulai murajaah perjalananmu dengan menambahkan surah pertama yang sedang kamu hafal.</div>
+    <button class="btn-primary hafalanku-empty-cta" onclick="openAddSurahModal()">
+      <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Tambah Surah Pertama
+    </button>`;
   return div;
 }
 
