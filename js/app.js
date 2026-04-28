@@ -4201,7 +4201,7 @@ function createHafalankuEmpty() {
   div.innerHTML = `
     <div class="hafalanku-empty-icon" aria-hidden="true">📖</div>
     <div class="hafalanku-empty-title">Belum ada hafalan</div>
-    <div class="hafalanku-empty-sub">Mulai murajaah perjalananmu dengan menambahkan surah pertama yang sedang kamu hafal.</div>
+    <div class="hafalanku-empty-sub">Mulai pantau perjalanan hafalanmu dengan menambah surat yang sedang kamu hafal.</div>
     <button class="btn-primary hafalanku-empty-cta" onclick="openAddSurahModal()">
       <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Tambah Surah Pertama

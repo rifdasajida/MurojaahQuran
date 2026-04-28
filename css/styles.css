@@ -1530,11 +1530,14 @@ body.page-hafalan-active #app {
   outline-offset: 2px;
 }
 
-/* Focus-visible for all interactive elements — keyboard-only */
+/* Focus-visible for interactive elements — keyboard-only.
+   .select-input/.audio-num are excluded because they have their own
+   subtle :focus state (accent border + glow) defined elsewhere. Adding
+   a 3px outline on top causes a heavy double-frame look. */
 button:focus-visible,
 a:focus-visible,
-input:focus-visible,
-select:focus-visible,
+input:not(.select-input):not(.audio-num):not(.audio-stepper-value):focus-visible,
+select:not(.select-input):focus-visible,
 textarea:focus-visible,
 [role="button"]:focus-visible,
 [role="menuitem"]:focus-visible,
@@ -1542,6 +1545,14 @@ textarea:focus-visible,
   outline: 3px solid var(--accent, #2D6A4F);
   outline-offset: 2px;
   border-radius: 4px;
+}
+/* For form fields with their own focus styling, just enhance the existing glow */
+.select-input:focus-visible,
+.audio-num:focus-visible,
+.audio-stepper-value:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow, rgba(45,106,79,0.12));
 }
 
 /* Remove outline only when the element has another focus indicator */
@@ -1792,6 +1803,17 @@ a:focus:not(:focus-visible) {
    ══════════════════════════════════════════════════════════════ */
 
 /* Header: title + small "Tambah" button on the right */
+/* Hafalanku header: match Setoran/Audio rec-header style with action button on right */
+.hafalanku-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.hafalanku-page-header .rec-title { margin-bottom: 2px; }
+.hafalanku-page-header .rec-sub { line-height: 1.5; }
+/* Old class kept as fallback (no-op for now) */
 .hafalanku-header {
   display: flex;
   align-items: center;
