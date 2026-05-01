@@ -945,15 +945,50 @@ function _milestoneNext() {
   }
 }
 
-function renderCalendar(setoranDates = []) {
+// Calendar state — tracks which month is currently displayed
+let _calYear = new Date().getFullYear();
+let _calMonth = new Date().getMonth(); // 0-indexed
+
+function calNavigate(delta) {
+  _calMonth += delta;
+  if (_calMonth > 11) { _calMonth = 0; _calYear++; }
+  if (_calMonth < 0)  { _calMonth = 11; _calYear--; }
+  // Disable "next" button if already at current month (no future data)
   const now = new Date();
-  const year = now.getFullYear(), month = now.getMonth();
+  const nextBtn = document.getElementById('cal-next-btn');
+  if (nextBtn) {
+    const isCurrent = _calYear === now.getFullYear() && _calMonth === now.getMonth();
+    nextBtn.disabled = isCurrent;
+    nextBtn.style.opacity = isCurrent ? '0.3' : '';
+  }
+  renderCalendar();
+}
+
+function renderCalendar(setoranDates = []) {
+  // Fetch activity dates if not passed in
+  if (!setoranDates.length) {
+    setoranDates = getActivityDates ? getActivityDates() : JSON.parse(localStorage.getItem('murajaah_activity_dates') || '[]');
+  }
+  const now = new Date();
+  const year = _calYear, month = _calMonth;
   const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-  document.getElementById('cal-month').textContent = `${months[month]} ${year}`;
+  const monthEl = document.getElementById('cal-month');
+  if (monthEl) monthEl.textContent = `${months[month]} ${year}`;
+
+  // Disable next button if at current month
+  const nextBtn = document.getElementById('cal-next-btn');
+  if (nextBtn) {
+    const isCurrent = year === now.getFullYear() && month === now.getMonth();
+    nextBtn.disabled = isCurrent;
+    nextBtn.style.opacity = isCurrent ? '0.3' : '';
+  }
+
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const today = now.getDate();
+  const todayDate = now.getDate();
+  const isCurrentMonth = year === now.getFullYear() && month === now.getMonth();
   const grid = document.getElementById('cal-grid');
+  if (!grid) return;
   grid.innerHTML = '';
   ['Min','Sen','Sel','Rab','Kam','Jum','Sab'].forEach(d => {
     const el = document.createElement('div');
@@ -968,7 +1003,7 @@ function renderCalendar(setoranDates = []) {
     const el = document.createElement('div');
     el.className = 'cal-day';
     const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    if (d === today) el.classList.add('today');
+    if (isCurrentMonth && d === todayDate) el.classList.add('today');
     if (setoranDates.includes(dateStr)) {
       el.classList.add('has-setoran');
       el.innerHTML = `${d}<span class="cal-check">✓</span>`;

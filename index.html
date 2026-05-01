@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Murajaah — Hafalan Al-Quran</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./css/styles.css?v=36">
+<link rel="stylesheet" href="./css/styles.css?v=37">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Google Analytics (GA4) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DGTDD0RQ9K"></script>
@@ -136,7 +136,15 @@
             <div class="cal-title">Kalender Aktivitas</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4">Yuk murojaah atau tambah hafalan untuk checklist istiqomahmu</div>
           </div>
-          <div class="cal-month" id="cal-month">—</div>
+          <div class="cal-nav">
+            <button class="cal-nav-btn" onclick="calNavigate(-1)" aria-label="Bulan sebelumnya">
+              <svg aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div class="cal-month" id="cal-month">—</div>
+            <button class="cal-nav-btn" onclick="calNavigate(1)" id="cal-next-btn" aria-label="Bulan berikutnya">
+              <svg aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
         </div>
         <div class="cal-grid" id="cal-grid">
           <!-- Rendered by JS -->
@@ -726,6 +734,6 @@
   <span>© 2026 Murajaah</span>
 </footer>
 
-<script src="./js/app.js?v=36"></script>
+<script src="./js/app.js?v=37"></script>
 </body>
 </html>
